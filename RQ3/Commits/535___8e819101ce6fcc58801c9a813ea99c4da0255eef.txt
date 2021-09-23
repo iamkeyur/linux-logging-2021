@@ -1,0 +1,28 @@
+['8e819101ce6fcc58801c9a813ea99c4da0255eef', '415.txt', 'FixFormatSpecifier']
+commit 8e819101ce6fcc58801c9a813ea99c4da0255eef
+Author: Dimitri Sivanich <sivanich@sgi.com>
+Date:   Thu Oct 27 17:47:12 2016 -0700
+
+    drivers/misc/sgi-gru/grumain.c: remove bogus 0x prefix from printk
+    
+    Would like to have this be a decimal number.
+    
+    Link: http://lkml.kernel.org/r/20161026134746.GA30169@sgi.com
+    Signed-off-by: Dimitri Sivanich <sivanich@sgi.com>
+    Reported-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+diff --git a/drivers/misc/sgi-gru/grumain.c b/drivers/misc/sgi-gru/grumain.c
+index 1525870f460a..33741ad4a74a 100644
+--- a/drivers/misc/sgi-gru/grumain.c
++++ b/drivers/misc/sgi-gru/grumain.c
+@@ -283,7 +283,7 @@ static void gru_unload_mm_tracker(struct gru_state *gru,
+ 	spin_lock(&gru->gs_asid_lock);
+ 	BUG_ON((asids->mt_ctxbitmap & ctxbitmap) != ctxbitmap);
+ 	asids->mt_ctxbitmap ^= ctxbitmap;
+-	gru_dbg(grudev, "gid %d, gts %p, gms %p, ctxnum 0x%d, asidmap 0x%lx\n",
++	gru_dbg(grudev, "gid %d, gts %p, gms %p, ctxnum %d, asidmap 0x%lx\n",
+ 		gru->gs_gid, gts, gms, gts->ts_ctxnum, gms->ms_asidmap[0]);
+ 	spin_unlock(&gru->gs_asid_lock);
+ 	spin_unlock(&gms->ms_asid_lock);

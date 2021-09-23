@@ -1,0 +1,27 @@
+['6b65dd4c2c318f8ae666d74ba116b417b5e8263f', '258.txt', 'FixFormatSpecifier']
+commit 6b65dd4c2c318f8ae666d74ba116b417b5e8263f
+Author: Mauro Carvalho Chehab <mchehab@kernel.org>
+Date:   Thu Mar 22 15:16:25 2018 -0400
+
+    media: cx23885: fix a warning
+    
+    drivers/media/pci/cx23885/cx23885-alsa.c:92 cx23885_alsa_dma_init() warn: argument 3 to %08lx specifier is cast from pointer
+    
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+
+diff --git a/drivers/media/pci/cx23885/cx23885-alsa.c b/drivers/media/pci/cx23885/cx23885-alsa.c
+index d8c3637e492e..20b3cb17f97f 100644
+--- a/drivers/media/pci/cx23885/cx23885-alsa.c
++++ b/drivers/media/pci/cx23885/cx23885-alsa.c
+@@ -89,9 +89,8 @@ static int cx23885_alsa_dma_init(struct cx23885_audio_dev *chip, int nr_pages)
+ 		return -ENOMEM;
+ 	}
+ 
+-	dprintk(1, "vmalloc is at addr 0x%08lx, size=%d\n",
+-				(unsigned long)buf->vaddr,
+-				nr_pages << PAGE_SHIFT);
++	dprintk(1, "vmalloc is at addr %p, size=%d\n",
++		buf->vaddr, nr_pages << PAGE_SHIFT);
+ 
+ 	memset(buf->vaddr, 0, nr_pages << PAGE_SHIFT);
+ 	buf->nr_pages = nr_pages;

@@ -1,0 +1,3797 @@
+['bdd0873dc28d57651ae2ed4e42bb79526ed684ac', '527.txt', 'ModernizeLog']
+commit bdd0873dc28d57651ae2ed4e42bb79526ed684ac
+Author: Gilad Ben-Yossef <gilad@benyossef.com>
+Date:   Tue Oct 3 11:42:16 2017 +0100
+
+    staging: ccree: move to generic device log infra
+    
+    Move over from using macro wrappers around to printk to
+    dev_err, dev_dbg and friends and clean up resulting fallout.
+    
+    Signed-off-by: Gilad Ben-Yossef <gilad@benyossef.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/ccree/ssi_aead.c b/drivers/staging/ccree/ssi_aead.c
+index a51ad553ef73..ba0954e4d2e5 100644
+--- a/drivers/staging/ccree/ssi_aead.c
++++ b/drivers/staging/ccree/ssi_aead.c
+@@ -95,14 +95,14 @@ static void ssi_aead_exit(struct crypto_aead *tfm)
+ 	struct ssi_aead_ctx *ctx = crypto_aead_ctx(tfm);
+ 	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 
+-	SSI_LOG_DEBUG("Clearing context @%p for %s\n",
+-		      crypto_aead_ctx(tfm), crypto_tfm_alg_name(&tfm->base));
++	dev_dbg(dev, "Clearing context @%p for %s\n", crypto_aead_ctx(tfm),
++		crypto_tfm_alg_name(&tfm->base));
+ 
+ 	/* Unmap enckey buffer */
+ 	if (ctx->enckey) {
+ 		dma_free_coherent(dev, AES_MAX_KEY_SIZE, ctx->enckey, ctx->enckey_dma_addr);
+-		SSI_LOG_DEBUG("Freed enckey DMA buffer enckey_dma_addr=%pad\n",
+-			      ctx->enckey_dma_addr);
++		dev_dbg(dev, "Freed enckey DMA buffer enckey_dma_addr=%pad\n",
++			&ctx->enckey_dma_addr);
+ 		ctx->enckey_dma_addr = 0;
+ 		ctx->enckey = NULL;
+ 	}
+@@ -115,8 +115,8 @@ static void ssi_aead_exit(struct crypto_aead *tfm)
+ 					  xcbc->xcbc_keys,
+ 					  xcbc->xcbc_keys_dma_addr);
+ 		}
+-		SSI_LOG_DEBUG("Freed xcbc_keys DMA buffer xcbc_keys_dma_addr=%pad\n",
+-			      xcbc->xcbc_keys_dma_addr);
++		dev_dbg(dev, "Freed xcbc_keys DMA buffer xcbc_keys_dma_addr=%pad\n",
++			&xcbc->xcbc_keys_dma_addr);
+ 		xcbc->xcbc_keys_dma_addr = 0;
+ 		xcbc->xcbc_keys = NULL;
+ 	} else if (ctx->auth_mode != DRV_HASH_NULL) { /* HMAC auth. */
+@@ -126,8 +126,8 @@ static void ssi_aead_exit(struct crypto_aead *tfm)
+ 			dma_free_coherent(dev, 2 * MAX_HMAC_DIGEST_SIZE,
+ 					  hmac->ipad_opad,
+ 					  hmac->ipad_opad_dma_addr);
+-			SSI_LOG_DEBUG("Freed ipad_opad DMA buffer ipad_opad_dma_addr=%pad\n",
+-				      hmac->ipad_opad_dma_addr);
++			dev_dbg(dev, "Freed ipad_opad DMA buffer ipad_opad_dma_addr=%pad\n",
++				&hmac->ipad_opad_dma_addr);
+ 			hmac->ipad_opad_dma_addr = 0;
+ 			hmac->ipad_opad = NULL;
+ 		}
+@@ -135,8 +135,8 @@ static void ssi_aead_exit(struct crypto_aead *tfm)
+ 			dma_free_coherent(dev, MAX_HMAC_BLOCK_SIZE,
+ 					  hmac->padded_authkey,
+ 					  hmac->padded_authkey_dma_addr);
+-			SSI_LOG_DEBUG("Freed padded_authkey DMA buffer padded_authkey_dma_addr=%pad\n",
+-				      hmac->padded_authkey_dma_addr);
++			dev_dbg(dev, "Freed padded_authkey DMA buffer padded_authkey_dma_addr=%pad\n",
++				&hmac->padded_authkey_dma_addr);
+ 			hmac->padded_authkey_dma_addr = 0;
+ 			hmac->padded_authkey = NULL;
+ 		}
+@@ -151,7 +151,8 @@ static int ssi_aead_init(struct crypto_aead *tfm)
+ 			container_of(alg, struct ssi_crypto_alg, aead_alg);
+ 	struct device *dev = drvdata_to_dev(ssi_alg->drvdata);
+ 
+-	SSI_LOG_DEBUG("Initializing context @%p for %s\n", ctx, crypto_tfm_alg_name(&tfm->base));
++	dev_dbg(dev, "Initializing context @%p for %s\n", ctx,
++		crypto_tfm_alg_name(&tfm->base));
+ 
+ 	/* Initialize modes in instance */
+ 	ctx->cipher_mode = ssi_alg->cipher_mode;
+@@ -164,10 +165,11 @@ static int ssi_aead_init(struct crypto_aead *tfm)
+ 	ctx->enckey = dma_alloc_coherent(dev, AES_MAX_KEY_SIZE,
+ 					 &ctx->enckey_dma_addr, GFP_KERNEL);
+ 	if (!ctx->enckey) {
+-		SSI_LOG_ERR("Failed allocating key buffer\n");
++		dev_err(dev, "Failed allocating key buffer\n");
+ 		goto init_failed;
+ 	}
+-	SSI_LOG_DEBUG("Allocated enckey buffer in context ctx->enckey=@%p\n", ctx->enckey);
++	dev_dbg(dev, "Allocated enckey buffer in context ctx->enckey=@%p\n",
++		ctx->enckey);
+ 
+ 	/* Set default authlen value */
+ 
+@@ -181,7 +183,7 @@ static int ssi_aead_init(struct crypto_aead *tfm)
+ 						     &xcbc->xcbc_keys_dma_addr,
+ 						     GFP_KERNEL);
+ 		if (!xcbc->xcbc_keys) {
+-			SSI_LOG_ERR("Failed allocating buffer for XCBC keys\n");
++			dev_err(dev, "Failed allocating buffer for XCBC keys\n");
+ 			goto init_failed;
+ 		}
+ 	} else if (ctx->auth_mode != DRV_HASH_NULL) { /* HMAC authentication */
+@@ -195,12 +197,12 @@ static int ssi_aead_init(struct crypto_aead *tfm)
+ 						     GFP_KERNEL);
+ 
+ 		if (!hmac->ipad_opad) {
+-			SSI_LOG_ERR("Failed allocating IPAD/OPAD buffer\n");
++			dev_err(dev, "Failed allocating IPAD/OPAD buffer\n");
+ 			goto init_failed;
+ 		}
+ 
+-		SSI_LOG_DEBUG("Allocated authkey buffer in context ctx->authkey=@%p\n",
+-			      hmac->ipad_opad);
++		dev_dbg(dev, "Allocated authkey buffer in context ctx->authkey=@%p\n",
++			hmac->ipad_opad);
+ 
+ 		hmac->padded_authkey = dma_alloc_coherent(dev,
+ 							  MAX_HMAC_BLOCK_SIZE,
+@@ -208,7 +210,7 @@ static int ssi_aead_init(struct crypto_aead *tfm)
+ 							  GFP_KERNEL);
+ 
+ 		if (!hmac->padded_authkey) {
+-			SSI_LOG_ERR("failed to allocate padded_authkey\n");
++			dev_err(dev, "failed to allocate padded_authkey\n");
+ 			goto init_failed;
+ 		}
+ 	} else {
+@@ -239,8 +241,7 @@ static void ssi_aead_complete(struct device *dev, void *ssi_req, void __iomem *c
+ 	if (areq_ctx->gen_ctx.op_type == DRV_CRYPTO_DIRECTION_DECRYPT) {
+ 		if (memcmp(areq_ctx->mac_buf, areq_ctx->icv_virt_addr,
+ 			   ctx->authsize) != 0) {
+-			SSI_LOG_DEBUG("Payload authentication failure, "
+-				"(auth-size=%d, cipher=%d).\n",
++			dev_dbg(dev, "Payload authentication failure, (auth-size=%d, cipher=%d)\n",
+ 				ctx->authsize, ctx->cipher_mode);
+ 			/* In case of payload authentication failure, MUST NOT
+ 			 * revealed the decrypted message --> zero its memory.
+@@ -251,8 +252,11 @@ static void ssi_aead_complete(struct device *dev, void *ssi_req, void __iomem *c
+ 	} else { /*ENCRYPT*/
+ 		if (unlikely(areq_ctx->is_icv_fragmented))
+ 			ssi_buffer_mgr_copy_scatterlist_portion(
+-				areq_ctx->mac_buf, areq_ctx->dst_sgl, areq->cryptlen + areq_ctx->dst_offset,
+-				areq->cryptlen + areq_ctx->dst_offset + ctx->authsize, SSI_SG_FROM_BUF);
++				dev, areq_ctx->mac_buf, areq_ctx->dst_sgl,
++				areq->cryptlen + areq_ctx->dst_offset,
++				(areq->cryptlen + areq_ctx->dst_offset +
++				 ctx->authsize),
++				SSI_SG_FROM_BUF);
+ 
+ 		/* If an IV was generated, copy it back to the user provided buffer. */
+ 		if (areq_ctx->backup_giv) {
+@@ -376,8 +380,10 @@ static int hmac_setkey(struct cc_hw_desc *desc, struct ssi_aead_ctx *ctx)
+ 
+ static int validate_keys_sizes(struct ssi_aead_ctx *ctx)
+ {
+-	SSI_LOG_DEBUG("enc_keylen=%u  authkeylen=%u\n",
+-		      ctx->enc_keylen, ctx->auth_keylen);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
++
++	dev_dbg(dev, "enc_keylen=%u  authkeylen=%u\n",
++		ctx->enc_keylen, ctx->auth_keylen);
+ 
+ 	switch (ctx->auth_mode) {
+ 	case DRV_HASH_SHA1:
+@@ -394,22 +400,22 @@ static int validate_keys_sizes(struct ssi_aead_ctx *ctx)
+ 			return -EINVAL;
+ 		break;
+ 	default:
+-		SSI_LOG_ERR("Invalid auth_mode=%d\n", ctx->auth_mode);
++		dev_err(dev, "Invalid auth_mode=%d\n", ctx->auth_mode);
+ 		return -EINVAL;
+ 	}
+ 	/* Check cipher key size */
+ 	if (unlikely(ctx->flow_mode == S_DIN_to_DES)) {
+ 		if (ctx->enc_keylen != DES3_EDE_KEY_SIZE) {
+-			SSI_LOG_ERR("Invalid cipher(3DES) key size: %u\n",
+-				    ctx->enc_keylen);
++			dev_err(dev, "Invalid cipher(3DES) key size: %u\n",
++				ctx->enc_keylen);
+ 			return -EINVAL;
+ 		}
+ 	} else { /* Default assumed to be AES ciphers */
+ 		if ((ctx->enc_keylen != AES_KEYSIZE_128) &&
+ 		    (ctx->enc_keylen != AES_KEYSIZE_192) &&
+ 		    (ctx->enc_keylen != AES_KEYSIZE_256)) {
+-			SSI_LOG_ERR("Invalid cipher(AES) key size: %u\n",
+-				    ctx->enc_keylen);
++			dev_err(dev, "Invalid cipher(AES) key size: %u\n",
++				ctx->enc_keylen);
+ 			return -EINVAL;
+ 		}
+ 	}
+@@ -454,8 +460,8 @@ ssi_get_plain_hmac_key(struct crypto_aead *tfm, const u8 *key, unsigned int keyl
+ 	if (likely(keylen != 0)) {
+ 		key_dma_addr = dma_map_single(dev, (void *)key, keylen, DMA_TO_DEVICE);
+ 		if (unlikely(dma_mapping_error(dev, key_dma_addr))) {
+-			SSI_LOG_ERR("Mapping key va=0x%p len=%u for"
+-				   " DMA failed\n", key, keylen);
++			dev_err(dev, "Mapping key va=0x%p len=%u for DMA failed\n",
++				key, keylen);
+ 			return -ENOMEM;
+ 		}
+ 		if (keylen > blocksize) {
+@@ -533,7 +539,7 @@ ssi_get_plain_hmac_key(struct crypto_aead *tfm, const u8 *key, unsigned int keyl
+ 
+ 	rc = send_request(ctx->drvdata, &ssi_req, desc, idx, 0);
+ 	if (unlikely(rc != 0))
+-		SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++		dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 
+ 	if (likely(key_dma_addr != 0))
+ 		dma_unmap_single(dev, key_dma_addr, keylen, DMA_TO_DEVICE);
+@@ -550,10 +556,10 @@ ssi_aead_setkey(struct crypto_aead *tfm, const u8 *key, unsigned int keylen)
+ 	struct crypto_authenc_key_param *param;
+ 	struct cc_hw_desc desc[MAX_AEAD_SETKEY_SEQ];
+ 	int seq_len = 0, rc = -EINVAL;
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 
+-	SSI_LOG_DEBUG("Setting key in context @%p for %s. key=%p keylen=%u\n",
+-		      ctx, crypto_tfm_alg_name(crypto_aead_tfm(tfm)),
+-		      key, keylen);
++	dev_dbg(dev, "Setting key in context @%p for %s. key=%p keylen=%u\n",
++		ctx, crypto_tfm_alg_name(crypto_aead_tfm(tfm)), key, keylen);
+ 
+ 	/* STAT_PHASE_0: Init and sanity checks */
+ 
+@@ -621,7 +627,7 @@ ssi_aead_setkey(struct crypto_aead *tfm, const u8 *key, unsigned int keylen)
+ 	case DRV_HASH_NULL: /* non-authenc modes, e.g., CCM */
+ 		break; /* No auth. key setup */
+ 	default:
+-		SSI_LOG_ERR("Unsupported authenc (%d)\n", ctx->auth_mode);
++		dev_err(dev, "Unsupported authenc (%d)\n", ctx->auth_mode);
+ 		rc = -ENOTSUPP;
+ 		goto badkey;
+ 	}
+@@ -631,7 +637,7 @@ ssi_aead_setkey(struct crypto_aead *tfm, const u8 *key, unsigned int keylen)
+ 	if (seq_len > 0) { /* For CCM there is no sequence to setup the key */
+ 		rc = send_request(ctx->drvdata, &ssi_req, desc, seq_len, 0);
+ 		if (unlikely(rc != 0)) {
+-			SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++			dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 			goto setkey_error;
+ 		}
+ 	}
+@@ -666,6 +672,7 @@ static int ssi_aead_setauthsize(
+ 	unsigned int authsize)
+ {
+ 	struct ssi_aead_ctx *ctx = crypto_aead_ctx(authenc);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 
+ 	/* Unsupported auth. sizes */
+ 	if ((authsize == 0) ||
+@@ -674,7 +681,7 @@ static int ssi_aead_setauthsize(
+ 	}
+ 
+ 	ctx->authsize = authsize;
+-	SSI_LOG_DEBUG("authlen=%d\n", ctx->authsize);
++	dev_dbg(dev, "authlen=%d\n", ctx->authsize);
+ 
+ 	return 0;
+ }
+@@ -727,10 +734,11 @@ ssi_aead_create_assoc_desc(
+ 	struct aead_req_ctx *areq_ctx = aead_request_ctx(areq);
+ 	enum ssi_req_dma_buf_type assoc_dma_type = areq_ctx->assoc_buff_type;
+ 	unsigned int idx = *seq_size;
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 
+ 	switch (assoc_dma_type) {
+ 	case SSI_DMA_BUF_DLLI:
+-		SSI_LOG_DEBUG("ASSOC buffer type DLLI\n");
++		dev_dbg(dev, "ASSOC buffer type DLLI\n");
+ 		hw_desc_init(&desc[idx]);
+ 		set_din_type(&desc[idx], DMA_DLLI, sg_dma_address(areq->src),
+ 			     areq->assoclen, NS_BIT); set_flow_mode(&desc[idx],
+@@ -740,7 +748,7 @@ ssi_aead_create_assoc_desc(
+ 			set_din_not_last_indication(&desc[idx]);
+ 		break;
+ 	case SSI_DMA_BUF_MLLI:
+-		SSI_LOG_DEBUG("ASSOC buffer type MLLI\n");
++		dev_dbg(dev, "ASSOC buffer type MLLI\n");
+ 		hw_desc_init(&desc[idx]);
+ 		set_din_type(&desc[idx], DMA_MLLI, areq_ctx->assoc.sram_addr,
+ 			     areq_ctx->assoc.mlli_nents, NS_BIT);
+@@ -751,7 +759,7 @@ ssi_aead_create_assoc_desc(
+ 		break;
+ 	case SSI_DMA_BUF_NULL:
+ 	default:
+-		SSI_LOG_ERR("Invalid ASSOC buffer type\n");
++		dev_err(dev, "Invalid ASSOC buffer type\n");
+ 	}
+ 
+ 	*seq_size = (++idx);
+@@ -768,6 +776,9 @@ ssi_aead_process_authenc_data_desc(
+ 	struct aead_req_ctx *areq_ctx = aead_request_ctx(areq);
+ 	enum ssi_req_dma_buf_type data_dma_type = areq_ctx->data_buff_type;
+ 	unsigned int idx = *seq_size;
++	struct crypto_aead *tfm = crypto_aead_reqtfm(areq);
++	struct ssi_aead_ctx *ctx = crypto_aead_ctx(tfm);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 
+ 	switch (data_dma_type) {
+ 	case SSI_DMA_BUF_DLLI:
+@@ -779,7 +790,7 @@ ssi_aead_process_authenc_data_desc(
+ 		unsigned int offset =
+ 			(direct == DRV_CRYPTO_DIRECTION_ENCRYPT) ?
+ 			areq_ctx->dst_offset : areq_ctx->src_offset;
+-		SSI_LOG_DEBUG("AUTHENC: SRC/DST buffer type DLLI\n");
++		dev_dbg(dev, "AUTHENC: SRC/DST buffer type DLLI\n");
+ 		hw_desc_init(&desc[idx]);
+ 		set_din_type(&desc[idx], DMA_DLLI,
+ 			     (sg_dma_address(cipher) + offset),
+@@ -806,7 +817,7 @@ ssi_aead_process_authenc_data_desc(
+ 			}
+ 		}
+ 
+-		SSI_LOG_DEBUG("AUTHENC: SRC/DST buffer type MLLI\n");
++		dev_dbg(dev, "AUTHENC: SRC/DST buffer type MLLI\n");
+ 		hw_desc_init(&desc[idx]);
+ 		set_din_type(&desc[idx], DMA_MLLI, mlli_addr, mlli_nents,
+ 			     NS_BIT);
+@@ -815,7 +826,7 @@ ssi_aead_process_authenc_data_desc(
+ 	}
+ 	case SSI_DMA_BUF_NULL:
+ 	default:
+-		SSI_LOG_ERR("AUTHENC: Invalid SRC/DST buffer type\n");
++		dev_err(dev, "AUTHENC: Invalid SRC/DST buffer type\n");
+ 	}
+ 
+ 	*seq_size = (++idx);
+@@ -831,13 +842,16 @@ ssi_aead_process_cipher_data_desc(
+ 	unsigned int idx = *seq_size;
+ 	struct aead_req_ctx *areq_ctx = aead_request_ctx(areq);
+ 	enum ssi_req_dma_buf_type data_dma_type = areq_ctx->data_buff_type;
++	struct crypto_aead *tfm = crypto_aead_reqtfm(areq);
++	struct ssi_aead_ctx *ctx = crypto_aead_ctx(tfm);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 
+ 	if (areq_ctx->cryptlen == 0)
+ 		return; /*null processing*/
+ 
+ 	switch (data_dma_type) {
+ 	case SSI_DMA_BUF_DLLI:
+-		SSI_LOG_DEBUG("CIPHER: SRC/DST buffer type DLLI\n");
++		dev_dbg(dev, "CIPHER: SRC/DST buffer type DLLI\n");
+ 		hw_desc_init(&desc[idx]);
+ 		set_din_type(&desc[idx], DMA_DLLI,
+ 			     (sg_dma_address(areq_ctx->src_sgl) +
+@@ -849,7 +863,7 @@ ssi_aead_process_cipher_data_desc(
+ 		set_flow_mode(&desc[idx], flow_mode);
+ 		break;
+ 	case SSI_DMA_BUF_MLLI:
+-		SSI_LOG_DEBUG("CIPHER: SRC/DST buffer type MLLI\n");
++		dev_dbg(dev, "CIPHER: SRC/DST buffer type MLLI\n");
+ 		hw_desc_init(&desc[idx]);
+ 		set_din_type(&desc[idx], DMA_MLLI, areq_ctx->src.sram_addr,
+ 			     areq_ctx->src.mlli_nents, NS_BIT);
+@@ -859,7 +873,7 @@ ssi_aead_process_cipher_data_desc(
+ 		break;
+ 	case SSI_DMA_BUF_NULL:
+ 	default:
+-		SSI_LOG_ERR("CIPHER: Invalid SRC/DST buffer type\n");
++		dev_err(dev, "CIPHER: Invalid SRC/DST buffer type\n");
+ 	}
+ 
+ 	*seq_size = (++idx);
+@@ -1174,14 +1188,15 @@ static inline void ssi_aead_load_mlli_to_sram(
+ 	struct aead_req_ctx *req_ctx = aead_request_ctx(req);
+ 	struct crypto_aead *tfm = crypto_aead_reqtfm(req);
+ 	struct ssi_aead_ctx *ctx = crypto_aead_ctx(tfm);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 
+ 	if (unlikely(
+ 		(req_ctx->assoc_buff_type == SSI_DMA_BUF_MLLI) ||
+ 		(req_ctx->data_buff_type == SSI_DMA_BUF_MLLI) ||
+ 		!req_ctx->is_single_pass)) {
+-		SSI_LOG_DEBUG("Copy-to-sram: mlli_dma=%08x, mlli_size=%u\n",
+-			      (unsigned int)ctx->drvdata->mlli_sram_addr,
+-			      req_ctx->mlli_params.mlli_len);
++		dev_dbg(dev, "Copy-to-sram: mlli_dma=%08x, mlli_size=%u\n",
++			(unsigned int)ctx->drvdata->mlli_sram_addr,
++			req_ctx->mlli_params.mlli_len);
+ 		/* Copy MLLI table host-to-sram */
+ 		hw_desc_init(&desc[*seq_size]);
+ 		set_din_type(&desc[*seq_size], DMA_DLLI,
+@@ -1329,6 +1344,7 @@ static int validate_data_size(struct ssi_aead_ctx *ctx,
+ 			      struct aead_request *req)
+ {
+ 	struct aead_req_ctx *areq_ctx = aead_request_ctx(req);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 	unsigned int assoclen = req->assoclen;
+ 	unsigned int cipherlen = (direct == DRV_CRYPTO_DIRECTION_DECRYPT) ?
+ 			(req->cryptlen - ctx->authsize) : req->cryptlen;
+@@ -1367,7 +1383,7 @@ static int validate_data_size(struct ssi_aead_ctx *ctx,
+ 			areq_ctx->is_single_pass = false;
+ 		break;
+ 	default:
+-		SSI_LOG_ERR("Unexpected flow mode (%d)\n", ctx->flow_mode);
++		dev_err(dev, "Unexpected flow mode (%d)\n", ctx->flow_mode);
+ 		goto data_size_err;
+ 	}
+ 
+@@ -1550,6 +1566,7 @@ static int config_ccm_adata(struct aead_request *req)
+ {
+ 	struct crypto_aead *tfm = crypto_aead_reqtfm(req);
+ 	struct ssi_aead_ctx *ctx = crypto_aead_ctx(tfm);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 	struct aead_req_ctx *req_ctx = aead_request_ctx(req);
+ 	//unsigned int size_of_a = 0, rem_a_size = 0;
+ 	unsigned int lp = req->iv[0];
+@@ -1571,7 +1588,7 @@ static int config_ccm_adata(struct aead_request *req)
+ 	/* taken from crypto/ccm.c */
+ 	/* 2 <= L <= 8, so 1 <= L' <= 7. */
+ 	if (l < 2 || l > 8) {
+-		SSI_LOG_ERR("illegal iv value %X\n", req->iv[0]);
++		dev_err(dev, "illegal iv value %X\n", req->iv[0]);
+ 		return -EINVAL;
+ 	}
+ 	memcpy(b0, req->iv, AES_BLOCK_SIZE);
+@@ -1584,8 +1601,10 @@ static int config_ccm_adata(struct aead_request *req)
+ 		*b0 |= 64;  /* Enable bit 6 if Adata exists. */
+ 
+ 	rc = set_msg_len(b0 + 16 - l, cryptlen, l);  /* Write L'. */
+-	if (rc != 0)
++	if (rc != 0) {
++		dev_err(dev, "message len overflow detected");
+ 		return rc;
++	}
+ 	 /* END of "taken from crypto/ccm.c" */
+ 
+ 	/* l(a) - size of associated data. */
+@@ -1854,13 +1873,13 @@ static inline void ssi_aead_dump_gcm(
+ 		return;
+ 
+ 	if (title) {
+-		SSI_LOG_DEBUG("----------------------------------------------------------------------------------");
+-		SSI_LOG_DEBUG("%s\n", title);
++		dev_dbg(dev, "----------------------------------------------------------------------------------");
++		dev_dbg(dev, "%s\n", title);
+ 	}
+ 
+-	SSI_LOG_DEBUG("cipher_mode %d, authsize %d, enc_keylen %d, assoclen %d, cryptlen %d\n",
+-		      ctx->cipher_mode, ctx->authsize, ctx->enc_keylen,
+-		      req->assoclen, req_ctx->cryptlen);
++	dev_dbg(dev, "cipher_mode %d, authsize %d, enc_keylen %d, assoclen %d, cryptlen %d\n",
++		ctx->cipher_mode, ctx->authsize, ctx->enc_keylen,
++		req->assoclen, req_ctx->cryptlen);
+ 
+ 	if (ctx->enckey)
+ 		dump_byte_array("mac key", ctx->enckey, 16);
+@@ -1890,6 +1909,7 @@ static int config_gcm_context(struct aead_request *req)
+ 	struct crypto_aead *tfm = crypto_aead_reqtfm(req);
+ 	struct ssi_aead_ctx *ctx = crypto_aead_ctx(tfm);
+ 	struct aead_req_ctx *req_ctx = aead_request_ctx(req);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 
+ 	unsigned int cryptlen = (req_ctx->gen_ctx.op_type ==
+ 				 DRV_CRYPTO_DIRECTION_ENCRYPT) ?
+@@ -1897,7 +1917,8 @@ static int config_gcm_context(struct aead_request *req)
+ 				(req->cryptlen - ctx->authsize);
+ 	__be32 counter = cpu_to_be32(2);
+ 
+-	SSI_LOG_DEBUG("%s() cryptlen = %d, req->assoclen = %d ctx->authsize = %d\n", __func__, cryptlen, req->assoclen, ctx->authsize);
++	dev_dbg(dev, "%s() cryptlen = %d, req->assoclen = %d ctx->authsize = %d\n",
++		__func__, cryptlen, req->assoclen, ctx->authsize);
+ 
+ 	memset(req_ctx->hkey, 0, AES_BLOCK_SIZE);
+ 
+@@ -1954,17 +1975,17 @@ static int ssi_aead_process(struct aead_request *req, enum drv_crypto_direction
+ 	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 	struct ssi_crypto_req ssi_req = {};
+ 
+-	SSI_LOG_DEBUG("%s context=%p req=%p iv=%p src=%p src_ofs=%d dst=%p dst_ofs=%d cryptolen=%d\n",
+-		      ((direct == DRV_CRYPTO_DIRECTION_ENCRYPT) ? "Encrypt" : "Decrypt"),
+-		      ctx, req, req->iv, sg_virt(req->src), req->src->offset,
+-		      sg_virt(req->dst), req->dst->offset, req->cryptlen);
++	dev_dbg(dev, "%s context=%p req=%p iv=%p src=%p src_ofs=%d dst=%p dst_ofs=%d cryptolen=%d\n",
++		((direct == DRV_CRYPTO_DIRECTION_ENCRYPT) ? "Enc" : "Dec"),
++		ctx, req, req->iv, sg_virt(req->src), req->src->offset,
++		sg_virt(req->dst), req->dst->offset, req->cryptlen);
+ 
+ 	/* STAT_PHASE_0: Init and sanity checks */
+ 
+ 	/* Check data length according to mode */
+ 	if (unlikely(validate_data_size(ctx, direct, req) != 0)) {
+-		SSI_LOG_ERR("Unsupported crypt/assoc len %d/%d.\n",
+-			    req->cryptlen, req->assoclen);
++		dev_err(dev, "Unsupported crypt/assoc len %d/%d.\n",
++			req->cryptlen, req->assoclen);
+ 		crypto_aead_set_flags(tfm, CRYPTO_TFM_RES_BAD_BLOCK_LEN);
+ 		return -EINVAL;
+ 	}
+@@ -2010,7 +2031,8 @@ static int ssi_aead_process(struct aead_request *req, enum drv_crypto_direction
+ 	if (ctx->cipher_mode == DRV_CIPHER_CCM) {
+ 		rc = config_ccm_adata(req);
+ 		if (unlikely(rc != 0)) {
+-			SSI_LOG_ERR("config_ccm_adata() returned with a failure %d!", rc);
++			dev_dbg(dev, "config_ccm_adata() returned with a failure %d!",
++				rc);
+ 			goto exit;
+ 		}
+ 	} else {
+@@ -2024,7 +2046,8 @@ static int ssi_aead_process(struct aead_request *req, enum drv_crypto_direction
+ 	if (ctx->cipher_mode == DRV_CIPHER_GCTR) {
+ 		rc = config_gcm_context(req);
+ 		if (unlikely(rc != 0)) {
+-			SSI_LOG_ERR("config_gcm_context() returned with a failure %d!", rc);
++			dev_dbg(dev, "config_gcm_context() returned with a failure %d!",
++				rc);
+ 			goto exit;
+ 		}
+ 	}
+@@ -2032,7 +2055,7 @@ static int ssi_aead_process(struct aead_request *req, enum drv_crypto_direction
+ 
+ 	rc = ssi_buffer_mgr_map_aead_request(ctx->drvdata, req);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("map_request() failed\n");
++		dev_err(dev, "map_request() failed\n");
+ 		goto exit;
+ 	}
+ 
+@@ -2088,7 +2111,7 @@ static int ssi_aead_process(struct aead_request *req, enum drv_crypto_direction
+ 			break;
+ #endif
+ 	default:
+-		SSI_LOG_ERR("Unsupported authenc (%d)\n", ctx->auth_mode);
++		dev_err(dev, "Unsupported authenc (%d)\n", ctx->auth_mode);
+ 		ssi_buffer_mgr_unmap_aead_request(dev, req);
+ 		rc = -ENOTSUPP;
+ 		goto exit;
+@@ -2099,7 +2122,7 @@ static int ssi_aead_process(struct aead_request *req, enum drv_crypto_direction
+ 	rc = send_request(ctx->drvdata, &ssi_req, desc, seq_len, 1);
+ 
+ 	if (unlikely(rc != -EINPROGRESS)) {
+-		SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++		dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 		ssi_buffer_mgr_unmap_aead_request(dev, req);
+ 	}
+ 
+@@ -2132,10 +2155,13 @@ static int ssi_rfc4309_ccm_encrypt(struct aead_request *req)
+ 	/* Very similar to ssi_aead_encrypt() above. */
+ 
+ 	struct aead_req_ctx *areq_ctx = aead_request_ctx(req);
++	struct crypto_aead *tfm = crypto_aead_reqtfm(req);
++	struct ssi_aead_ctx *ctx = crypto_aead_ctx(tfm);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 	int rc = -EINVAL;
+ 
+ 	if (!valid_assoclen(req)) {
+-		SSI_LOG_ERR("invalid Assoclen:%u\n", req->assoclen);
++		dev_err(dev, "invalid Assoclen:%u\n", req->assoclen);
+ 		goto out;
+ 	}
+ 
+@@ -2176,13 +2202,14 @@ static int ssi_aead_decrypt(struct aead_request *req)
+ #if SSI_CC_HAS_AES_CCM
+ static int ssi_rfc4309_ccm_decrypt(struct aead_request *req)
+ {
+-	/* Very similar to ssi_aead_decrypt() above. */
+-
++	struct crypto_aead *tfm = crypto_aead_reqtfm(req);
++	struct ssi_aead_ctx *ctx = crypto_aead_ctx(tfm);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 	struct aead_req_ctx *areq_ctx = aead_request_ctx(req);
+ 	int rc = -EINVAL;
+ 
+ 	if (!valid_assoclen(req)) {
+-		SSI_LOG_ERR("invalid Assoclen:%u\n", req->assoclen);
++		dev_err(dev, "invalid Assoclen:%u\n", req->assoclen);
+ 		goto out;
+ 	}
+ 
+@@ -2207,8 +2234,9 @@ static int ssi_rfc4309_ccm_decrypt(struct aead_request *req)
+ static int ssi_rfc4106_gcm_setkey(struct crypto_aead *tfm, const u8 *key, unsigned int keylen)
+ {
+ 	struct ssi_aead_ctx *ctx = crypto_aead_ctx(tfm);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 
+-	SSI_LOG_DEBUG("%s()  keylen %d, key %p\n", __func__, keylen, key);
++	dev_dbg(dev, "%s()  keylen %d, key %p\n", __func__, keylen, key);
+ 
+ 	if (keylen < 4)
+ 		return -EINVAL;
+@@ -2222,8 +2250,9 @@ static int ssi_rfc4106_gcm_setkey(struct crypto_aead *tfm, const u8 *key, unsign
+ static int ssi_rfc4543_gcm_setkey(struct crypto_aead *tfm, const u8 *key, unsigned int keylen)
+ {
+ 	struct ssi_aead_ctx *ctx = crypto_aead_ctx(tfm);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 
+-	SSI_LOG_DEBUG("%s()  keylen %d, key %p\n", __func__, keylen, key);
++	dev_dbg(dev, "%s()  keylen %d, key %p\n", __func__, keylen, key);
+ 
+ 	if (keylen < 4)
+ 		return -EINVAL;
+@@ -2256,7 +2285,10 @@ static int ssi_gcm_setauthsize(struct crypto_aead *authenc,
+ static int ssi_rfc4106_gcm_setauthsize(struct crypto_aead *authenc,
+ 				       unsigned int authsize)
+ {
+-	SSI_LOG_DEBUG("authsize %d\n", authsize);
++	struct ssi_aead_ctx *ctx = crypto_aead_ctx(authenc);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
++
++	dev_dbg(dev, "authsize %d\n", authsize);
+ 
+ 	switch (authsize) {
+ 	case 8:
+@@ -2273,7 +2305,10 @@ static int ssi_rfc4106_gcm_setauthsize(struct crypto_aead *authenc,
+ static int ssi_rfc4543_gcm_setauthsize(struct crypto_aead *authenc,
+ 				       unsigned int authsize)
+ {
+-	SSI_LOG_DEBUG("authsize %d\n", authsize);
++	struct ssi_aead_ctx *ctx = crypto_aead_ctx(authenc);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
++
++	dev_dbg(dev, "authsize %d\n", authsize);
+ 
+ 	if (authsize != 16)
+ 		return -EINVAL;
+@@ -2285,11 +2320,14 @@ static int ssi_rfc4106_gcm_encrypt(struct aead_request *req)
+ {
+ 	/* Very similar to ssi_aead_encrypt() above. */
+ 
++	struct crypto_aead *tfm = crypto_aead_reqtfm(req);
++	struct ssi_aead_ctx *ctx = crypto_aead_ctx(tfm);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 	struct aead_req_ctx *areq_ctx = aead_request_ctx(req);
+ 	int rc = -EINVAL;
+ 
+ 	if (!valid_assoclen(req)) {
+-		SSI_LOG_ERR("invalid Assoclen:%u\n", req->assoclen);
++		dev_err(dev, "invalid Assoclen:%u\n", req->assoclen);
+ 		goto out;
+ 	}
+ 
+@@ -2337,11 +2375,14 @@ static int ssi_rfc4106_gcm_decrypt(struct aead_request *req)
+ {
+ 	/* Very similar to ssi_aead_decrypt() above. */
+ 
++	struct crypto_aead *tfm = crypto_aead_reqtfm(req);
++	struct ssi_aead_ctx *ctx = crypto_aead_ctx(tfm);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 	struct aead_req_ctx *areq_ctx = aead_request_ctx(req);
+ 	int rc = -EINVAL;
+ 
+ 	if (!valid_assoclen(req)) {
+-		SSI_LOG_ERR("invalid Assoclen:%u\n", req->assoclen);
++		dev_err(dev, "invalid Assoclen:%u\n", req->assoclen);
+ 		goto out;
+ 	}
+ 
+@@ -2641,16 +2682,17 @@ static struct ssi_alg_template aead_algs[] = {
+ #endif /*SSI_CC_HAS_AES_GCM*/
+ };
+ 
+-static struct ssi_crypto_alg *ssi_aead_create_alg(struct ssi_alg_template *template)
++static struct ssi_crypto_alg *ssi_aead_create_alg(
++			struct ssi_alg_template *template,
++			struct device *dev)
+ {
+ 	struct ssi_crypto_alg *t_alg;
+ 	struct aead_alg *alg;
+ 
+ 	t_alg = kzalloc(sizeof(*t_alg), GFP_KERNEL);
+-	if (!t_alg) {
+-		SSI_LOG_ERR("failed to allocate t_alg\n");
++	if (!t_alg)
+ 		return ERR_PTR(-ENOMEM);
+-	}
++
+ 	alg = &template->template_aead;
+ 
+ 	snprintf(alg->base.cra_name, CRYPTO_MAX_ALG_NAME, "%s", template->name);
+@@ -2700,6 +2742,7 @@ int ssi_aead_alloc(struct ssi_drvdata *drvdata)
+ 	struct ssi_crypto_alg *t_alg;
+ 	int rc = -ENOMEM;
+ 	int alg;
++	struct device *dev = drvdata_to_dev(drvdata);
+ 
+ 	aead_handle = kmalloc(sizeof(*aead_handle), GFP_KERNEL);
+ 	if (!aead_handle) {
+@@ -2713,29 +2756,30 @@ int ssi_aead_alloc(struct ssi_drvdata *drvdata)
+ 	aead_handle->sram_workspace_addr = ssi_sram_mgr_alloc(
+ 		drvdata, MAX_HMAC_DIGEST_SIZE);
+ 	if (aead_handle->sram_workspace_addr == NULL_SRAM_ADDR) {
+-		SSI_LOG_ERR("SRAM pool exhausted\n");
++		dev_err(dev, "SRAM pool exhausted\n");
+ 		rc = -ENOMEM;
+ 		goto fail1;
+ 	}
+ 
+ 	/* Linux crypto */
+ 	for (alg = 0; alg < ARRAY_SIZE(aead_algs); alg++) {
+-		t_alg = ssi_aead_create_alg(&aead_algs[alg]);
++		t_alg = ssi_aead_create_alg(&aead_algs[alg], dev);
+ 		if (IS_ERR(t_alg)) {
+ 			rc = PTR_ERR(t_alg);
+-			SSI_LOG_ERR("%s alg allocation failed\n",
+-				    aead_algs[alg].driver_name);
++			dev_err(dev, "%s alg allocation failed\n",
++				aead_algs[alg].driver_name);
+ 			goto fail1;
+ 		}
+ 		t_alg->drvdata = drvdata;
+ 		rc = crypto_register_aead(&t_alg->aead_alg);
+ 		if (unlikely(rc != 0)) {
+-			SSI_LOG_ERR("%s alg registration failed\n",
+-				    t_alg->aead_alg.base.cra_driver_name);
++			dev_err(dev, "%s alg registration failed\n",
++				t_alg->aead_alg.base.cra_driver_name);
+ 			goto fail2;
+ 		} else {
+ 			list_add_tail(&t_alg->entry, &aead_handle->aead_list);
+-			SSI_LOG_DEBUG("Registered %s\n", t_alg->aead_alg.base.cra_driver_name);
++			dev_dbg(dev, "Registered %s\n",
++				t_alg->aead_alg.base.cra_driver_name);
+ 		}
+ 	}
+ 
+diff --git a/drivers/staging/ccree/ssi_buffer_mgr.c b/drivers/staging/ccree/ssi_buffer_mgr.c
+index 8fd588d090fa..dca3ce84d043 100644
+--- a/drivers/staging/ccree/ssi_buffer_mgr.c
++++ b/drivers/staging/ccree/ssi_buffer_mgr.c
+@@ -33,14 +33,10 @@
+ #include "ssi_hash.h"
+ #include "ssi_aead.h"
+ 
+-#ifdef CC_DEBUG
+ #define GET_DMA_BUFFER_TYPE(buff_type) ( \
+ 	((buff_type) == SSI_DMA_BUF_NULL) ? "BUF_NULL" : \
+ 	((buff_type) == SSI_DMA_BUF_DLLI) ? "BUF_DLLI" : \
+ 	((buff_type) == SSI_DMA_BUF_MLLI) ? "BUF_MLLI" : "BUF_INVALID")
+-#else
+-#define GET_DMA_BUFFER_TYPE(buff_type)
+-#endif
+ 
+ enum dma_buffer_type {
+ 	DMA_NULL_TYPE = -1,
+@@ -76,7 +72,8 @@ struct buffer_array {
+  * @lbytes: [OUT] Returns the amount of bytes at the last entry
+  */
+ static unsigned int ssi_buffer_mgr_get_sgl_nents(
+-	struct scatterlist *sg_list, unsigned int nbytes, u32 *lbytes, bool *is_chained)
++	struct device *dev, struct scatterlist *sg_list,
++	unsigned int nbytes, u32 *lbytes, bool *is_chained)
+ {
+ 	unsigned int nents = 0;
+ 
+@@ -93,7 +90,7 @@ static unsigned int ssi_buffer_mgr_get_sgl_nents(
+ 				*is_chained = true;
+ 		}
+ 	}
+-	SSI_LOG_DEBUG("nents %d last bytes %d\n", nents, *lbytes);
++	dev_dbg(dev, "nents %d last bytes %d\n", nents, *lbytes);
+ 	return nents;
+ }
+ 
+@@ -129,20 +126,20 @@ void ssi_buffer_mgr_zero_sgl(struct scatterlist *sgl, u32 data_len)
+  * @direct:
+  */
+ void ssi_buffer_mgr_copy_scatterlist_portion(
+-	u8 *dest, struct scatterlist *sg,
+-	u32 to_skip,  u32 end,
+-	enum ssi_sg_cpy_direct direct)
++	struct device *dev, u8 *dest,
++	struct scatterlist *sg, u32 to_skip,
++	u32 end, enum ssi_sg_cpy_direct direct)
+ {
+ 	u32 nents, lbytes;
+ 
+-	nents = ssi_buffer_mgr_get_sgl_nents(sg, end, &lbytes, NULL);
++	nents = ssi_buffer_mgr_get_sgl_nents(dev, sg, end, &lbytes, NULL);
+ 	sg_copy_buffer(sg, nents, (void *)dest, (end - to_skip + 1), to_skip,
+ 		       (direct == SSI_SG_TO_BUF));
+ }
+ 
+ static inline int ssi_buffer_mgr_render_buff_to_mlli(
+-	dma_addr_t buff_dma, u32 buff_size, u32 *curr_nents,
+-	u32 **mlli_entry_pp)
++	struct device *dev, dma_addr_t buff_dma, u32 buff_size,
++	u32 *curr_nents, u32 **mlli_entry_pp)
+ {
+ 	u32 *mlli_entry_p = *mlli_entry_pp;
+ 	u32 new_nents;
+@@ -156,9 +153,9 @@ static inline int ssi_buffer_mgr_render_buff_to_mlli(
+ 	while (buff_size > CC_MAX_MLLI_ENTRY_SIZE) {
+ 		cc_lli_set_addr(mlli_entry_p, buff_dma);
+ 		cc_lli_set_size(mlli_entry_p, CC_MAX_MLLI_ENTRY_SIZE);
+-		SSI_LOG_DEBUG("entry[%d]: single_buff=0x%08X size=%08X\n", *curr_nents,
+-			      mlli_entry_p[LLI_WORD0_OFFSET],
+-			      mlli_entry_p[LLI_WORD1_OFFSET]);
++		dev_dbg(dev, "entry[%d]: single_buff=0x%08X size=%08X\n",
++			*curr_nents, mlli_entry_p[LLI_WORD0_OFFSET],
++			mlli_entry_p[LLI_WORD1_OFFSET]);
+ 		buff_dma += CC_MAX_MLLI_ENTRY_SIZE;
+ 		buff_size -= CC_MAX_MLLI_ENTRY_SIZE;
+ 		mlli_entry_p = mlli_entry_p + 2;
+@@ -167,9 +164,9 @@ static inline int ssi_buffer_mgr_render_buff_to_mlli(
+ 	/*Last entry */
+ 	cc_lli_set_addr(mlli_entry_p, buff_dma);
+ 	cc_lli_set_size(mlli_entry_p, buff_size);
+-	SSI_LOG_DEBUG("entry[%d]: single_buff=0x%08X size=%08X\n", *curr_nents,
+-		      mlli_entry_p[LLI_WORD0_OFFSET],
+-		      mlli_entry_p[LLI_WORD1_OFFSET]);
++	dev_dbg(dev, "entry[%d]: single_buff=0x%08X size=%08X\n",
++		*curr_nents, mlli_entry_p[LLI_WORD0_OFFSET],
++		mlli_entry_p[LLI_WORD1_OFFSET]);
+ 	mlli_entry_p = mlli_entry_p + 2;
+ 	*mlli_entry_pp = mlli_entry_p;
+ 	(*curr_nents)++;
+@@ -177,8 +174,9 @@ static inline int ssi_buffer_mgr_render_buff_to_mlli(
+ }
+ 
+ static inline int ssi_buffer_mgr_render_scatterlist_to_mlli(
+-	struct scatterlist *sgl, u32 sgl_data_len, u32 sgl_offset,
+-	u32 *curr_nents, u32 **mlli_entry_pp)
++	struct device *dev, struct scatterlist *sgl,
++	u32 sgl_data_len, u32 sgl_offset, u32 *curr_nents,
++	u32 **mlli_entry_pp)
+ {
+ 	struct scatterlist *curr_sgl = sgl;
+ 	u32 *mlli_entry_p = *mlli_entry_pp;
+@@ -192,8 +190,8 @@ static inline int ssi_buffer_mgr_render_scatterlist_to_mlli(
+ 				sgl_data_len;
+ 		sgl_data_len -= entry_data_len;
+ 		rc = ssi_buffer_mgr_render_buff_to_mlli(
+-			sg_dma_address(curr_sgl) + sgl_offset, entry_data_len,
+-			curr_nents, &mlli_entry_p);
++			dev, sg_dma_address(curr_sgl) + sgl_offset,
++			entry_data_len, curr_nents, &mlli_entry_p);
+ 		if (rc != 0)
+ 			return rc;
+ 
+@@ -212,14 +210,14 @@ static int ssi_buffer_mgr_generate_mlli(
+ 	u32 total_nents = 0, prev_total_nents = 0;
+ 	int rc = 0, i;
+ 
+-	SSI_LOG_DEBUG("NUM of SG's = %d\n", sg_data->num_of_buffers);
++	dev_dbg(dev, "NUM of SG's = %d\n", sg_data->num_of_buffers);
+ 
+ 	/* Allocate memory from the pointed pool */
+ 	mlli_params->mlli_virt_addr = dma_pool_alloc(
+ 			mlli_params->curr_pool, GFP_KERNEL,
+ 			&mlli_params->mlli_dma_addr);
+ 	if (unlikely(!mlli_params->mlli_virt_addr)) {
+-		SSI_LOG_ERR("dma_pool_alloc() failed\n");
++		dev_err(dev, "dma_pool_alloc() failed\n");
+ 		rc = -ENOMEM;
+ 		goto build_mlli_exit;
+ 	}
+@@ -229,12 +227,12 @@ static int ssi_buffer_mgr_generate_mlli(
+ 	for (i = 0; i < sg_data->num_of_buffers; i++) {
+ 		if (sg_data->type[i] == DMA_SGL_TYPE)
+ 			rc = ssi_buffer_mgr_render_scatterlist_to_mlli(
+-				sg_data->entry[i].sgl,
+-				sg_data->total_data_len[i], sg_data->offset[i], &total_nents,
+-				&mlli_p);
++				dev, sg_data->entry[i].sgl,
++				sg_data->total_data_len[i], sg_data->offset[i],
++				&total_nents, &mlli_p);
+ 		else /*DMA_BUFF_TYPE*/
+ 			rc = ssi_buffer_mgr_render_buff_to_mlli(
+-				sg_data->entry[i].buffer_dma,
++				dev, sg_data->entry[i].buffer_dma,
+ 				sg_data->total_data_len[i], &total_nents,
+ 				&mlli_p);
+ 		if (rc != 0)
+@@ -254,26 +252,23 @@ static int ssi_buffer_mgr_generate_mlli(
+ 	/* Set MLLI size for the bypass operation */
+ 	mlli_params->mlli_len = (total_nents * LLI_ENTRY_BYTE_SIZE);
+ 
+-	SSI_LOG_DEBUG("MLLI params: "
+-		     "virt_addr=%pK dma_addr=%pad mlli_len=0x%X\n",
+-		   mlli_params->mlli_virt_addr,
+-		   mlli_params->mlli_dma_addr,
+-		   mlli_params->mlli_len);
++	dev_dbg(dev, "MLLI params: virt_addr=%pK dma_addr=%pad mlli_len=0x%X\n",
++		mlli_params->mlli_virt_addr, &mlli_params->mlli_dma_addr,
++		mlli_params->mlli_len);
+ 
+ build_mlli_exit:
+ 	return rc;
+ }
+ 
+ static inline void ssi_buffer_mgr_add_buffer_entry(
+-	struct buffer_array *sgl_data,
++	struct device *dev, struct buffer_array *sgl_data,
+ 	dma_addr_t buffer_dma, unsigned int buffer_len,
+ 	bool is_last_entry, u32 *mlli_nents)
+ {
+ 	unsigned int index = sgl_data->num_of_buffers;
+ 
+-	SSI_LOG_DEBUG("index=%u single_buff=%pad "
+-		     "buffer_len=0x%08X is_last=%d\n",
+-		     index, buffer_dma, buffer_len, is_last_entry);
++	dev_dbg(dev, "index=%u single_buff=%pad buffer_len=0x%08X is_last=%d\n",
++		index, &buffer_dma, buffer_len, is_last_entry);
+ 	sgl_data->nents[index] = 1;
+ 	sgl_data->entry[index].buffer_dma = buffer_dma;
+ 	sgl_data->offset[index] = 0;
+@@ -287,6 +282,7 @@ static inline void ssi_buffer_mgr_add_buffer_entry(
+ }
+ 
+ static inline void ssi_buffer_mgr_add_scatterlist_entry(
++	struct device *dev,
+ 	struct buffer_array *sgl_data,
+ 	unsigned int nents,
+ 	struct scatterlist *sgl,
+@@ -297,8 +293,8 @@ static inline void ssi_buffer_mgr_add_scatterlist_entry(
+ {
+ 	unsigned int index = sgl_data->num_of_buffers;
+ 
+-	SSI_LOG_DEBUG("index=%u nents=%u sgl=%pK data_len=0x%08X is_last=%d\n",
+-		      index, nents, sgl, data_len, is_last_table);
++	dev_dbg(dev, "index=%u nents=%u sgl=%pK data_len=0x%08X is_last=%d\n",
++		index, nents, sgl, data_len, is_last_table);
+ 	sgl_data->nents[index] = nents;
+ 	sgl_data->entry[index].sgl = sgl;
+ 	sgl_data->offset[index] = data_offset;
+@@ -322,7 +318,7 @@ ssi_buffer_mgr_dma_map_sg(struct device *dev, struct scatterlist *sg, u32 nents,
+ 		if (!l_sg)
+ 			break;
+ 		if (unlikely(dma_map_sg(dev, l_sg, 1, direction) != 1)) {
+-			SSI_LOG_ERR("dma_map_page() sg buffer failed\n");
++			dev_err(dev, "dma_map_page() sg buffer failed\n");
+ 			goto err;
+ 		}
+ 		l_sg = sg_next(l_sg);
+@@ -351,26 +347,22 @@ static int ssi_buffer_mgr_map_scatterlist(
+ 	if (sg_is_last(sg)) {
+ 		/* One entry only case -set to DLLI */
+ 		if (unlikely(dma_map_sg(dev, sg, 1, direction) != 1)) {
+-			SSI_LOG_ERR("dma_map_sg() single buffer failed\n");
++			dev_err(dev, "dma_map_sg() single buffer failed\n");
+ 			return -ENOMEM;
+ 		}
+-		SSI_LOG_DEBUG("Mapped sg: dma_address=%pad "
+-			     "page=%p addr=%pK offset=%u "
+-			     "length=%u\n",
+-			     sg_dma_address(sg),
+-			     sg_page(sg),
+-			     sg_virt(sg),
+-			     sg->offset, sg->length);
++		dev_dbg(dev, "Mapped sg: dma_address=%pad page=%p addr=%pK offset=%u length=%u\n",
++			&sg_dma_address(sg), sg_page(sg), sg_virt(sg),
++			sg->offset, sg->length);
+ 		*lbytes = nbytes;
+ 		*nents = 1;
+ 		*mapped_nents = 1;
+ 	} else {  /*sg_is_last*/
+-		*nents = ssi_buffer_mgr_get_sgl_nents(sg, nbytes, lbytes,
++		*nents = ssi_buffer_mgr_get_sgl_nents(dev, sg, nbytes, lbytes,
+ 						      &is_chained);
+ 		if (*nents > max_sg_nents) {
+ 			*nents = 0;
+-			SSI_LOG_ERR("Too many fragments. current %d max %d\n",
+-				    *nents, max_sg_nents);
++			dev_err(dev, "Too many fragments. current %d max %d\n",
++				*nents, max_sg_nents);
+ 			return -ENOMEM;
+ 		}
+ 		if (!is_chained) {
+@@ -380,7 +372,7 @@ static int ssi_buffer_mgr_map_scatterlist(
+ 			*mapped_nents = dma_map_sg(dev, sg, *nents, direction);
+ 			if (unlikely(*mapped_nents == 0)) {
+ 				*nents = 0;
+-				SSI_LOG_ERR("dma_map_sg() sg buffer failed\n");
++				dev_err(dev, "dma_map_sg() sg buffer failed\n");
+ 				return -ENOMEM;
+ 			}
+ 		} else {
+@@ -393,7 +385,7 @@ static int ssi_buffer_mgr_map_scatterlist(
+ 								  direction);
+ 			if (unlikely(*mapped_nents != *nents)) {
+ 				*nents = *mapped_nents;
+-				SSI_LOG_ERR("dma_map_sg() sg buffer failed\n");
++				dev_err(dev, "dma_map_sg() sg buffer failed\n");
+ 				return -ENOMEM;
+ 			}
+ 		}
+@@ -409,26 +401,22 @@ ssi_aead_handle_config_buf(struct device *dev,
+ 			   struct buffer_array *sg_data,
+ 			   unsigned int assoclen)
+ {
+-	SSI_LOG_DEBUG(" handle additional data config set to   DLLI\n");
++	dev_dbg(dev, " handle additional data config set to DLLI\n");
+ 	/* create sg for the current buffer */
+ 	sg_init_one(&areq_ctx->ccm_adata_sg, config_data, AES_BLOCK_SIZE + areq_ctx->ccm_hdr_size);
+ 	if (unlikely(dma_map_sg(dev, &areq_ctx->ccm_adata_sg, 1,
+ 				DMA_TO_DEVICE) != 1)) {
+-			SSI_LOG_ERR("dma_map_sg() "
+-			   "config buffer failed\n");
++			dev_err(dev, "dma_map_sg() config buffer failed\n");
+ 			return -ENOMEM;
+ 	}
+-	SSI_LOG_DEBUG("Mapped curr_buff: dma_address=%pad "
+-		     "page=%p addr=%pK "
+-		     "offset=%u length=%u\n",
+-		     sg_dma_address(&areq_ctx->ccm_adata_sg),
+-		     sg_page(&areq_ctx->ccm_adata_sg),
+-		     sg_virt(&areq_ctx->ccm_adata_sg),
+-		     areq_ctx->ccm_adata_sg.offset,
+-		     areq_ctx->ccm_adata_sg.length);
++	dev_dbg(dev, "Mapped curr_buff: dma_address=%pad page=%p addr=%pK offset=%u length=%u\n",
++		&sg_dma_address(&areq_ctx->ccm_adata_sg),
++		sg_page(&areq_ctx->ccm_adata_sg),
++		sg_virt(&areq_ctx->ccm_adata_sg),
++		areq_ctx->ccm_adata_sg.offset, areq_ctx->ccm_adata_sg.length);
+ 	/* prepare for case of MLLI */
+ 	if (assoclen > 0) {
+-		ssi_buffer_mgr_add_scatterlist_entry(sg_data, 1,
++		ssi_buffer_mgr_add_scatterlist_entry(dev, sg_data, 1,
+ 						     &areq_ctx->ccm_adata_sg,
+ 						     (AES_BLOCK_SIZE + areq_ctx->ccm_hdr_size),
+ 						     0, false, NULL);
+@@ -442,28 +430,23 @@ static inline int ssi_ahash_handle_curr_buf(struct device *dev,
+ 					    u32 curr_buff_cnt,
+ 					    struct buffer_array *sg_data)
+ {
+-	SSI_LOG_DEBUG(" handle curr buff %x set to   DLLI\n", curr_buff_cnt);
++	dev_dbg(dev, " handle curr buff %x set to   DLLI\n", curr_buff_cnt);
+ 	/* create sg for the current buffer */
+ 	sg_init_one(areq_ctx->buff_sg, curr_buff, curr_buff_cnt);
+ 	if (unlikely(dma_map_sg(dev, areq_ctx->buff_sg, 1,
+ 				DMA_TO_DEVICE) != 1)) {
+-			SSI_LOG_ERR("dma_map_sg() "
+-			   "src buffer failed\n");
++			dev_err(dev, "dma_map_sg() src buffer failed\n");
+ 			return -ENOMEM;
+ 	}
+-	SSI_LOG_DEBUG("Mapped curr_buff: dma_address=%pad "
+-		     "page=%p addr=%pK "
+-		     "offset=%u length=%u\n",
+-		     sg_dma_address(areq_ctx->buff_sg),
+-		     sg_page(areq_ctx->buff_sg),
+-		     sg_virt(areq_ctx->buff_sg),
+-		     areq_ctx->buff_sg->offset,
+-		     areq_ctx->buff_sg->length);
++	dev_dbg(dev, "Mapped curr_buff: dma_address=%pad page=%p addr=%pK offset=%u length=%u\n",
++		&sg_dma_address(areq_ctx->buff_sg), sg_page(areq_ctx->buff_sg),
++		sg_virt(areq_ctx->buff_sg), areq_ctx->buff_sg->offset,
++		areq_ctx->buff_sg->length);
+ 	areq_ctx->data_dma_buf_type = SSI_DMA_BUF_DLLI;
+ 	areq_ctx->curr_sg = areq_ctx->buff_sg;
+ 	areq_ctx->in_nents = 0;
+ 	/* prepare for case of MLLI */
+-	ssi_buffer_mgr_add_scatterlist_entry(sg_data, 1, areq_ctx->buff_sg,
++	ssi_buffer_mgr_add_scatterlist_entry(dev, sg_data, 1, areq_ctx->buff_sg,
+ 					     curr_buff_cnt, 0, false, NULL);
+ 	return 0;
+ }
+@@ -478,9 +461,8 @@ void ssi_buffer_mgr_unmap_blkcipher_request(
+ 	struct blkcipher_req_ctx *req_ctx = (struct blkcipher_req_ctx *)ctx;
+ 
+ 	if (likely(req_ctx->gen_ctx.iv_dma_addr != 0)) {
+-		SSI_LOG_DEBUG("Unmapped iv: iv_dma_addr=%pad iv_size=%u\n",
+-			      req_ctx->gen_ctx.iv_dma_addr,
+-			      ivsize);
++		dev_dbg(dev, "Unmapped iv: iv_dma_addr=%pad iv_size=%u\n",
++			&req_ctx->gen_ctx.iv_dma_addr, ivsize);
+ 		dma_unmap_single(dev, req_ctx->gen_ctx.iv_dma_addr,
+ 				 ivsize,
+ 				 req_ctx->is_giv ? DMA_BIDIRECTIONAL :
+@@ -494,11 +476,11 @@ void ssi_buffer_mgr_unmap_blkcipher_request(
+ 	}
+ 
+ 	dma_unmap_sg(dev, src, req_ctx->in_nents, DMA_BIDIRECTIONAL);
+-	SSI_LOG_DEBUG("Unmapped req->src=%pK\n", sg_virt(src));
++	dev_dbg(dev, "Unmapped req->src=%pK\n", sg_virt(src));
+ 
+ 	if (src != dst) {
+ 		dma_unmap_sg(dev, dst, req_ctx->out_nents, DMA_BIDIRECTIONAL);
+-		SSI_LOG_DEBUG("Unmapped req->dst=%pK\n", sg_virt(dst));
++		dev_dbg(dev, "Unmapped req->dst=%pK\n", sg_virt(dst));
+ 	}
+ }
+ 
+@@ -534,13 +516,12 @@ int ssi_buffer_mgr_map_blkcipher_request(
+ 				       DMA_TO_DEVICE);
+ 		if (unlikely(dma_mapping_error(dev,
+ 					       req_ctx->gen_ctx.iv_dma_addr))) {
+-			SSI_LOG_ERR("Mapping iv %u B at va=%pK "
+-				   "for DMA failed\n", ivsize, info);
++			dev_err(dev, "Mapping iv %u B at va=%pK for DMA failed\n",
++				ivsize, info);
+ 			return -ENOMEM;
+ 		}
+-		SSI_LOG_DEBUG("Mapped iv %u B at va=%pK to dma=%pad\n",
+-			      ivsize, info,
+-			      req_ctx->gen_ctx.iv_dma_addr);
++		dev_dbg(dev, "Mapped iv %u B at va=%pK to dma=%pad\n",
++			ivsize, info, &req_ctx->gen_ctx.iv_dma_addr);
+ 	} else {
+ 		req_ctx->gen_ctx.iv_dma_addr = 0;
+ 	}
+@@ -562,7 +543,7 @@ int ssi_buffer_mgr_map_blkcipher_request(
+ 		/* Handle inplace operation */
+ 		if (unlikely(req_ctx->dma_buf_type == SSI_DMA_BUF_MLLI)) {
+ 			req_ctx->out_nents = 0;
+-			ssi_buffer_mgr_add_scatterlist_entry(&sg_data,
++			ssi_buffer_mgr_add_scatterlist_entry(dev, &sg_data,
+ 							     req_ctx->in_nents,
+ 							     src, nbytes, 0,
+ 							     true,
+@@ -582,12 +563,12 @@ int ssi_buffer_mgr_map_blkcipher_request(
+ 			req_ctx->dma_buf_type = SSI_DMA_BUF_MLLI;
+ 
+ 		if (unlikely((req_ctx->dma_buf_type == SSI_DMA_BUF_MLLI))) {
+-			ssi_buffer_mgr_add_scatterlist_entry(&sg_data,
++			ssi_buffer_mgr_add_scatterlist_entry(dev, &sg_data,
+ 							     req_ctx->in_nents,
+ 							     src, nbytes, 0,
+ 							     true,
+ 							     &req_ctx->in_mlli_nents);
+-			ssi_buffer_mgr_add_scatterlist_entry(&sg_data,
++			ssi_buffer_mgr_add_scatterlist_entry(dev, &sg_data,
+ 							     req_ctx->out_nents,
+ 							     dst, nbytes, 0,
+ 							     true,
+@@ -602,8 +583,8 @@ int ssi_buffer_mgr_map_blkcipher_request(
+ 			goto ablkcipher_exit;
+ 	}
+ 
+-	SSI_LOG_DEBUG("areq_ctx->dma_buf_type = %s\n",
+-		      GET_DMA_BUFFER_TYPE(req_ctx->dma_buf_type));
++	dev_dbg(dev, "areq_ctx->dma_buf_type = %s\n",
++		GET_DMA_BUFFER_TYPE(req_ctx->dma_buf_type));
+ 
+ 	return 0;
+ 
+@@ -669,30 +650,34 @@ void ssi_buffer_mgr_unmap_aead_request(
+ 	 *allocated and should be released
+ 	 */
+ 	if (areq_ctx->mlli_params.curr_pool) {
+-		SSI_LOG_DEBUG("free MLLI buffer: dma=%pad virt=%pK\n",
+-			      areq_ctx->mlli_params.mlli_dma_addr,
+-			      areq_ctx->mlli_params.mlli_virt_addr);
++		dev_dbg(dev, "free MLLI buffer: dma=%pad virt=%pK\n",
++			&areq_ctx->mlli_params.mlli_dma_addr,
++			areq_ctx->mlli_params.mlli_virt_addr);
+ 		dma_pool_free(areq_ctx->mlli_params.curr_pool,
+ 			      areq_ctx->mlli_params.mlli_virt_addr,
+ 			      areq_ctx->mlli_params.mlli_dma_addr);
+ 	}
+ 
+-	SSI_LOG_DEBUG("Unmapping src sgl: req->src=%pK areq_ctx->src.nents=%u areq_ctx->assoc.nents=%u assoclen:%u cryptlen=%u\n", sg_virt(req->src), areq_ctx->src.nents, areq_ctx->assoc.nents, req->assoclen, req->cryptlen);
++	dev_dbg(dev, "Unmapping src sgl: req->src=%pK areq_ctx->src.nents=%u areq_ctx->assoc.nents=%u assoclen:%u cryptlen=%u\n",
++		sg_virt(req->src), areq_ctx->src.nents, areq_ctx->assoc.nents,
++		req->assoclen, req->cryptlen);
+ 	size_to_unmap = req->assoclen + req->cryptlen;
+ 	if (areq_ctx->gen_ctx.op_type == DRV_CRYPTO_DIRECTION_ENCRYPT)
+ 		size_to_unmap += areq_ctx->req_authsize;
+ 	if (areq_ctx->is_gcm4543)
+ 		size_to_unmap += crypto_aead_ivsize(tfm);
+ 
+-	dma_unmap_sg(dev, req->src, ssi_buffer_mgr_get_sgl_nents(req->src, size_to_unmap, &dummy, &chained), DMA_BIDIRECTIONAL);
++	dma_unmap_sg(dev, req->src,
++		     ssi_buffer_mgr_get_sgl_nents(dev, req->src, size_to_unmap,
++						  &dummy, &chained),
++		     DMA_BIDIRECTIONAL);
+ 	if (unlikely(req->src != req->dst)) {
+-		SSI_LOG_DEBUG("Unmapping dst sgl: req->dst=%pK\n",
+-			      sg_virt(req->dst));
++		dev_dbg(dev, "Unmapping dst sgl: req->dst=%pK\n",
++			sg_virt(req->dst));
+ 		dma_unmap_sg(dev, req->dst,
+-			     ssi_buffer_mgr_get_sgl_nents(req->dst,
++			     ssi_buffer_mgr_get_sgl_nents(dev, req->dst,
+ 							  size_to_unmap,
+-							  &dummy,
+-							  &chained),
++							  &dummy, &chained),
+ 			     DMA_BIDIRECTIONAL);
+ 	}
+ 	if (drvdata->coherent &&
+@@ -707,13 +692,14 @@ void ssi_buffer_mgr_unmap_aead_request(
+ 		 * data memory overriding that caused by cache coherence problem.
+ 		 */
+ 		ssi_buffer_mgr_copy_scatterlist_portion(
+-			areq_ctx->backup_mac, req->src,
++			dev, areq_ctx->backup_mac, req->src,
+ 			size_to_skip + req->cryptlen - areq_ctx->req_authsize,
+ 			size_to_skip + req->cryptlen, SSI_SG_FROM_BUF);
+ 	}
+ }
+ 
+ static inline int ssi_buffer_mgr_get_aead_icv_nents(
++	struct device *dev,
+ 	struct scatterlist *sgl,
+ 	unsigned int sgl_nents,
+ 	unsigned int authsize,
+@@ -752,12 +738,12 @@ static inline int ssi_buffer_mgr_get_aead_icv_nents(
+ 		nents = 2;
+ 		*is_icv_fragmented = true;
+ 	} else {
+-		SSI_LOG_ERR("Unsupported num. of ICV fragments (> %d)\n",
+-			    MAX_ICV_NENTS_SUPPORTED);
++		dev_err(dev, "Unsupported num. of ICV fragments (> %d)\n",
++			MAX_ICV_NENTS_SUPPORTED);
+ 		nents = -1; /*unsupported*/
+ 	}
+-	SSI_LOG_DEBUG("is_frag=%s icv_nents=%u\n",
+-		      (*is_icv_fragmented ? "true" : "false"), nents);
++	dev_dbg(dev, "is_frag=%s icv_nents=%u\n",
++		(*is_icv_fragmented ? "true" : "false"), nents);
+ 
+ 	return nents;
+ }
+@@ -781,22 +767,22 @@ static inline int ssi_buffer_mgr_aead_chain_iv(
+ 	areq_ctx->gen_ctx.iv_dma_addr = dma_map_single(dev, req->iv, hw_iv_size,
+ 						       DMA_BIDIRECTIONAL);
+ 	if (unlikely(dma_mapping_error(dev, areq_ctx->gen_ctx.iv_dma_addr))) {
+-		SSI_LOG_ERR("Mapping iv %u B at va=%pK for DMA failed\n",
+-			    hw_iv_size, req->iv);
++		dev_err(dev, "Mapping iv %u B at va=%pK for DMA failed\n",
++			hw_iv_size, req->iv);
+ 		rc = -ENOMEM;
+ 		goto chain_iv_exit;
+ 	}
+ 
+-	SSI_LOG_DEBUG("Mapped iv %u B at va=%pK to dma=%pad\n",
+-		      hw_iv_size, req->iv,
+-		      areq_ctx->gen_ctx.iv_dma_addr);
++	dev_dbg(dev, "Mapped iv %u B at va=%pK to dma=%pad\n",
++		hw_iv_size, req->iv, &areq_ctx->gen_ctx.iv_dma_addr);
+ 	if (do_chain && areq_ctx->plaintext_authenticate_only) {  // TODO: what about CTR?? ask Ron
+ 		struct crypto_aead *tfm = crypto_aead_reqtfm(req);
+ 		unsigned int iv_size_to_authenc = crypto_aead_ivsize(tfm);
+ 		unsigned int iv_ofs = GCM_BLOCK_RFC4_IV_OFFSET;
+ 		/* Chain to given list */
+ 		ssi_buffer_mgr_add_buffer_entry(
+-			sg_data, areq_ctx->gen_ctx.iv_dma_addr + iv_ofs,
++			dev, sg_data,
++			areq_ctx->gen_ctx.iv_dma_addr + iv_ofs,
+ 			iv_size_to_authenc, is_last,
+ 			&areq_ctx->assoc.mlli_nents);
+ 		areq_ctx->assoc_buff_type = SSI_DMA_BUF_MLLI;
+@@ -819,6 +805,7 @@ static inline int ssi_buffer_mgr_aead_chain_assoc(
+ 	struct crypto_aead *tfm = crypto_aead_reqtfm(req);
+ 	unsigned int sg_index = 0;
+ 	u32 size_of_assoc = req->assoclen;
++	struct device *dev = drvdata_to_dev(drvdata);
+ 
+ 	if (areq_ctx->is_gcm4543)
+ 		size_of_assoc += crypto_aead_ivsize(tfm);
+@@ -832,9 +819,9 @@ static inline int ssi_buffer_mgr_aead_chain_assoc(
+ 		areq_ctx->assoc_buff_type = SSI_DMA_BUF_NULL;
+ 		areq_ctx->assoc.nents = 0;
+ 		areq_ctx->assoc.mlli_nents = 0;
+-		SSI_LOG_DEBUG("Chain assoc of length 0: buff_type=%s nents=%u\n",
+-			      GET_DMA_BUFFER_TYPE(areq_ctx->assoc_buff_type),
+-			      areq_ctx->assoc.nents);
++		dev_dbg(dev, "Chain assoc of length 0: buff_type=%s nents=%u\n",
++			GET_DMA_BUFFER_TYPE(areq_ctx->assoc_buff_type),
++			areq_ctx->assoc.nents);
+ 		goto chain_assoc_exit;
+ 	}
+ 
+@@ -848,7 +835,7 @@ static inline int ssi_buffer_mgr_aead_chain_assoc(
+ 			current_sg = sg_next(current_sg);
+ 			//if have reached the end of the sgl, then this is unexpected
+ 			if (!current_sg) {
+-				SSI_LOG_ERR("reached end of sg list. unexpected\n");
++				dev_err(dev, "reached end of sg list. unexpected\n");
+ 				return -EINVAL;
+ 			}
+ 			sg_index += current_sg->length;
+@@ -856,8 +843,8 @@ static inline int ssi_buffer_mgr_aead_chain_assoc(
+ 		}
+ 	}
+ 	if (unlikely(mapped_nents > LLI_MAX_NUM_OF_ASSOC_DATA_ENTRIES)) {
+-		SSI_LOG_ERR("Too many fragments. current %d max %d\n",
+-			    mapped_nents, LLI_MAX_NUM_OF_ASSOC_DATA_ENTRIES);
++		dev_err(dev, "Too many fragments. current %d max %d\n",
++			mapped_nents, LLI_MAX_NUM_OF_ASSOC_DATA_ENTRIES);
+ 		return -ENOMEM;
+ 	}
+ 	areq_ctx->assoc.nents = mapped_nents;
+@@ -868,9 +855,9 @@ static inline int ssi_buffer_mgr_aead_chain_assoc(
+ 	if (areq_ctx->ccm_hdr_size != ccm_header_size_null) {
+ 		if (unlikely((mapped_nents + 1) >
+ 			LLI_MAX_NUM_OF_ASSOC_DATA_ENTRIES)) {
+-			SSI_LOG_ERR("CCM case.Too many fragments. Current %d max %d\n",
+-				    (areq_ctx->assoc.nents + 1),
+-				    LLI_MAX_NUM_OF_ASSOC_DATA_ENTRIES);
++			dev_err(dev, "CCM case.Too many fragments. Current %d max %d\n",
++				(areq_ctx->assoc.nents + 1),
++				LLI_MAX_NUM_OF_ASSOC_DATA_ENTRIES);
+ 			rc = -ENOMEM;
+ 			goto chain_assoc_exit;
+ 		}
+@@ -884,11 +871,11 @@ static inline int ssi_buffer_mgr_aead_chain_assoc(
+ 
+ 	if (unlikely((do_chain) ||
+ 		     (areq_ctx->assoc_buff_type == SSI_DMA_BUF_MLLI))) {
+-		SSI_LOG_DEBUG("Chain assoc: buff_type=%s nents=%u\n",
+-			      GET_DMA_BUFFER_TYPE(areq_ctx->assoc_buff_type),
+-			      areq_ctx->assoc.nents);
++		dev_dbg(dev, "Chain assoc: buff_type=%s nents=%u\n",
++			GET_DMA_BUFFER_TYPE(areq_ctx->assoc_buff_type),
++			areq_ctx->assoc.nents);
+ 		ssi_buffer_mgr_add_scatterlist_entry(
+-			sg_data, areq_ctx->assoc.nents,
++			dev, sg_data, areq_ctx->assoc.nents,
+ 			req->src, req->assoclen, 0, is_last,
+ 			&areq_ctx->assoc.mlli_nents);
+ 		areq_ctx->assoc_buff_type = SSI_DMA_BUF_MLLI;
+@@ -946,10 +933,11 @@ static inline int ssi_buffer_mgr_prepare_aead_data_mlli(
+ 	unsigned int authsize = areq_ctx->req_authsize;
+ 	int rc = 0, icv_nents;
+ 	struct crypto_aead *tfm = crypto_aead_reqtfm(req);
++	struct device *dev = drvdata_to_dev(drvdata);
+ 
+ 	if (likely(req->src == req->dst)) {
+ 		/*INPLACE*/
+-		ssi_buffer_mgr_add_scatterlist_entry(sg_data,
++		ssi_buffer_mgr_add_scatterlist_entry(dev, sg_data,
+ 						     areq_ctx->src.nents,
+ 						     areq_ctx->src_sgl,
+ 						     areq_ctx->cryptlen,
+@@ -957,7 +945,8 @@ static inline int ssi_buffer_mgr_prepare_aead_data_mlli(
+ 						     is_last_table,
+ 						     &areq_ctx->src.mlli_nents);
+ 
+-		icv_nents = ssi_buffer_mgr_get_aead_icv_nents(areq_ctx->src_sgl,
++		icv_nents = ssi_buffer_mgr_get_aead_icv_nents(dev,
++							      areq_ctx->src_sgl,
+ 							      areq_ctx->src.nents,
+ 							      authsize,
+ 							      *src_last_bytes,
+@@ -985,7 +974,8 @@ static inline int ssi_buffer_mgr_prepare_aead_data_mlli(
+ 						skip += crypto_aead_ivsize(tfm);
+ 
+ 					ssi_buffer_mgr_copy_scatterlist_portion(
+-						areq_ctx->backup_mac, req->src,
++						dev, areq_ctx->backup_mac,
++						req->src,
+ 						(skip + req->cryptlen -
+ 						 areq_ctx->req_authsize),
+ 						skip + req->cryptlen,
+@@ -1008,14 +998,14 @@ static inline int ssi_buffer_mgr_prepare_aead_data_mlli(
+ 
+ 	} else if (direct == DRV_CRYPTO_DIRECTION_DECRYPT) {
+ 		/*NON-INPLACE and DECRYPT*/
+-		ssi_buffer_mgr_add_scatterlist_entry(sg_data,
++		ssi_buffer_mgr_add_scatterlist_entry(dev, sg_data,
+ 						     areq_ctx->src.nents,
+ 						     areq_ctx->src_sgl,
+ 						     areq_ctx->cryptlen,
+ 						     areq_ctx->src_offset,
+ 						     is_last_table,
+ 						     &areq_ctx->src.mlli_nents);
+-		ssi_buffer_mgr_add_scatterlist_entry(sg_data,
++		ssi_buffer_mgr_add_scatterlist_entry(dev, sg_data,
+ 						     areq_ctx->dst.nents,
+ 						     areq_ctx->dst_sgl,
+ 						     areq_ctx->cryptlen,
+@@ -1023,7 +1013,8 @@ static inline int ssi_buffer_mgr_prepare_aead_data_mlli(
+ 						     is_last_table,
+ 						     &areq_ctx->dst.mlli_nents);
+ 
+-		icv_nents = ssi_buffer_mgr_get_aead_icv_nents(areq_ctx->src_sgl,
++		icv_nents = ssi_buffer_mgr_get_aead_icv_nents(dev,
++							      areq_ctx->src_sgl,
+ 							      areq_ctx->src.nents,
+ 							      authsize,
+ 							      *src_last_bytes,
+@@ -1044,9 +1035,9 @@ static inline int ssi_buffer_mgr_prepare_aead_data_mlli(
+ 				  size_to_skip += crypto_aead_ivsize(tfm);
+ 
+ 			  ssi_buffer_mgr_copy_scatterlist_portion(
+-				  areq_ctx->backup_mac, req->src,
+-				  size_to_skip + req->cryptlen - areq_ctx->req_authsize,
+-				  size_to_skip + req->cryptlen, SSI_SG_TO_BUF);
++				dev, areq_ctx->backup_mac, req->src,
++				size_to_skip + req->cryptlen - areq_ctx->req_authsize,
++				size_to_skip + req->cryptlen, SSI_SG_TO_BUF);
+ 			areq_ctx->icv_virt_addr = areq_ctx->backup_mac;
+ 		} else { /* Contig. ICV */
+ 			/*Should hanlde if the sg is not contig.*/
+@@ -1060,14 +1051,14 @@ static inline int ssi_buffer_mgr_prepare_aead_data_mlli(
+ 
+ 	} else {
+ 		/*NON-INPLACE and ENCRYPT*/
+-		ssi_buffer_mgr_add_scatterlist_entry(sg_data,
++		ssi_buffer_mgr_add_scatterlist_entry(dev, sg_data,
+ 						     areq_ctx->dst.nents,
+ 						     areq_ctx->dst_sgl,
+ 						     areq_ctx->cryptlen,
+ 						     areq_ctx->dst_offset,
+ 						     is_last_table,
+ 						     &areq_ctx->dst.mlli_nents);
+-		ssi_buffer_mgr_add_scatterlist_entry(sg_data,
++		ssi_buffer_mgr_add_scatterlist_entry(dev, sg_data,
+ 						     areq_ctx->src.nents,
+ 						     areq_ctx->src_sgl,
+ 						     areq_ctx->cryptlen,
+@@ -1075,7 +1066,8 @@ static inline int ssi_buffer_mgr_prepare_aead_data_mlli(
+ 						     is_last_table,
+ 						     &areq_ctx->src.mlli_nents);
+ 
+-		icv_nents = ssi_buffer_mgr_get_aead_icv_nents(areq_ctx->dst_sgl,
++		icv_nents = ssi_buffer_mgr_get_aead_icv_nents(dev,
++							      areq_ctx->dst_sgl,
+ 							      areq_ctx->dst.nents,
+ 							      authsize,
+ 							      *dst_last_bytes,
+@@ -1139,7 +1131,10 @@ static inline int ssi_buffer_mgr_aead_chain_data(
+ 		size_for_map += crypto_aead_ivsize(tfm);
+ 
+ 	size_for_map += (direct == DRV_CRYPTO_DIRECTION_ENCRYPT) ? authsize : 0;
+-	src_mapped_nents = ssi_buffer_mgr_get_sgl_nents(req->src, size_for_map, &src_last_bytes, &chained);
++	src_mapped_nents = ssi_buffer_mgr_get_sgl_nents(dev, req->src,
++							size_for_map,
++							&src_last_bytes,
++							&chained);
+ 	sg_index = areq_ctx->src_sgl->length;
+ 	//check where the data starts
+ 	while (sg_index <= size_to_skip) {
+@@ -1147,15 +1142,15 @@ static inline int ssi_buffer_mgr_aead_chain_data(
+ 		areq_ctx->src_sgl = sg_next(areq_ctx->src_sgl);
+ 		//if have reached the end of the sgl, then this is unexpected
+ 		if (!areq_ctx->src_sgl) {
+-			SSI_LOG_ERR("reached end of sg list. unexpected\n");
++			dev_err(dev, "reached end of sg list. unexpected\n");
+ 			return -EINVAL;
+ 		}
+ 		sg_index += areq_ctx->src_sgl->length;
+ 		src_mapped_nents--;
+ 	}
+ 	if (unlikely(src_mapped_nents > LLI_MAX_NUM_OF_DATA_ENTRIES)) {
+-		SSI_LOG_ERR("Too many fragments. current %d max %d\n",
+-			    src_mapped_nents, LLI_MAX_NUM_OF_DATA_ENTRIES);
++		dev_err(dev, "Too many fragments. current %d max %d\n",
++			src_mapped_nents, LLI_MAX_NUM_OF_DATA_ENTRIES);
+ 			return -ENOMEM;
+ 	}
+ 
+@@ -1181,7 +1176,10 @@ static inline int ssi_buffer_mgr_aead_chain_data(
+ 		}
+ 	}
+ 
+-	dst_mapped_nents = ssi_buffer_mgr_get_sgl_nents(req->dst, size_for_map, &dst_last_bytes, &chained);
++	dst_mapped_nents = ssi_buffer_mgr_get_sgl_nents(dev, req->dst,
++							size_for_map,
++							&dst_last_bytes,
++							&chained);
+ 	sg_index = areq_ctx->dst_sgl->length;
+ 	offset = size_to_skip;
+ 
+@@ -1191,15 +1189,15 @@ static inline int ssi_buffer_mgr_aead_chain_data(
+ 		areq_ctx->dst_sgl = sg_next(areq_ctx->dst_sgl);
+ 		//if have reached the end of the sgl, then this is unexpected
+ 		if (!areq_ctx->dst_sgl) {
+-			SSI_LOG_ERR("reached end of sg list. unexpected\n");
++			dev_err(dev, "reached end of sg list. unexpected\n");
+ 			return -EINVAL;
+ 		}
+ 		sg_index += areq_ctx->dst_sgl->length;
+ 		dst_mapped_nents--;
+ 	}
+ 	if (unlikely(dst_mapped_nents > LLI_MAX_NUM_OF_DATA_ENTRIES)) {
+-		SSI_LOG_ERR("Too many fragments. current %d max %d\n",
+-			    dst_mapped_nents, LLI_MAX_NUM_OF_DATA_ENTRIES);
++		dev_err(dev, "Too many fragments. current %d max %d\n",
++			dst_mapped_nents, LLI_MAX_NUM_OF_DATA_ENTRIES);
+ 		return -ENOMEM;
+ 	}
+ 	areq_ctx->dst.nents = dst_mapped_nents;
+@@ -1306,7 +1304,7 @@ int ssi_buffer_mgr_map_aead_request(
+ 		 * data memory overriding that caused by cache coherence problem.
+ 		 */
+ 		ssi_buffer_mgr_copy_scatterlist_portion(
+-			areq_ctx->backup_mac, req->src,
++			dev, areq_ctx->backup_mac, req->src,
+ 			size_to_skip + req->cryptlen - areq_ctx->req_authsize,
+ 			size_to_skip + req->cryptlen, SSI_SG_TO_BUF);
+ 	}
+@@ -1321,8 +1319,8 @@ int ssi_buffer_mgr_map_aead_request(
+ 						    MAX_MAC_SIZE,
+ 						    DMA_BIDIRECTIONAL);
+ 	if (unlikely(dma_mapping_error(dev, areq_ctx->mac_buf_dma_addr))) {
+-		SSI_LOG_ERR("Mapping mac_buf %u B at va=%pK for DMA failed\n",
+-			    MAX_MAC_SIZE, areq_ctx->mac_buf);
++		dev_err(dev, "Mapping mac_buf %u B at va=%pK for DMA failed\n",
++			MAX_MAC_SIZE, areq_ctx->mac_buf);
+ 		rc = -ENOMEM;
+ 		goto aead_map_failure;
+ 	}
+@@ -1334,9 +1332,10 @@ int ssi_buffer_mgr_map_aead_request(
+ 							    DMA_TO_DEVICE);
+ 
+ 		if (unlikely(dma_mapping_error(dev, areq_ctx->ccm_iv0_dma_addr))) {
+-			SSI_LOG_ERR("Mapping mac_buf %u B at va=%pK "
+-			"for DMA failed\n", AES_BLOCK_SIZE,
+-			(areq_ctx->ccm_config + CCM_CTR_COUNT_0_OFFSET));
++			dev_err(dev, "Mapping mac_buf %u B at va=%pK for DMA failed\n",
++				AES_BLOCK_SIZE,
++				(areq_ctx->ccm_config +
++				 CCM_CTR_COUNT_0_OFFSET));
+ 			areq_ctx->ccm_iv0_dma_addr = 0;
+ 			rc = -ENOMEM;
+ 			goto aead_map_failure;
+@@ -1356,8 +1355,8 @@ int ssi_buffer_mgr_map_aead_request(
+ 							 AES_BLOCK_SIZE,
+ 							 DMA_BIDIRECTIONAL);
+ 		if (unlikely(dma_mapping_error(dev, areq_ctx->hkey_dma_addr))) {
+-			SSI_LOG_ERR("Mapping hkey %u B at va=%pK for DMA failed\n",
+-				    AES_BLOCK_SIZE, areq_ctx->hkey);
++			dev_err(dev, "Mapping hkey %u B at va=%pK for DMA failed\n",
++				AES_BLOCK_SIZE, areq_ctx->hkey);
+ 			rc = -ENOMEM;
+ 			goto aead_map_failure;
+ 		}
+@@ -1367,8 +1366,8 @@ int ssi_buffer_mgr_map_aead_request(
+ 								  AES_BLOCK_SIZE,
+ 								  DMA_TO_DEVICE);
+ 		if (unlikely(dma_mapping_error(dev, areq_ctx->gcm_block_len_dma_addr))) {
+-			SSI_LOG_ERR("Mapping gcm_len_block %u B at va=%pK for DMA failed\n",
+-				    AES_BLOCK_SIZE, &areq_ctx->gcm_len_block);
++			dev_err(dev, "Mapping gcm_len_block %u B at va=%pK for DMA failed\n",
++				AES_BLOCK_SIZE, &areq_ctx->gcm_len_block);
+ 			rc = -ENOMEM;
+ 			goto aead_map_failure;
+ 		}
+@@ -1379,9 +1378,8 @@ int ssi_buffer_mgr_map_aead_request(
+ 								DMA_TO_DEVICE);
+ 
+ 		if (unlikely(dma_mapping_error(dev, areq_ctx->gcm_iv_inc1_dma_addr))) {
+-			SSI_LOG_ERR("Mapping gcm_iv_inc1 %u B at va=%pK "
+-			"for DMA failed\n", AES_BLOCK_SIZE,
+-			(areq_ctx->gcm_iv_inc1));
++			dev_err(dev, "Mapping gcm_iv_inc1 %u B at va=%pK for DMA failed\n",
++				AES_BLOCK_SIZE, (areq_ctx->gcm_iv_inc1));
+ 			areq_ctx->gcm_iv_inc1_dma_addr = 0;
+ 			rc = -ENOMEM;
+ 			goto aead_map_failure;
+@@ -1393,9 +1391,8 @@ int ssi_buffer_mgr_map_aead_request(
+ 								DMA_TO_DEVICE);
+ 
+ 		if (unlikely(dma_mapping_error(dev, areq_ctx->gcm_iv_inc2_dma_addr))) {
+-			SSI_LOG_ERR("Mapping gcm_iv_inc2 %u B at va=%pK "
+-			"for DMA failed\n", AES_BLOCK_SIZE,
+-			(areq_ctx->gcm_iv_inc2));
++			dev_err(dev, "Mapping gcm_iv_inc2 %u B at va=%pK for DMA failed\n",
++				AES_BLOCK_SIZE, (areq_ctx->gcm_iv_inc2));
+ 			areq_ctx->gcm_iv_inc2_dma_addr = 0;
+ 			rc = -ENOMEM;
+ 			goto aead_map_failure;
+@@ -1475,9 +1472,10 @@ int ssi_buffer_mgr_map_aead_request(
+ 			goto aead_map_failure;
+ 
+ 		ssi_buffer_mgr_update_aead_mlli_nents(drvdata, req);
+-		SSI_LOG_DEBUG("assoc params mn %d\n", areq_ctx->assoc.mlli_nents);
+-		SSI_LOG_DEBUG("src params mn %d\n", areq_ctx->src.mlli_nents);
+-		SSI_LOG_DEBUG("dst params mn %d\n", areq_ctx->dst.mlli_nents);
++		dev_dbg(dev, "assoc params mn %d\n",
++			areq_ctx->assoc.mlli_nents);
++		dev_dbg(dev, "src params mn %d\n", areq_ctx->src.mlli_nents);
++		dev_dbg(dev, "dst params mn %d\n", areq_ctx->dst.mlli_nents);
+ 	}
+ 	return 0;
+ 
+@@ -1501,11 +1499,8 @@ int ssi_buffer_mgr_map_hash_request_final(
+ 	u32 dummy = 0;
+ 	u32 mapped_nents = 0;
+ 
+-	SSI_LOG_DEBUG(" final params : curr_buff=%pK "
+-		     "curr_buff_cnt=0x%X nbytes = 0x%X "
+-		     "src=%pK curr_index=%u\n",
+-		     curr_buff, *curr_buff_cnt, nbytes,
+-		     src, areq_ctx->buff_index);
++	dev_dbg(dev, "final params : curr_buff=%pK curr_buff_cnt=0x%X nbytes = 0x%X src=%pK curr_index=%u\n",
++		curr_buff, *curr_buff_cnt, nbytes, src, areq_ctx->buff_index);
+ 	/* Init the type of the dma buffer */
+ 	areq_ctx->data_dma_buf_type = SSI_DMA_BUF_NULL;
+ 	mlli_params->curr_pool = NULL;
+@@ -1551,7 +1546,7 @@ int ssi_buffer_mgr_map_hash_request_final(
+ 	if (unlikely(areq_ctx->data_dma_buf_type == SSI_DMA_BUF_MLLI)) {
+ 		mlli_params->curr_pool = buff_mgr->mlli_buffs_pool;
+ 		/* add the src data to the sg_data */
+-		ssi_buffer_mgr_add_scatterlist_entry(&sg_data,
++		ssi_buffer_mgr_add_scatterlist_entry(dev, &sg_data,
+ 						     areq_ctx->in_nents,
+ 						     src, nbytes, 0, true,
+ 						     &areq_ctx->mlli_nents);
+@@ -1562,8 +1557,8 @@ int ssi_buffer_mgr_map_hash_request_final(
+ 	}
+ 	/* change the buffer index for the unmap function */
+ 	areq_ctx->buff_index = (areq_ctx->buff_index ^ 1);
+-	SSI_LOG_DEBUG("areq_ctx->data_dma_buf_type = %s\n",
+-		      GET_DMA_BUFFER_TYPE(areq_ctx->data_dma_buf_type));
++	dev_dbg(dev, "areq_ctx->data_dma_buf_type = %s\n",
++		GET_DMA_BUFFER_TYPE(areq_ctx->data_dma_buf_type));
+ 	return 0;
+ 
+ fail_unmap_din:
+@@ -1598,11 +1593,8 @@ int ssi_buffer_mgr_map_hash_request_update(
+ 	u32 dummy = 0;
+ 	u32 mapped_nents = 0;
+ 
+-	SSI_LOG_DEBUG(" update params : curr_buff=%pK "
+-		     "curr_buff_cnt=0x%X nbytes=0x%X "
+-		     "src=%pK curr_index=%u\n",
+-		     curr_buff, *curr_buff_cnt, nbytes,
+-		     src, areq_ctx->buff_index);
++	dev_dbg(dev, " update params : curr_buff=%pK curr_buff_cnt=0x%X nbytes=0x%X src=%pK curr_index=%u\n",
++		curr_buff, *curr_buff_cnt, nbytes, src, areq_ctx->buff_index);
+ 	/* Init the type of the dma buffer */
+ 	areq_ctx->data_dma_buf_type = SSI_DMA_BUF_NULL;
+ 	mlli_params->curr_pool = NULL;
+@@ -1611,14 +1603,11 @@ int ssi_buffer_mgr_map_hash_request_update(
+ 	areq_ctx->in_nents = 0;
+ 
+ 	if (unlikely(total_in_len < block_size)) {
+-		SSI_LOG_DEBUG(" less than one block: curr_buff=%pK "
+-			     "*curr_buff_cnt=0x%X copy_to=%pK\n",
+-			curr_buff, *curr_buff_cnt,
+-			&curr_buff[*curr_buff_cnt]);
++		dev_dbg(dev, " less than one block: curr_buff=%pK *curr_buff_cnt=0x%X copy_to=%pK\n",
++			curr_buff, *curr_buff_cnt, &curr_buff[*curr_buff_cnt]);
+ 		areq_ctx->in_nents =
+-			ssi_buffer_mgr_get_sgl_nents(src,
+-						     nbytes,
+-						     &dummy, NULL);
++			ssi_buffer_mgr_get_sgl_nents(dev, src, nbytes, &dummy,
++						     NULL);
+ 		sg_copy_to_buffer(src, areq_ctx->in_nents,
+ 				  &curr_buff[*curr_buff_cnt], nbytes);
+ 		*curr_buff_cnt += nbytes;
+@@ -1630,17 +1619,15 @@ int ssi_buffer_mgr_map_hash_request_update(
+ 	/* update data len */
+ 	update_data_len = total_in_len - *next_buff_cnt;
+ 
+-	SSI_LOG_DEBUG(" temp length : *next_buff_cnt=0x%X "
+-		     "update_data_len=0x%X\n",
++	dev_dbg(dev, " temp length : *next_buff_cnt=0x%X update_data_len=0x%X\n",
+ 		*next_buff_cnt, update_data_len);
+ 
+ 	/* Copy the new residue to next buffer */
+ 	if (*next_buff_cnt != 0) {
+-		SSI_LOG_DEBUG(" handle residue: next buff %pK skip data %u"
+-			     " residue %u\n", next_buff,
+-			     (update_data_len - *curr_buff_cnt),
+-			     *next_buff_cnt);
+-		ssi_buffer_mgr_copy_scatterlist_portion(next_buff, src,
++		dev_dbg(dev, " handle residue: next buff %pK skip data %u residue %u\n",
++			next_buff, (update_data_len - *curr_buff_cnt),
++			*next_buff_cnt);
++		ssi_buffer_mgr_copy_scatterlist_portion(dev, next_buff, src,
+ 							(update_data_len - *curr_buff_cnt),
+ 							nbytes, SSI_SG_TO_BUF);
+ 		/* change the buffer index for next operation */
+@@ -1682,7 +1669,7 @@ int ssi_buffer_mgr_map_hash_request_update(
+ 	if (unlikely(areq_ctx->data_dma_buf_type == SSI_DMA_BUF_MLLI)) {
+ 		mlli_params->curr_pool = buff_mgr->mlli_buffs_pool;
+ 		/* add the src data to the sg_data */
+-		ssi_buffer_mgr_add_scatterlist_entry(&sg_data,
++		ssi_buffer_mgr_add_scatterlist_entry(dev, &sg_data,
+ 						     areq_ctx->in_nents,
+ 						     src,
+ 						     (update_data_len - *curr_buff_cnt),
+@@ -1719,29 +1706,26 @@ void ssi_buffer_mgr_unmap_hash_request(
+ 	 *allocated and should be released
+ 	 */
+ 	if (areq_ctx->mlli_params.curr_pool) {
+-		SSI_LOG_DEBUG("free MLLI buffer: dma=%pad virt=%pK\n",
+-			      areq_ctx->mlli_params.mlli_dma_addr,
+-			      areq_ctx->mlli_params.mlli_virt_addr);
++		dev_dbg(dev, "free MLLI buffer: dma=%pad virt=%pK\n",
++			&areq_ctx->mlli_params.mlli_dma_addr,
++			areq_ctx->mlli_params.mlli_virt_addr);
+ 		dma_pool_free(areq_ctx->mlli_params.curr_pool,
+ 			      areq_ctx->mlli_params.mlli_virt_addr,
+ 			      areq_ctx->mlli_params.mlli_dma_addr);
+ 	}
+ 
+ 	if ((src) && likely(areq_ctx->in_nents != 0)) {
+-		SSI_LOG_DEBUG("Unmapped sg src: virt=%pK dma=%pad len=0x%X\n",
+-			      sg_virt(src),
+-			      sg_dma_address(src),
+-			      sg_dma_len(src));
++		dev_dbg(dev, "Unmapped sg src: virt=%pK dma=%pad len=0x%X\n",
++			sg_virt(src), &sg_dma_address(src), sg_dma_len(src));
+ 		dma_unmap_sg(dev, src,
+ 			     areq_ctx->in_nents, DMA_TO_DEVICE);
+ 	}
+ 
+ 	if (*prev_len != 0) {
+-		SSI_LOG_DEBUG("Unmapped buffer: areq_ctx->buff_sg=%pK"
+-			     " dma=%pad len 0x%X\n",
+-				sg_virt(areq_ctx->buff_sg),
+-				sg_dma_address(areq_ctx->buff_sg),
+-				sg_dma_len(areq_ctx->buff_sg));
++		dev_dbg(dev, "Unmapped buffer: areq_ctx->buff_sg=%pK dma=%pad len 0x%X\n",
++			sg_virt(areq_ctx->buff_sg),
++			&sg_dma_address(areq_ctx->buff_sg),
++			sg_dma_len(areq_ctx->buff_sg));
+ 		dma_unmap_sg(dev, areq_ctx->buff_sg, 1, DMA_TO_DEVICE);
+ 		if (!do_revert) {
+ 			/* clean the previous data length for update operation */
+diff --git a/drivers/staging/ccree/ssi_buffer_mgr.h b/drivers/staging/ccree/ssi_buffer_mgr.h
+index 41f5223730f8..1032f25edcab 100644
+--- a/drivers/staging/ccree/ssi_buffer_mgr.h
++++ b/drivers/staging/ccree/ssi_buffer_mgr.h
+@@ -80,7 +80,10 @@ int ssi_buffer_mgr_map_hash_request_update(struct ssi_drvdata *drvdata, void *ct
+ 
+ void ssi_buffer_mgr_unmap_hash_request(struct device *dev, void *ctx, struct scatterlist *src, bool do_revert);
+ 
+-void ssi_buffer_mgr_copy_scatterlist_portion(u8 *dest, struct scatterlist *sg, u32 to_skip, u32 end, enum ssi_sg_cpy_direct direct);
++void ssi_buffer_mgr_copy_scatterlist_portion(struct device *dev, u8 *dest,
++					     struct scatterlist *sg,
++					     u32 to_skip, u32 end,
++					     enum ssi_sg_cpy_direct direct);
+ 
+ void ssi_buffer_mgr_zero_sgl(struct scatterlist *sgl, u32 data_len);
+ 
+diff --git a/drivers/staging/ccree/ssi_cipher.c b/drivers/staging/ccree/ssi_cipher.c
+index 471c571bfcb5..d70d86ac2a8e 100644
+--- a/drivers/staging/ccree/ssi_cipher.c
++++ b/drivers/staging/ccree/ssi_cipher.c
+@@ -185,8 +185,8 @@ static int ssi_blkcipher_init(struct crypto_tfm *tfm)
+ 	int rc = 0;
+ 	unsigned int max_key_buf_size = get_max_keysize(tfm);
+ 
+-	SSI_LOG_DEBUG("Initializing context @%p for %s\n",
+-		      ctx_p, crypto_tfm_alg_name(tfm));
++	dev_dbg(dev, "Initializing context @%p for %s\n", ctx_p,
++		crypto_tfm_alg_name(tfm));
+ 
+ 	ctx_p->cipher_mode = ssi_alg->cipher_mode;
+ 	ctx_p->flow_mode = ssi_alg->flow_mode;
+@@ -195,30 +195,29 @@ static int ssi_blkcipher_init(struct crypto_tfm *tfm)
+ 	/* Allocate key buffer, cache line aligned */
+ 	ctx_p->user.key = kmalloc(max_key_buf_size, GFP_KERNEL | GFP_DMA);
+ 	if (!ctx_p->user.key) {
+-		SSI_LOG_ERR("Allocating key buffer in context failed\n");
++		dev_dbg(dev, "Allocating key buffer in context failed\n");
+ 		rc = -ENOMEM;
+ 	}
+-	SSI_LOG_DEBUG("Allocated key buffer in context. key=@%p\n",
+-		      ctx_p->user.key);
++	dev_dbg(dev, "Allocated key buffer in context. key=@%p\n",
++		ctx_p->user.key);
+ 
+ 	/* Map key buffer */
+ 	ctx_p->user.key_dma_addr = dma_map_single(dev, (void *)ctx_p->user.key,
+ 						  max_key_buf_size,
+ 						  DMA_TO_DEVICE);
+ 	if (dma_mapping_error(dev, ctx_p->user.key_dma_addr)) {
+-		SSI_LOG_ERR("Mapping Key %u B at va=%pK for DMA failed\n",
+-			    max_key_buf_size, ctx_p->user.key);
++		dev_err(dev, "Mapping Key %u B at va=%pK for DMA failed\n",
++			max_key_buf_size, ctx_p->user.key);
+ 		return -ENOMEM;
+ 	}
+-	SSI_LOG_DEBUG("Mapped key %u B at va=%pK to dma=%pad\n",
+-		      max_key_buf_size, ctx_p->user.key,
+-		      ctx_p->user.key_dma_addr);
++	dev_dbg(dev, "Mapped key %u B at va=%pK to dma=%pad\n",
++		max_key_buf_size, ctx_p->user.key, &ctx_p->user.key_dma_addr);
+ 
+ 	if (ctx_p->cipher_mode == DRV_CIPHER_ESSIV) {
+ 		/* Alloc hash tfm for essiv */
+ 		ctx_p->shash_tfm = crypto_alloc_shash("sha256-generic", 0, 0);
+ 		if (IS_ERR(ctx_p->shash_tfm)) {
+-			SSI_LOG_ERR("Error allocating hash tfm for ESSIV.\n");
++			dev_err(dev, "Error allocating hash tfm for ESSIV.\n");
+ 			return PTR_ERR(ctx_p->shash_tfm);
+ 		}
+ 	}
+@@ -232,8 +231,8 @@ static void ssi_blkcipher_exit(struct crypto_tfm *tfm)
+ 	struct device *dev = drvdata_to_dev(ctx_p->drvdata);
+ 	unsigned int max_key_buf_size = get_max_keysize(tfm);
+ 
+-	SSI_LOG_DEBUG("Clearing context @%p for %s\n",
+-		      crypto_tfm_ctx(tfm), crypto_tfm_alg_name(tfm));
++	dev_dbg(dev, "Clearing context @%p for %s\n",
++		crypto_tfm_ctx(tfm), crypto_tfm_alg_name(tfm));
+ 
+ 	if (ctx_p->cipher_mode == DRV_CIPHER_ESSIV) {
+ 		/* Free hash tfm for essiv */
+@@ -244,12 +243,12 @@ static void ssi_blkcipher_exit(struct crypto_tfm *tfm)
+ 	/* Unmap key buffer */
+ 	dma_unmap_single(dev, ctx_p->user.key_dma_addr, max_key_buf_size,
+ 			 DMA_TO_DEVICE);
+-	SSI_LOG_DEBUG("Unmapped key buffer key_dma_addr=%pad\n",
+-		      ctx_p->user.key_dma_addr);
++	dev_dbg(dev, "Unmapped key buffer key_dma_addr=%pad\n",
++		&ctx_p->user.key_dma_addr);
+ 
+ 	/* Free key buffer in context */
+ 	kfree(ctx_p->user.key);
+-	SSI_LOG_DEBUG("Free key buffer in context. key=@%p\n", ctx_p->user.key);
++	dev_dbg(dev, "Free key buffer in context. key=@%p\n", ctx_p->user.key);
+ }
+ 
+ struct tdes_keys {
+@@ -301,12 +300,10 @@ static int ssi_blkcipher_setkey(struct crypto_tfm *tfm,
+ 	u32 tmp[DES_EXPKEY_WORDS];
+ 	unsigned int max_key_buf_size = get_max_keysize(tfm);
+ 
+-	SSI_LOG_DEBUG("Setting key in context @%p for %s. keylen=%u\n",
+-		      ctx_p, crypto_tfm_alg_name(tfm), keylen);
++	dev_dbg(dev, "Setting key in context @%p for %s. keylen=%u\n",
++		ctx_p, crypto_tfm_alg_name(tfm), keylen);
+ 	dump_byte_array("key", (u8 *)key, keylen);
+ 
+-	SSI_LOG_DEBUG("after FIPS check");
+-
+ 	/* STAT_PHASE_0: Init and sanity checks */
+ 
+ #if SSI_CC_HAS_MULTI2
+@@ -316,7 +313,7 @@ static int ssi_blkcipher_setkey(struct crypto_tfm *tfm,
+ #endif /*SSI_CC_HAS_MULTI2*/
+ 
+ 	if (unlikely(validate_keys_sizes(ctx_p, keylen) != 0)) {
+-		SSI_LOG_ERR("Unsupported key size %d.\n", keylen);
++		dev_err(dev, "Unsupported key size %d.\n", keylen);
+ 		crypto_tfm_set_flags(tfm, CRYPTO_TFM_RES_BAD_KEY_LEN);
+ 		return -EINVAL;
+ 	}
+@@ -326,13 +323,14 @@ static int ssi_blkcipher_setkey(struct crypto_tfm *tfm,
+ 		struct arm_hw_key_info *hki = (struct arm_hw_key_info *)key;
+ 
+ 		if (unlikely(ctx_p->flow_mode != S_DIN_to_AES)) {
+-			SSI_LOG_ERR("HW key not supported for non-AES flows\n");
++			dev_err(dev, "HW key not supported for non-AES flows\n");
+ 			return -EINVAL;
+ 		}
+ 
+ 		ctx_p->hw.key1_slot = hw_key_to_cc_hw_key(hki->hw_key1);
+ 		if (unlikely(ctx_p->hw.key1_slot == END_OF_KEYS)) {
+-			SSI_LOG_ERR("Unsupported hw key1 number (%d)\n", hki->hw_key1);
++			dev_err(dev, "Unsupported hw key1 number (%d)\n",
++				hki->hw_key1);
+ 			return -EINVAL;
+ 		}
+ 
+@@ -340,18 +338,20 @@ static int ssi_blkcipher_setkey(struct crypto_tfm *tfm,
+ 		    (ctx_p->cipher_mode == DRV_CIPHER_ESSIV) ||
+ 		    (ctx_p->cipher_mode == DRV_CIPHER_BITLOCKER)) {
+ 			if (unlikely(hki->hw_key1 == hki->hw_key2)) {
+-				SSI_LOG_ERR("Illegal hw key numbers (%d,%d)\n", hki->hw_key1, hki->hw_key2);
++				dev_err(dev, "Illegal hw key numbers (%d,%d)\n",
++					hki->hw_key1, hki->hw_key2);
+ 				return -EINVAL;
+ 			}
+ 			ctx_p->hw.key2_slot = hw_key_to_cc_hw_key(hki->hw_key2);
+ 			if (unlikely(ctx_p->hw.key2_slot == END_OF_KEYS)) {
+-				SSI_LOG_ERR("Unsupported hw key2 number (%d)\n", hki->hw_key2);
++				dev_err(dev, "Unsupported hw key2 number (%d)\n",
++					hki->hw_key2);
+ 				return -EINVAL;
+ 			}
+ 		}
+ 
+ 		ctx_p->keylen = keylen;
+-		SSI_LOG_DEBUG("ssi_is_hw_key ret 0");
++		dev_dbg(dev, "ssi_is_hw_key ret 0");
+ 
+ 		return 0;
+ 	}
+@@ -361,19 +361,19 @@ static int ssi_blkcipher_setkey(struct crypto_tfm *tfm,
+ 		if (unlikely(!des_ekey(tmp, key)) &&
+ 		    (crypto_tfm_get_flags(tfm) & CRYPTO_TFM_REQ_WEAK_KEY)) {
+ 			tfm->crt_flags |= CRYPTO_TFM_RES_WEAK_KEY;
+-			SSI_LOG_DEBUG("weak DES key");
++			dev_dbg(dev, "weak DES key");
+ 			return -EINVAL;
+ 		}
+ 	}
+ 	if ((ctx_p->cipher_mode == DRV_CIPHER_XTS) &&
+ 	    xts_check_key(tfm, key, keylen) != 0) {
+-		SSI_LOG_DEBUG("weak XTS key");
++		dev_dbg(dev, "weak XTS key");
+ 		return -EINVAL;
+ 	}
+ 	if ((ctx_p->flow_mode == S_DIN_to_DES) &&
+ 	    (keylen == DES3_EDE_KEY_SIZE) &&
+ 	    ssi_verify_3des_keys(key, keylen) != 0) {
+-		SSI_LOG_DEBUG("weak 3DES key");
++		dev_dbg(dev, "weak 3DES key");
+ 		return -EINVAL;
+ 	}
+ 
+@@ -388,7 +388,7 @@ static int ssi_blkcipher_setkey(struct crypto_tfm *tfm,
+ 		if (ctx_p->key_round_number < CC_MULTI2_MIN_NUM_ROUNDS ||
+ 		    ctx_p->key_round_number > CC_MULTI2_MAX_NUM_ROUNDS) {
+ 			crypto_tfm_set_flags(tfm, CRYPTO_TFM_RES_BAD_KEY_LEN);
+-			SSI_LOG_DEBUG("SSI_CC_HAS_MULTI2 einval");
++			dev_dbg(dev, "SSI_CC_HAS_MULTI2 einval");
+ 			return -EINVAL;
+ #endif /*SSI_CC_HAS_MULTI2*/
+ 	} else {
+@@ -406,7 +406,7 @@ static int ssi_blkcipher_setkey(struct crypto_tfm *tfm,
+ 
+ 			err = crypto_shash_digest(desc, ctx_p->user.key, key_len, ctx_p->user.key + key_len);
+ 			if (err) {
+-				SSI_LOG_ERR("Failed to hash ESSIV key.\n");
++				dev_err(dev, "Failed to hash ESSIV key.\n");
+ 				return err;
+ 			}
+ 		}
+@@ -415,7 +415,7 @@ static int ssi_blkcipher_setkey(struct crypto_tfm *tfm,
+ 				   max_key_buf_size, DMA_TO_DEVICE);
+ 	ctx_p->keylen = keylen;
+ 
+-	 SSI_LOG_DEBUG("return safely");
++	 dev_dbg(dev, "return safely");
+ 	return 0;
+ }
+ 
+@@ -429,6 +429,7 @@ ssi_blkcipher_create_setup_desc(
+ 	unsigned int *seq_size)
+ {
+ 	struct ssi_ablkcipher_ctx *ctx_p = crypto_tfm_ctx(tfm);
++	struct device *dev = drvdata_to_dev(ctx_p->drvdata);
+ 	int cipher_mode = ctx_p->cipher_mode;
+ 	int flow_mode = ctx_p->flow_mode;
+ 	int direction = req_ctx->gen_ctx.op_type;
+@@ -539,7 +540,7 @@ ssi_blkcipher_create_setup_desc(
+ 		(*seq_size)++;
+ 		break;
+ 	default:
+-		SSI_LOG_ERR("Unsupported cipher mode (%d)\n", cipher_mode);
++		dev_err(dev, "Unsupported cipher mode (%d)\n", cipher_mode);
+ 	}
+ }
+ 
+@@ -599,6 +600,7 @@ ssi_blkcipher_create_data_desc(
+ 	unsigned int *seq_size)
+ {
+ 	struct ssi_ablkcipher_ctx *ctx_p = crypto_tfm_ctx(tfm);
++	struct device *dev = drvdata_to_dev(ctx_p->drvdata);
+ 	unsigned int flow_mode = ctx_p->flow_mode;
+ 
+ 	switch (ctx_p->flow_mode) {
+@@ -614,15 +616,15 @@ ssi_blkcipher_create_data_desc(
+ 		break;
+ #endif /*SSI_CC_HAS_MULTI2*/
+ 	default:
+-		SSI_LOG_ERR("invalid flow mode, flow_mode = %d\n", flow_mode);
++		dev_err(dev, "invalid flow mode, flow_mode = %d\n", flow_mode);
+ 		return;
+ 	}
+ 	/* Process */
+ 	if (likely(req_ctx->dma_buf_type == SSI_DMA_BUF_DLLI)) {
+-		SSI_LOG_DEBUG(" data params addr %pad length 0x%X\n",
+-			      sg_dma_address(src), nbytes);
+-		SSI_LOG_DEBUG(" data params addr %pad length 0x%X\n",
+-			      sg_dma_address(dst), nbytes);
++		dev_dbg(dev, " data params addr %pad length 0x%X\n",
++			&sg_dma_address(src), nbytes);
++		dev_dbg(dev, " data params addr %pad length 0x%X\n",
++			&sg_dma_address(dst), nbytes);
+ 		hw_desc_init(&desc[*seq_size]);
+ 		set_din_type(&desc[*seq_size], DMA_DLLI, sg_dma_address(src),
+ 			     nbytes, NS_BIT);
+@@ -635,9 +637,8 @@ ssi_blkcipher_create_data_desc(
+ 		(*seq_size)++;
+ 	} else {
+ 		/* bypass */
+-		SSI_LOG_DEBUG(" bypass params addr %pad "
+-			     "length 0x%X addr 0x%08X\n",
+-			req_ctx->mlli_params.mlli_dma_addr,
++		dev_dbg(dev, " bypass params addr %pad length 0x%X addr 0x%08X\n",
++			&req_ctx->mlli_params.mlli_dma_addr,
+ 			req_ctx->mlli_params.mlli_len,
+ 			(unsigned int)ctx_p->drvdata->mlli_sram_addr);
+ 		hw_desc_init(&desc[*seq_size]);
+@@ -655,21 +656,18 @@ ssi_blkcipher_create_data_desc(
+ 			     ctx_p->drvdata->mlli_sram_addr,
+ 			     req_ctx->in_mlli_nents, NS_BIT);
+ 		if (req_ctx->out_nents == 0) {
+-			SSI_LOG_DEBUG(" din/dout params addr 0x%08X "
+-				     "addr 0x%08X\n",
+-			(unsigned int)ctx_p->drvdata->mlli_sram_addr,
+-			(unsigned int)ctx_p->drvdata->mlli_sram_addr);
++			dev_dbg(dev, " din/dout params addr 0x%08X addr 0x%08X\n",
++				(unsigned int)ctx_p->drvdata->mlli_sram_addr,
++				(unsigned int)ctx_p->drvdata->mlli_sram_addr);
+ 			set_dout_mlli(&desc[*seq_size],
+ 				      ctx_p->drvdata->mlli_sram_addr,
+ 				      req_ctx->in_mlli_nents, NS_BIT,
+ 				      (!areq ? 0 : 1));
+ 		} else {
+-			SSI_LOG_DEBUG(" din/dout params "
+-				     "addr 0x%08X addr 0x%08X\n",
++			dev_dbg(dev, " din/dout params addr 0x%08X addr 0x%08X\n",
+ 				(unsigned int)ctx_p->drvdata->mlli_sram_addr,
+ 				(unsigned int)ctx_p->drvdata->mlli_sram_addr +
+-				(u32)LLI_ENTRY_BYTE_SIZE *
+-							req_ctx->in_nents);
++				(u32)LLI_ENTRY_BYTE_SIZE * req_ctx->in_nents);
+ 			set_dout_mlli(&desc[*seq_size],
+ 				      (ctx_p->drvdata->mlli_sram_addr +
+ 				       (LLI_ENTRY_BYTE_SIZE *
+@@ -742,15 +740,15 @@ static int ssi_blkcipher_process(
+ 	struct ssi_crypto_req ssi_req = {};
+ 	int rc, seq_len = 0, cts_restore_flag = 0;
+ 
+-	SSI_LOG_DEBUG("%s areq=%p info=%p nbytes=%d\n",
+-		      ((direction == DRV_CRYPTO_DIRECTION_ENCRYPT) ? "Encrypt" : "Decrypt"),
+-		      areq, info, nbytes);
++	dev_dbg(dev, "%s areq=%p info=%p nbytes=%d\n",
++		((direction == DRV_CRYPTO_DIRECTION_ENCRYPT) ?
++		"Encrypt" : "Decrypt"), areq, info, nbytes);
+ 
+ 	/* STAT_PHASE_0: Init and sanity checks */
+ 
+ 	/* TODO: check data length according to mode */
+ 	if (unlikely(validate_data_size(ctx_p, nbytes))) {
+-		SSI_LOG_ERR("Unsupported data size %d.\n", nbytes);
++		dev_err(dev, "Unsupported data size %d.\n", nbytes);
+ 		crypto_tfm_set_flags(tfm, CRYPTO_TFM_RES_BAD_BLOCK_LEN);
+ 		rc = -EINVAL;
+ 		goto exit_process;
+@@ -783,7 +781,7 @@ static int ssi_blkcipher_process(
+ 
+ 	rc = ssi_buffer_mgr_map_blkcipher_request(ctx_p->drvdata, req_ctx, ivsize, nbytes, info, src, dst);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("map_request() failed\n");
++		dev_err(dev, "map_request() failed\n");
+ 		goto exit_process;
+ 	}
+ 
+@@ -1240,14 +1238,15 @@ static struct ssi_alg_template blkcipher_algs[] = {
+ };
+ 
+ static
+-struct ssi_crypto_alg *ssi_ablkcipher_create_alg(struct ssi_alg_template *template)
++struct ssi_crypto_alg *ssi_ablkcipher_create_alg(struct ssi_alg_template
++						 *template, struct device *dev)
+ {
+ 	struct ssi_crypto_alg *t_alg;
+ 	struct crypto_alg *alg;
+ 
+ 	t_alg = kzalloc(sizeof(*t_alg), GFP_KERNEL);
+ 	if (!t_alg) {
+-		SSI_LOG_ERR("failed to allocate t_alg\n");
++		dev_dbg(dev, "failed to allocate t_alg\n");
+ 		return ERR_PTR(-ENOMEM);
+ 	}
+ 
+@@ -1299,6 +1298,7 @@ int ssi_ablkcipher_alloc(struct ssi_drvdata *drvdata)
+ {
+ 	struct ssi_blkcipher_handle *ablkcipher_handle;
+ 	struct ssi_crypto_alg *t_alg;
++	struct device *dev = drvdata_to_dev(drvdata);
+ 	int rc = -ENOMEM;
+ 	int alg;
+ 
+@@ -1310,32 +1310,34 @@ int ssi_ablkcipher_alloc(struct ssi_drvdata *drvdata)
+ 	drvdata->blkcipher_handle = ablkcipher_handle;
+ 
+ 	/* Linux crypto */
+-	SSI_LOG_DEBUG("Number of algorithms = %zu\n", ARRAY_SIZE(blkcipher_algs));
++	dev_dbg(dev, "Number of algorithms = %zu\n",
++		ARRAY_SIZE(blkcipher_algs));
+ 	for (alg = 0; alg < ARRAY_SIZE(blkcipher_algs); alg++) {
+-		SSI_LOG_DEBUG("creating %s\n", blkcipher_algs[alg].driver_name);
+-		t_alg = ssi_ablkcipher_create_alg(&blkcipher_algs[alg]);
++		dev_dbg(dev, "creating %s\n", blkcipher_algs[alg].driver_name);
++		t_alg = ssi_ablkcipher_create_alg(&blkcipher_algs[alg], dev);
+ 		if (IS_ERR(t_alg)) {
+ 			rc = PTR_ERR(t_alg);
+-			SSI_LOG_ERR("%s alg allocation failed\n",
+-				    blkcipher_algs[alg].driver_name);
++			dev_err(dev, "%s alg allocation failed\n",
++				blkcipher_algs[alg].driver_name);
+ 			goto fail0;
+ 		}
+ 		t_alg->drvdata = drvdata;
+ 
+-		SSI_LOG_DEBUG("registering %s\n", blkcipher_algs[alg].driver_name);
++		dev_dbg(dev, "registering %s\n",
++			blkcipher_algs[alg].driver_name);
+ 		rc = crypto_register_alg(&t_alg->crypto_alg);
+-		SSI_LOG_DEBUG("%s alg registration rc = %x\n",
+-			      t_alg->crypto_alg.cra_driver_name, rc);
++		dev_dbg(dev, "%s alg registration rc = %x\n",
++			t_alg->crypto_alg.cra_driver_name, rc);
+ 		if (unlikely(rc != 0)) {
+-			SSI_LOG_ERR("%s alg registration failed\n",
+-				    t_alg->crypto_alg.cra_driver_name);
++			dev_err(dev, "%s alg registration failed\n",
++				t_alg->crypto_alg.cra_driver_name);
+ 			kfree(t_alg);
+ 			goto fail0;
+ 		} else {
+ 			list_add_tail(&t_alg->entry,
+ 				      &ablkcipher_handle->blkcipher_alg_list);
+-			SSI_LOG_DEBUG("Registered %s\n",
+-				      t_alg->crypto_alg.cra_driver_name);
++			dev_dbg(dev, "Registered %s\n",
++				t_alg->crypto_alg.cra_driver_name);
+ 		}
+ 	}
+ 	return 0;
+diff --git a/drivers/staging/ccree/ssi_driver.c b/drivers/staging/ccree/ssi_driver.c
+index 5342ab8ddaf0..c4b608b77b05 100644
+--- a/drivers/staging/ccree/ssi_driver.c
++++ b/drivers/staging/ccree/ssi_driver.c
+@@ -74,41 +74,17 @@
+ #include "ssi_fips.h"
+ 
+ #ifdef DX_DUMP_BYTES
+-void dump_byte_array(const char *name, const u8 *the_array, unsigned long size)
++void dump_byte_array(const char *name, const u8 *buf, size_t len)
+ {
+-	int i, line_offset = 0, ret = 0;
+-	const u8 *cur_byte;
+-	char line_buf[80];
++	char prefix[NAME_LEN];
+ 
+-	if (!the_array) {
+-		SSI_LOG_ERR("cannot dump array - NULL pointer\n");
++	if (!buf)
+ 		return;
+-	}
+ 
+-	ret = snprintf(line_buf, sizeof(line_buf), "%s[%lu]: ", name, size);
+-	if (ret < 0) {
+-		SSI_LOG_ERR("snprintf returned %d . aborting buffer array dump\n", ret);
+-		return;
+-	}
+-	line_offset = ret;
+-	for (i = 0, cur_byte = the_array;
+-	     (i < size) && (line_offset < sizeof(line_buf)); i++, cur_byte++) {
+-			ret = snprintf(line_buf + line_offset,
+-				       sizeof(line_buf) - line_offset,
+-				       "0x%02X ", *cur_byte);
+-		if (ret < 0) {
+-			SSI_LOG_ERR("snprintf returned %d . aborting buffer array dump\n", ret);
+-			return;
+-		}
+-		line_offset += ret;
+-		if (line_offset > 75) { /* Cut before line end */
+-			SSI_LOG_DEBUG("%s\n", line_buf);
+-			line_offset = 0;
+-		}
+-	}
++	snprintf(prefix, sizeof(prefix), "%s[%lu]: ", name, len);
+ 
+-	if (line_offset > 0) /* Dump remaining line */
+-		SSI_LOG_DEBUG("%s\n", line_buf);
++	print_hex_dump(KERN_DEBUG, prefix, DUMP_PREFIX_ADDRESS, 16, 1, len,
++		       false);
+ }
+ #endif
+ 
+@@ -116,6 +92,7 @@ static irqreturn_t cc_isr(int irq, void *dev_id)
+ {
+ 	struct ssi_drvdata *drvdata = (struct ssi_drvdata *)dev_id;
+ 	void __iomem *cc_base = drvdata->cc_base;
++	struct device *dev = drvdata_to_dev(drvdata);
+ 	u32 irr;
+ 	u32 imr;
+ 
+@@ -123,9 +100,9 @@ static irqreturn_t cc_isr(int irq, void *dev_id)
+ 
+ 	/* read the interrupt status */
+ 	irr = CC_HAL_READ_REGISTER(CC_REG_OFFSET(HOST_RGF, HOST_IRR));
+-	SSI_LOG_DEBUG("Got IRR=0x%08X\n", irr);
++	dev_dbg(dev, "Got IRR=0x%08X\n", irr);
+ 	if (unlikely(irr == 0)) { /* Probably shared interrupt line */
+-		SSI_LOG_ERR("Got interrupt with empty IRR\n");
++		dev_err(dev, "Got interrupt with empty IRR\n");
+ 		return IRQ_NONE;
+ 	}
+ 	imr = CC_HAL_READ_REGISTER(CC_REG_OFFSET(HOST_RGF, HOST_IMR));
+@@ -156,13 +133,15 @@ static irqreturn_t cc_isr(int irq, void *dev_id)
+ 
+ 		/* Read the AXI error ID */
+ 		axi_err = CC_HAL_READ_REGISTER(CC_REG_OFFSET(CRY_KERNEL, AXIM_MON_ERR));
+-		SSI_LOG_DEBUG("AXI completion error: axim_mon_err=0x%08X\n", axi_err);
++		dev_dbg(dev, "AXI completion error: axim_mon_err=0x%08X\n",
++			axi_err);
+ 
+ 		irr &= ~SSI_AXI_ERR_IRQ_MASK;
+ 	}
+ 
+ 	if (unlikely(irr != 0)) {
+-		SSI_LOG_DEBUG("IRR includes unknown cause bits (0x%08X)\n", irr);
++		dev_dbg(dev, "IRR includes unknown cause bits (0x%08X)\n",
++			irr);
+ 		/* Just warning */
+ 	}
+ 
+@@ -173,15 +152,17 @@ int init_cc_regs(struct ssi_drvdata *drvdata, bool is_probe)
+ {
+ 	unsigned int val, cache_params;
+ 	void __iomem *cc_base = drvdata->cc_base;
++	struct device *dev = drvdata_to_dev(drvdata);
+ 
+ 	/* Unmask all AXI interrupt sources AXI_CFG1 register */
+ 	val = CC_HAL_READ_REGISTER(CC_REG_OFFSET(CRY_KERNEL, AXIM_CFG));
+ 	CC_HAL_WRITE_REGISTER(CC_REG_OFFSET(CRY_KERNEL, AXIM_CFG), val & ~SSI_AXI_IRQ_MASK);
+-	SSI_LOG_DEBUG("AXIM_CFG=0x%08X\n", CC_HAL_READ_REGISTER(CC_REG_OFFSET(CRY_KERNEL, AXIM_CFG)));
++	dev_dbg(dev, "AXIM_CFG=0x%08X\n",
++		CC_HAL_READ_REGISTER(CC_REG_OFFSET(CRY_KERNEL, AXIM_CFG)));
+ 
+ 	/* Clear all pending interrupts */
+ 	val = CC_HAL_READ_REGISTER(CC_REG_OFFSET(HOST_RGF, HOST_IRR));
+-	SSI_LOG_DEBUG("IRR=0x%08X\n", val);
++	dev_dbg(dev, "IRR=0x%08X\n", val);
+ 	CC_HAL_WRITE_REGISTER(CC_REG_OFFSET(HOST_RGF, HOST_ICR), val);
+ 
+ 	/* Unmask relevant interrupt cause */
+@@ -196,8 +177,8 @@ int init_cc_regs(struct ssi_drvdata *drvdata, bool is_probe)
+ 			      DX_IRQ_DELAY);
+ #endif
+ 	if (CC_HAL_READ_REGISTER(CC_REG_OFFSET(HOST_RGF, HOST_IRQ_TIMER_INIT_VAL)) > 0) {
+-		SSI_LOG_DEBUG("irq_delay=%d CC cycles\n",
+-			      CC_HAL_READ_REGISTER(CC_REG_OFFSET(HOST_RGF, HOST_IRQ_TIMER_INIT_VAL)));
++		dev_dbg(dev, "irq_delay=%d CC cycles\n",
++			CC_HAL_READ_REGISTER(CC_REG_OFFSET(HOST_RGF, HOST_IRQ_TIMER_INIT_VAL)));
+ 	}
+ #endif
+ 
+@@ -206,15 +187,15 @@ int init_cc_regs(struct ssi_drvdata *drvdata, bool is_probe)
+ 	val = CC_HAL_READ_REGISTER(CC_REG_OFFSET(CRY_KERNEL, AXIM_CACHE_PARAMS));
+ 
+ 	if (is_probe)
+-		SSI_LOG_INFO("Cache params previous: 0x%08X\n", val);
++		dev_info(dev, "Cache params previous: 0x%08X\n", val);
+ 
+ 	CC_HAL_WRITE_REGISTER(CC_REG_OFFSET(CRY_KERNEL, AXIM_CACHE_PARAMS),
+ 			      cache_params);
+ 	val = CC_HAL_READ_REGISTER(CC_REG_OFFSET(CRY_KERNEL, AXIM_CACHE_PARAMS));
+ 
+ 	if (is_probe)
+-		SSI_LOG_INFO("Cache params current: 0x%08X (expect: 0x%08X)\n",
+-			     val, cache_params);
++		dev_info(dev, "Cache params current: 0x%08X (expect: 0x%08X)\n",
++			 val, cache_params);
+ 
+ 	return 0;
+ }
+@@ -231,7 +212,7 @@ static int init_cc_resources(struct platform_device *plat_dev)
+ 
+ 	new_drvdata = devm_kzalloc(dev, sizeof(*new_drvdata), GFP_KERNEL);
+ 	if (!new_drvdata) {
+-		SSI_LOG_ERR("Failed to allocate drvdata");
++		dev_dbg(dev, "Failed to allocate drvdata");
+ 		rc = -ENOMEM;
+ 		goto post_drvdata_err;
+ 	}
+@@ -247,24 +228,22 @@ static int init_cc_resources(struct platform_device *plat_dev)
+ 	/* Map registers space */
+ 	new_drvdata->cc_base = devm_ioremap_resource(dev, req_mem_cc_regs);
+ 	if (IS_ERR(new_drvdata->cc_base)) {
+-		SSI_LOG_ERR("Failed to ioremap registers");
++		dev_err(dev, "Failed to ioremap registers");
+ 		rc = PTR_ERR(new_drvdata->cc_base);
+ 		goto post_drvdata_err;
+ 	}
+ 
+-	SSI_LOG_DEBUG("Got MEM resource (%s): start=%pad end=%pad\n",
+-		      req_mem_cc_regs->name,
+-		      req_mem_cc_regs->start,
+-		      req_mem_cc_regs->end);
+-	SSI_LOG_DEBUG("CC registers mapped from %pa to 0x%p\n",
+-		      &req_mem_cc_regs->start, new_drvdata->cc_base);
++	dev_dbg(dev, "Got MEM resource (%s): %pR\n", req_mem_cc_regs->name,
++		req_mem_cc_regs);
++	dev_dbg(dev, "CC registers mapped from %pa to 0x%p\n",
++		&req_mem_cc_regs->start, new_drvdata->cc_base);
+ 
+ 	cc_base = new_drvdata->cc_base;
+ 
+ 	/* Then IRQ */
+ 	new_drvdata->irq = platform_get_irq(plat_dev, 0);
+ 	if (new_drvdata->irq < 0) {
+-		SSI_LOG_ERR("Failed getting IRQ resource\n");
++		dev_err(dev, "Failed getting IRQ resource\n");
+ 		rc = new_drvdata->irq;
+ 		goto post_drvdata_err;
+ 	}
+@@ -272,11 +251,11 @@ static int init_cc_resources(struct platform_device *plat_dev)
+ 	rc = devm_request_irq(dev, new_drvdata->irq, cc_isr,
+ 			      IRQF_SHARED, "arm_cc7x", new_drvdata);
+ 	if (rc) {
+-		SSI_LOG_ERR("Could not register to interrupt %d\n",
+-			    new_drvdata->irq);
++		dev_err(dev, "Could not register to interrupt %d\n",
++			new_drvdata->irq);
+ 		goto post_drvdata_err;
+ 	}
+-	SSI_LOG_DEBUG("Registered to IRQ: %d\n", new_drvdata->irq);
++	dev_dbg(dev, "Registered to IRQ: %d\n", new_drvdata->irq);
+ 
+ 	rc = cc_clk_on(new_drvdata);
+ 	if (rc)
+@@ -291,91 +270,93 @@ static int init_cc_resources(struct platform_device *plat_dev)
+ 	/* Verify correct mapping */
+ 	signature_val = CC_HAL_READ_REGISTER(CC_REG_OFFSET(HOST_RGF, HOST_SIGNATURE));
+ 	if (signature_val != DX_DEV_SIGNATURE) {
+-		SSI_LOG_ERR("Invalid CC signature: SIGNATURE=0x%08X != expected=0x%08X\n",
+-			    signature_val, (u32)DX_DEV_SIGNATURE);
++		dev_err(dev, "Invalid CC signature: SIGNATURE=0x%08X != expected=0x%08X\n",
++			signature_val, (u32)DX_DEV_SIGNATURE);
+ 		rc = -EINVAL;
+ 		goto post_clk_err;
+ 	}
+-	SSI_LOG_DEBUG("CC SIGNATURE=0x%08X\n", signature_val);
++	dev_dbg(dev, "CC SIGNATURE=0x%08X\n", signature_val);
+ 
+ 	/* Display HW versions */
+-	SSI_LOG(KERN_INFO, "ARM CryptoCell %s Driver: HW version 0x%08X, Driver version %s\n", SSI_DEV_NAME_STR,
+-		CC_HAL_READ_REGISTER(CC_REG_OFFSET(HOST_RGF, HOST_VERSION)), DRV_MODULE_VERSION);
++	dev_info(dev, "ARM CryptoCell %s Driver: HW version 0x%08X, Driver version %s\n",
++		 SSI_DEV_NAME_STR,
++		 CC_HAL_READ_REGISTER(CC_REG_OFFSET(HOST_RGF, HOST_VERSION)),
++		 DRV_MODULE_VERSION);
+ 
+ 	rc = init_cc_regs(new_drvdata, true);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("init_cc_regs failed\n");
++		dev_err(dev, "init_cc_regs failed\n");
+ 		goto post_clk_err;
+ 	}
+ 
+ #ifdef ENABLE_CC_SYSFS
+ 	rc = ssi_sysfs_init(&dev->kobj, new_drvdata);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("init_stat_db failed\n");
++		dev_err(dev, "init_stat_db failed\n");
+ 		goto post_regs_err;
+ 	}
+ #endif
+ 
+ 	rc = ssi_fips_init(new_drvdata);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("SSI_FIPS_INIT failed 0x%x\n", rc);
++		dev_err(dev, "SSI_FIPS_INIT failed 0x%x\n", rc);
+ 		goto post_sysfs_err;
+ 	}
+ 	rc = ssi_sram_mgr_init(new_drvdata);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("ssi_sram_mgr_init failed\n");
++		dev_err(dev, "ssi_sram_mgr_init failed\n");
+ 		goto post_fips_init_err;
+ 	}
+ 
+ 	new_drvdata->mlli_sram_addr =
+ 		ssi_sram_mgr_alloc(new_drvdata, MAX_MLLI_BUFF_SIZE);
+ 	if (unlikely(new_drvdata->mlli_sram_addr == NULL_SRAM_ADDR)) {
+-		SSI_LOG_ERR("Failed to alloc MLLI Sram buffer\n");
++		dev_err(dev, "Failed to alloc MLLI Sram buffer\n");
+ 		rc = -ENOMEM;
+ 		goto post_sram_mgr_err;
+ 	}
+ 
+ 	rc = request_mgr_init(new_drvdata);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("request_mgr_init failed\n");
++		dev_err(dev, "request_mgr_init failed\n");
+ 		goto post_sram_mgr_err;
+ 	}
+ 
+ 	rc = ssi_buffer_mgr_init(new_drvdata);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("buffer_mgr_init failed\n");
++		dev_err(dev, "buffer_mgr_init failed\n");
+ 		goto post_req_mgr_err;
+ 	}
+ 
+ 	rc = ssi_power_mgr_init(new_drvdata);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("ssi_power_mgr_init failed\n");
++		dev_err(dev, "ssi_power_mgr_init failed\n");
+ 		goto post_buf_mgr_err;
+ 	}
+ 
+ 	rc = ssi_ivgen_init(new_drvdata);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("ssi_ivgen_init failed\n");
++		dev_err(dev, "ssi_ivgen_init failed\n");
+ 		goto post_power_mgr_err;
+ 	}
+ 
+ 	/* Allocate crypto algs */
+ 	rc = ssi_ablkcipher_alloc(new_drvdata);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("ssi_ablkcipher_alloc failed\n");
++		dev_err(dev, "ssi_ablkcipher_alloc failed\n");
+ 		goto post_ivgen_err;
+ 	}
+ 
+ 	/* hash must be allocated before aead since hash exports APIs */
+ 	rc = ssi_hash_alloc(new_drvdata);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("ssi_hash_alloc failed\n");
++		dev_err(dev, "ssi_hash_alloc failed\n");
+ 		goto post_cipher_err;
+ 	}
+ 
+ 	rc = ssi_aead_alloc(new_drvdata);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("ssi_aead_alloc failed\n");
++		dev_err(dev, "ssi_aead_alloc failed\n");
+ 		goto post_hash_err;
+ 	}
+ 
+@@ -412,7 +393,7 @@ static int init_cc_resources(struct platform_device *plat_dev)
+ post_clk_err:
+ 	cc_clk_off(new_drvdata);
+ post_drvdata_err:
+-	SSI_LOG_ERR("ccree init error occurred!\n");
++	dev_err(dev, "ccree init error occurred!\n");
+ 	dev_set_drvdata(dev, NULL);
+ 	return rc;
+ }
+@@ -476,18 +457,19 @@ void cc_clk_off(struct ssi_drvdata *drvdata)
+ static int cc7x_probe(struct platform_device *plat_dev)
+ {
+ 	int rc;
++	struct device *dev = &plat_dev->dev;
+ #if defined(CONFIG_ARM) && defined(CC_DEBUG)
+ 	u32 ctr, cacheline_size;
+ 
+ 	asm volatile("mrc p15, 0, %0, c0, c0, 1" : "=r" (ctr));
+ 	cacheline_size =  4 << ((ctr >> 16) & 0xf);
+-	SSI_LOG_DEBUG("CP15(L1_CACHE_BYTES) = %u , Kconfig(L1_CACHE_BYTES) = %u\n",
+-		      cacheline_size, L1_CACHE_BYTES);
++	dev_dbg(dev, "CP15(L1_CACHE_BYTES) = %u , Kconfig(L1_CACHE_BYTES) = %u\n",
++		cacheline_size, L1_CACHE_BYTES);
+ 
+ 	asm volatile("mrc p15, 0, %0, c0, c0, 0" : "=r" (ctr));
+-	SSI_LOG_DEBUG("Main ID register (MIDR): Implementer 0x%02X, Arch 0x%01X, Part 0x%03X, Rev r%dp%d\n",
+-		      (ctr >> 24), (ctr >> 16) & 0xF, (ctr >> 4) & 0xFFF,
+-		      (ctr >> 20) & 0xF, ctr & 0xF);
++	dev_dbg(dev, "Main ID register (MIDR): Implementer 0x%02X, Arch 0x%01X, Part 0x%03X, Rev r%dp%d\n",
++		(ctr >> 24), (ctr >> 16) & 0xF, (ctr >> 4) & 0xFFF,
++		(ctr >> 20) & 0xF, ctr & 0xF);
+ #endif
+ 
+ 	/* Map registers space */
+@@ -495,18 +477,20 @@ static int cc7x_probe(struct platform_device *plat_dev)
+ 	if (rc != 0)
+ 		return rc;
+ 
+-	SSI_LOG(KERN_INFO, "ARM cc7x_ree device initialized\n");
++	dev_info(dev, "ARM ccree device initialized\n");
+ 
+ 	return 0;
+ }
+ 
+ static int cc7x_remove(struct platform_device *plat_dev)
+ {
+-	SSI_LOG_DEBUG("Releasing cc7x resources...\n");
++	struct device *dev = &plat_dev->dev;
++
++	dev_dbg(dev, "Releasing cc7x resources...\n");
+ 
+ 	cleanup_cc_resources(plat_dev);
+ 
+-	SSI_LOG(KERN_INFO, "ARM cc7x_ree device terminated\n");
++	dev_info(dev, "ARM ccree device terminated\n");
+ 
+ 	return 0;
+ }
+diff --git a/drivers/staging/ccree/ssi_driver.h b/drivers/staging/ccree/ssi_driver.h
+index 7cd51aa24acb..488f66541c4c 100644
+--- a/drivers/staging/ccree/ssi_driver.h
++++ b/drivers/staging/ccree/ssi_driver.h
+@@ -91,19 +91,6 @@
+  * field in the HW descriptor. The DMA engine +8 that value.
+  */
+ 
+-/* Logging macros */
+-#define SSI_LOG(level, format, ...) \
+-	printk(level "cc715ree::%s: " format, __func__, ##__VA_ARGS__)
+-#define SSI_LOG_ERR(format, ...) SSI_LOG(KERN_ERR, format, ##__VA_ARGS__)
+-#define SSI_LOG_WARNING(format, ...) SSI_LOG(KERN_WARNING, format, ##__VA_ARGS__)
+-#define SSI_LOG_NOTICE(format, ...) SSI_LOG(KERN_NOTICE, format, ##__VA_ARGS__)
+-#define SSI_LOG_INFO(format, ...) SSI_LOG(KERN_INFO, format, ##__VA_ARGS__)
+-#ifdef CC_DEBUG
+-#define SSI_LOG_DEBUG(format, ...) SSI_LOG(KERN_DEBUG, format, ##__VA_ARGS__)
+-#else /* Debug log messages are removed at compile time for non-DEBUG config. */
+-#define SSI_LOG_DEBUG(format, ...) do {} while (0)
+-#endif
+-
+ #define MIN(a, b) (((a) < (b)) ? (a) : (b))
+ #define MAX(a, b) (((a) > (b)) ? (a) : (b))
+ 
+diff --git a/drivers/staging/ccree/ssi_fips.c b/drivers/staging/ccree/ssi_fips.c
+index 33d53d64603d..15009a2ec329 100644
+--- a/drivers/staging/ccree/ssi_fips.c
++++ b/drivers/staging/ccree/ssi_fips.c
+@@ -76,18 +76,19 @@ void fips_handler(struct ssi_drvdata *drvdata)
+ 	tasklet_schedule(&fips_handle_ptr->tasklet);
+ }
+ 
+-static inline void tee_fips_error(void)
++static inline void tee_fips_error(struct device *dev)
+ {
+ 	if (fips_enabled)
+ 		panic("ccree: TEE reported cryptographic error in fips mode!\n");
+ 	else
+-		SSI_LOG_ERR("TEE reported error!\n");
++		dev_err(dev, "TEE reported error!\n");
+ }
+ 
+ /* Deferred service handler, run as interrupt-fired tasklet */
+ static void fips_dsr(unsigned long devarg)
+ {
+ 	struct ssi_drvdata *drvdata = (struct ssi_drvdata *)devarg;
++	struct device *dev = drvdata_to_dev(drvdata);
+ 	void __iomem *cc_base = drvdata->cc_base;
+ 	u32 irq, state, val;
+ 
+@@ -97,7 +98,7 @@ static void fips_dsr(unsigned long devarg)
+ 		state = CC_HAL_READ_REGISTER(CC_REG_OFFSET(HOST_RGF, GPR_HOST));
+ 
+ 		if (state != (CC_FIPS_SYNC_TEE_STATUS | CC_FIPS_SYNC_MODULE_OK))
+-			tee_fips_error();
++			tee_fips_error(dev);
+ 	}
+ 
+ 	/* after verifing that there is nothing to do,
+@@ -111,6 +112,7 @@ static void fips_dsr(unsigned long devarg)
+ int ssi_fips_init(struct ssi_drvdata *p_drvdata)
+ {
+ 	struct ssi_fips_handle *fips_h;
++	struct device *dev = drvdata_to_dev(p_drvdata);
+ 
+ 	fips_h = kzalloc(sizeof(*fips_h), GFP_KERNEL);
+ 	if (!fips_h)
+@@ -118,11 +120,11 @@ int ssi_fips_init(struct ssi_drvdata *p_drvdata)
+ 
+ 	p_drvdata->fips_handle = fips_h;
+ 
+-	SSI_LOG_DEBUG("Initializing fips tasklet\n");
++	dev_dbg(dev, "Initializing fips tasklet\n");
+ 	tasklet_init(&fips_h->tasklet, fips_dsr, (unsigned long)p_drvdata);
+ 
+ 	if (!cc_get_tee_fips_status(p_drvdata))
+-		tee_fips_error();
++		tee_fips_error(dev);
+ 
+ 	return 0;
+ }
+diff --git a/drivers/staging/ccree/ssi_hash.c b/drivers/staging/ccree/ssi_hash.c
+index 7eb1adc073c3..a27c988dcd47 100644
+--- a/drivers/staging/ccree/ssi_hash.c
++++ b/drivers/staging/ccree/ssi_hash.c
+@@ -134,14 +134,13 @@ static int ssi_hash_map_result(struct device *dev,
+ 			       digestsize,
+ 			       DMA_BIDIRECTIONAL);
+ 	if (unlikely(dma_mapping_error(dev, state->digest_result_dma_addr))) {
+-		SSI_LOG_ERR("Mapping digest result buffer %u B for DMA failed\n",
+-			    digestsize);
++		dev_err(dev, "Mapping digest result buffer %u B for DMA failed\n",
++			digestsize);
+ 		return -ENOMEM;
+ 	}
+-	SSI_LOG_DEBUG("Mapped digest result buffer %u B "
+-		     "at va=%pK to dma=%pad\n",
++	dev_dbg(dev, "Mapped digest result buffer %u B at va=%pK to dma=%pad\n",
+ 		digestsize, state->digest_result_buff,
+-		state->digest_result_dma_addr);
++		&state->digest_result_dma_addr);
+ 
+ 	return 0;
+ }
+@@ -159,53 +158,56 @@ static int ssi_hash_map_request(struct device *dev,
+ 
+ 	state->buff0 = kzalloc(SSI_MAX_HASH_BLCK_SIZE, GFP_KERNEL | GFP_DMA);
+ 	if (!state->buff0) {
+-		SSI_LOG_ERR("Allocating buff0 in context failed\n");
++		dev_err(dev, "Allocating buff0 in context failed\n");
+ 		goto fail0;
+ 	}
+ 	state->buff1 = kzalloc(SSI_MAX_HASH_BLCK_SIZE, GFP_KERNEL | GFP_DMA);
+ 	if (!state->buff1) {
+-		SSI_LOG_ERR("Allocating buff1 in context failed\n");
++		dev_err(dev, "Allocating buff1 in context failed\n");
+ 		goto fail_buff0;
+ 	}
+ 	state->digest_result_buff = kzalloc(SSI_MAX_HASH_DIGEST_SIZE, GFP_KERNEL | GFP_DMA);
+ 	if (!state->digest_result_buff) {
+-		SSI_LOG_ERR("Allocating digest_result_buff in context failed\n");
++		dev_err(dev, "Allocating digest_result_buff in context failed\n");
+ 		goto fail_buff1;
+ 	}
+ 	state->digest_buff = kzalloc(ctx->inter_digestsize, GFP_KERNEL | GFP_DMA);
+ 	if (!state->digest_buff) {
+-		SSI_LOG_ERR("Allocating digest-buffer in context failed\n");
++		dev_err(dev, "Allocating digest-buffer in context failed\n");
+ 		goto fail_digest_result_buff;
+ 	}
+ 
+-	SSI_LOG_DEBUG("Allocated digest-buffer in context ctx->digest_buff=@%p\n", state->digest_buff);
++	dev_dbg(dev, "Allocated digest-buffer in context ctx->digest_buff=@%p\n",
++		state->digest_buff);
+ 	if (ctx->hw_mode != DRV_CIPHER_XCBC_MAC) {
+ 		state->digest_bytes_len = kzalloc(HASH_LEN_SIZE, GFP_KERNEL | GFP_DMA);
+ 		if (!state->digest_bytes_len) {
+-			SSI_LOG_ERR("Allocating digest-bytes-len in context failed\n");
++			dev_err(dev, "Allocating digest-bytes-len in context failed\n");
+ 			goto fail1;
+ 		}
+-		SSI_LOG_DEBUG("Allocated digest-bytes-len in context state->>digest_bytes_len=@%p\n", state->digest_bytes_len);
++		dev_dbg(dev, "Allocated digest-bytes-len in context state->>digest_bytes_len=@%p\n",
++			state->digest_bytes_len);
+ 	} else {
+ 		state->digest_bytes_len = NULL;
+ 	}
+ 
+ 	state->opad_digest_buff = kzalloc(ctx->inter_digestsize, GFP_KERNEL | GFP_DMA);
+ 	if (!state->opad_digest_buff) {
+-		SSI_LOG_ERR("Allocating opad-digest-buffer in context failed\n");
++		dev_err(dev, "Allocating opad-digest-buffer in context failed\n");
+ 		goto fail2;
+ 	}
+-	SSI_LOG_DEBUG("Allocated opad-digest-buffer in context state->digest_bytes_len=@%p\n", state->opad_digest_buff);
++	dev_dbg(dev, "Allocated opad-digest-buffer in context state->digest_bytes_len=@%p\n",
++		state->opad_digest_buff);
+ 
+ 	state->digest_buff_dma_addr = dma_map_single(dev, (void *)state->digest_buff, ctx->inter_digestsize, DMA_BIDIRECTIONAL);
+ 	if (dma_mapping_error(dev, state->digest_buff_dma_addr)) {
+-		SSI_LOG_ERR("Mapping digest len %d B at va=%pK for DMA failed\n",
+-			    ctx->inter_digestsize, state->digest_buff);
++		dev_err(dev, "Mapping digest len %d B at va=%pK for DMA failed\n",
++			ctx->inter_digestsize, state->digest_buff);
+ 		goto fail3;
+ 	}
+-	SSI_LOG_DEBUG("Mapped digest %d B at va=%pK to dma=%pad\n",
+-		      ctx->inter_digestsize, state->digest_buff,
+-		      state->digest_buff_dma_addr);
++	dev_dbg(dev, "Mapped digest %d B at va=%pK to dma=%pad\n",
++		ctx->inter_digestsize, state->digest_buff,
++		&state->digest_buff_dma_addr);
+ 
+ 	if (is_hmac) {
+ 		dma_sync_single_for_cpu(dev, ctx->digest_buff_dma_addr, ctx->inter_digestsize, DMA_BIDIRECTIONAL);
+@@ -240,7 +242,7 @@ static int ssi_hash_map_request(struct device *dev,
+ 
+ 		rc = send_request(ctx->drvdata, &ssi_req, &desc, 1, 0);
+ 		if (unlikely(rc != 0)) {
+-			SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++			dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 			goto fail4;
+ 		}
+ 	}
+@@ -248,13 +250,13 @@ static int ssi_hash_map_request(struct device *dev,
+ 	if (ctx->hw_mode != DRV_CIPHER_XCBC_MAC) {
+ 		state->digest_bytes_len_dma_addr = dma_map_single(dev, (void *)state->digest_bytes_len, HASH_LEN_SIZE, DMA_BIDIRECTIONAL);
+ 		if (dma_mapping_error(dev, state->digest_bytes_len_dma_addr)) {
+-			SSI_LOG_ERR("Mapping digest len %u B at va=%pK for DMA failed\n",
+-				    HASH_LEN_SIZE, state->digest_bytes_len);
++			dev_err(dev, "Mapping digest len %u B at va=%pK for DMA failed\n",
++				HASH_LEN_SIZE, state->digest_bytes_len);
+ 			goto fail4;
+ 		}
+-		SSI_LOG_DEBUG("Mapped digest len %u B at va=%pK to dma=%pad\n",
+-			      HASH_LEN_SIZE, state->digest_bytes_len,
+-			      state->digest_bytes_len_dma_addr);
++		dev_dbg(dev, "Mapped digest len %u B at va=%pK to dma=%pad\n",
++			HASH_LEN_SIZE, state->digest_bytes_len,
++			&state->digest_bytes_len_dma_addr);
+ 	} else {
+ 		state->digest_bytes_len_dma_addr = 0;
+ 	}
+@@ -262,14 +264,14 @@ static int ssi_hash_map_request(struct device *dev,
+ 	if (is_hmac && ctx->hash_mode != DRV_HASH_NULL) {
+ 		state->opad_digest_dma_addr = dma_map_single(dev, (void *)state->opad_digest_buff, ctx->inter_digestsize, DMA_BIDIRECTIONAL);
+ 		if (dma_mapping_error(dev, state->opad_digest_dma_addr)) {
+-			SSI_LOG_ERR("Mapping opad digest %d B at va=%pK for DMA failed\n",
+-				    ctx->inter_digestsize,
+-				    state->opad_digest_buff);
++			dev_err(dev, "Mapping opad digest %d B at va=%pK for DMA failed\n",
++				ctx->inter_digestsize,
++				state->opad_digest_buff);
+ 			goto fail5;
+ 		}
+-		SSI_LOG_DEBUG("Mapped opad digest %d B at va=%pK to dma=%pad\n",
+-			      ctx->inter_digestsize, state->opad_digest_buff,
+-			      state->opad_digest_dma_addr);
++		dev_dbg(dev, "Mapped opad digest %d B at va=%pK to dma=%pad\n",
++			ctx->inter_digestsize, state->opad_digest_buff,
++			&state->opad_digest_dma_addr);
+ 	} else {
+ 		state->opad_digest_dma_addr = 0;
+ 	}
+@@ -316,22 +318,22 @@ static void ssi_hash_unmap_request(struct device *dev,
+ 	if (state->digest_buff_dma_addr != 0) {
+ 		dma_unmap_single(dev, state->digest_buff_dma_addr,
+ 				 ctx->inter_digestsize, DMA_BIDIRECTIONAL);
+-		SSI_LOG_DEBUG("Unmapped digest-buffer: digest_buff_dma_addr=%pad\n",
+-			      state->digest_buff_dma_addr);
++		dev_dbg(dev, "Unmapped digest-buffer: digest_buff_dma_addr=%pad\n",
++			&state->digest_buff_dma_addr);
+ 		state->digest_buff_dma_addr = 0;
+ 	}
+ 	if (state->digest_bytes_len_dma_addr != 0) {
+ 		dma_unmap_single(dev, state->digest_bytes_len_dma_addr,
+ 				 HASH_LEN_SIZE, DMA_BIDIRECTIONAL);
+-		SSI_LOG_DEBUG("Unmapped digest-bytes-len buffer: digest_bytes_len_dma_addr=%pad\n",
+-			      state->digest_bytes_len_dma_addr);
++		dev_dbg(dev, "Unmapped digest-bytes-len buffer: digest_bytes_len_dma_addr=%pad\n",
++			&state->digest_bytes_len_dma_addr);
+ 		state->digest_bytes_len_dma_addr = 0;
+ 	}
+ 	if (state->opad_digest_dma_addr != 0) {
+ 		dma_unmap_single(dev, state->opad_digest_dma_addr,
+ 				 ctx->inter_digestsize, DMA_BIDIRECTIONAL);
+-		SSI_LOG_DEBUG("Unmapped opad-digest: opad_digest_dma_addr=%pad\n",
+-			      state->opad_digest_dma_addr);
++		dev_dbg(dev, "Unmapped opad-digest: opad_digest_dma_addr=%pad\n",
++			&state->opad_digest_dma_addr);
+ 		state->opad_digest_dma_addr = 0;
+ 	}
+ 
+@@ -352,11 +354,9 @@ static void ssi_hash_unmap_result(struct device *dev,
+ 				 state->digest_result_dma_addr,
+ 				 digestsize,
+ 				  DMA_BIDIRECTIONAL);
+-		SSI_LOG_DEBUG("unmpa digest result buffer "
+-			     "va (%pK) pa (%pad) len %u\n",
+-			     state->digest_result_buff,
+-			     state->digest_result_dma_addr,
+-			     digestsize);
++		dev_dbg(dev, "unmpa digest result buffer va (%pK) pa (%pad) len %u\n",
++			state->digest_result_buff,
++			&state->digest_result_dma_addr, digestsize);
+ 		memcpy(result,
+ 		       state->digest_result_buff,
+ 		       digestsize);
+@@ -369,7 +369,7 @@ static void ssi_hash_update_complete(struct device *dev, void *ssi_req, void __i
+ 	struct ahash_request *req = (struct ahash_request *)ssi_req;
+ 	struct ahash_req_ctx *state = ahash_request_ctx(req);
+ 
+-	SSI_LOG_DEBUG("req=%pK\n", req);
++	dev_dbg(dev, "req=%pK\n", req);
+ 
+ 	ssi_buffer_mgr_unmap_hash_request(dev, state, req->src, false);
+ 	req->base.complete(&req->base, 0);
+@@ -383,7 +383,7 @@ static void ssi_hash_digest_complete(struct device *dev, void *ssi_req, void __i
+ 	struct ssi_hash_ctx *ctx = crypto_ahash_ctx(tfm);
+ 	u32 digestsize = crypto_ahash_digestsize(tfm);
+ 
+-	SSI_LOG_DEBUG("req=%pK\n", req);
++	dev_dbg(dev, "req=%pK\n", req);
+ 
+ 	ssi_buffer_mgr_unmap_hash_request(dev, state, req->src, false);
+ 	ssi_hash_unmap_result(dev, state, digestsize, req->result);
+@@ -399,7 +399,7 @@ static void ssi_hash_complete(struct device *dev, void *ssi_req, void __iomem *c
+ 	struct ssi_hash_ctx *ctx = crypto_ahash_ctx(tfm);
+ 	u32 digestsize = crypto_ahash_digestsize(tfm);
+ 
+-	SSI_LOG_DEBUG("req=%pK\n", req);
++	dev_dbg(dev, "req=%pK\n", req);
+ 
+ 	ssi_buffer_mgr_unmap_hash_request(dev, state, req->src, false);
+ 	ssi_hash_unmap_result(dev, state, digestsize, req->result);
+@@ -423,20 +423,21 @@ static int ssi_hash_digest(struct ahash_req_ctx *state,
+ 	int idx = 0;
+ 	int rc = 0;
+ 
+-	SSI_LOG_DEBUG("===== %s-digest (%d) ====\n", is_hmac ? "hmac" : "hash", nbytes);
++	dev_dbg(dev, "===== %s-digest (%d) ====\n", is_hmac ? "hmac" : "hash",
++		nbytes);
+ 
+ 	if (unlikely(ssi_hash_map_request(dev, state, ctx) != 0)) {
+-		SSI_LOG_ERR("map_ahash_source() failed\n");
++		dev_err(dev, "map_ahash_source() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 
+ 	if (unlikely(ssi_hash_map_result(dev, state, digestsize) != 0)) {
+-		SSI_LOG_ERR("map_ahash_digest() failed\n");
++		dev_err(dev, "map_ahash_digest() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 
+ 	if (unlikely(ssi_buffer_mgr_map_hash_request_final(ctx->drvdata, state, src, nbytes, 1) != 0)) {
+-		SSI_LOG_ERR("map_ahash_request_final() failed\n");
++		dev_err(dev, "map_ahash_request_final() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 
+@@ -553,7 +554,7 @@ ctx->drvdata, ctx->hash_mode), HASH_LEN_SIZE);
+ 	if (async_req) {
+ 		rc = send_request(ctx->drvdata, &ssi_req, desc, idx, 1);
+ 		if (unlikely(rc != -EINPROGRESS)) {
+-			SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++			dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 			ssi_buffer_mgr_unmap_hash_request(dev, state, src, true);
+ 			ssi_hash_unmap_result(dev, state, digestsize, result);
+ 			ssi_hash_unmap_request(dev, state, ctx);
+@@ -561,7 +562,7 @@ ctx->drvdata, ctx->hash_mode), HASH_LEN_SIZE);
+ 	} else {
+ 		rc = send_request(ctx->drvdata, &ssi_req, desc, idx, 0);
+ 		if (rc != 0) {
+-			SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++			dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 			ssi_buffer_mgr_unmap_hash_request(dev, state, src, true);
+ 		} else {
+ 			ssi_buffer_mgr_unmap_hash_request(dev, state, src, false);
+@@ -585,8 +586,8 @@ static int ssi_hash_update(struct ahash_req_ctx *state,
+ 	u32 idx = 0;
+ 	int rc;
+ 
+-	SSI_LOG_DEBUG("===== %s-update (%d) ====\n", ctx->is_hmac ?
+-					"hmac" : "hash", nbytes);
++	dev_dbg(dev, "===== %s-update (%d) ====\n", ctx->is_hmac ?
++		"hmac" : "hash", nbytes);
+ 
+ 	if (nbytes == 0) {
+ 		/* no real updates required */
+@@ -596,12 +597,12 @@ static int ssi_hash_update(struct ahash_req_ctx *state,
+ 	rc = ssi_buffer_mgr_map_hash_request_update(ctx->drvdata, state, src, nbytes, block_size);
+ 	if (unlikely(rc)) {
+ 		if (rc == 1) {
+-			SSI_LOG_DEBUG(" data size not require HW update %x\n",
+-				      nbytes);
++			dev_dbg(dev, " data size not require HW update %x\n",
++				nbytes);
+ 			/* No hardware updates are required */
+ 			return 0;
+ 		}
+-		SSI_LOG_ERR("map_ahash_request_update() failed\n");
++		dev_err(dev, "map_ahash_request_update() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 
+@@ -653,13 +654,13 @@ static int ssi_hash_update(struct ahash_req_ctx *state,
+ 	if (async_req) {
+ 		rc = send_request(ctx->drvdata, &ssi_req, desc, idx, 1);
+ 		if (unlikely(rc != -EINPROGRESS)) {
+-			SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++			dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 			ssi_buffer_mgr_unmap_hash_request(dev, state, src, true);
+ 		}
+ 	} else {
+ 		rc = send_request(ctx->drvdata, &ssi_req, desc, idx, 0);
+ 		if (rc != 0) {
+-			SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++			dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 			ssi_buffer_mgr_unmap_hash_request(dev, state, src, true);
+ 		} else {
+ 			ssi_buffer_mgr_unmap_hash_request(dev, state, src, false);
+@@ -683,14 +684,15 @@ static int ssi_hash_finup(struct ahash_req_ctx *state,
+ 	int idx = 0;
+ 	int rc;
+ 
+-	SSI_LOG_DEBUG("===== %s-finup (%d) ====\n", is_hmac ? "hmac" : "hash", nbytes);
++	dev_dbg(dev, "===== %s-finup (%d) ====\n", is_hmac ? "hmac" : "hash",
++		nbytes);
+ 
+ 	if (unlikely(ssi_buffer_mgr_map_hash_request_final(ctx->drvdata, state, src, nbytes, 1) != 0)) {
+-		SSI_LOG_ERR("map_ahash_request_final() failed\n");
++		dev_err(dev, "map_ahash_request_final() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 	if (unlikely(ssi_hash_map_result(dev, state, digestsize) != 0)) {
+-		SSI_LOG_ERR("map_ahash_digest() failed\n");
++		dev_err(dev, "map_ahash_digest() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 
+@@ -783,14 +785,14 @@ ctx->drvdata, ctx->hash_mode), HASH_LEN_SIZE);
+ 	if (async_req) {
+ 		rc = send_request(ctx->drvdata, &ssi_req, desc, idx, 1);
+ 		if (unlikely(rc != -EINPROGRESS)) {
+-			SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++			dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 			ssi_buffer_mgr_unmap_hash_request(dev, state, src, true);
+ 			ssi_hash_unmap_result(dev, state, digestsize, result);
+ 		}
+ 	} else {
+ 		rc = send_request(ctx->drvdata, &ssi_req, desc, idx, 0);
+ 		if (rc != 0) {
+-			SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++			dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 			ssi_buffer_mgr_unmap_hash_request(dev, state, src, true);
+ 			ssi_hash_unmap_result(dev, state, digestsize, result);
+ 		} else {
+@@ -817,15 +819,16 @@ static int ssi_hash_final(struct ahash_req_ctx *state,
+ 	int idx = 0;
+ 	int rc;
+ 
+-	SSI_LOG_DEBUG("===== %s-final (%d) ====\n", is_hmac ? "hmac" : "hash", nbytes);
++	dev_dbg(dev, "===== %s-final (%d) ====\n", is_hmac ? "hmac" : "hash",
++		nbytes);
+ 
+ 	if (unlikely(ssi_buffer_mgr_map_hash_request_final(ctx->drvdata, state, src, nbytes, 0) != 0)) {
+-		SSI_LOG_ERR("map_ahash_request_final() failed\n");
++		dev_err(dev, "map_ahash_request_final() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 
+ 	if (unlikely(ssi_hash_map_result(dev, state, digestsize) != 0)) {
+-		SSI_LOG_ERR("map_ahash_digest() failed\n");
++		dev_err(dev, "map_ahash_digest() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 
+@@ -927,14 +930,14 @@ ctx->drvdata, ctx->hash_mode), HASH_LEN_SIZE);
+ 	if (async_req) {
+ 		rc = send_request(ctx->drvdata, &ssi_req, desc, idx, 1);
+ 		if (unlikely(rc != -EINPROGRESS)) {
+-			SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++			dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 			ssi_buffer_mgr_unmap_hash_request(dev, state, src, true);
+ 			ssi_hash_unmap_result(dev, state, digestsize, result);
+ 		}
+ 	} else {
+ 		rc = send_request(ctx->drvdata, &ssi_req, desc, idx, 0);
+ 		if (rc != 0) {
+-			SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++			dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 			ssi_buffer_mgr_unmap_hash_request(dev, state, src, true);
+ 			ssi_hash_unmap_result(dev, state, digestsize, result);
+ 		} else {
+@@ -972,10 +975,10 @@ static int ssi_hash_setkey(void *hash,
+ 	ssi_sram_addr_t larval_addr;
+ 	struct device *dev;
+ 
+-	 SSI_LOG_DEBUG("start keylen: %d", keylen);
+-
+ 	ctx = crypto_ahash_ctx(((struct crypto_ahash *)hash));
+ 	dev = drvdata_to_dev(ctx->drvdata);
++	dev_dbg(dev, "start keylen: %d", keylen);
++
+ 	blocksize = crypto_tfm_alg_blocksize(&((struct crypto_ahash *)hash)->base);
+ 	digestsize = crypto_ahash_digestsize(((struct crypto_ahash *)hash));
+ 
+@@ -995,13 +998,12 @@ static int ssi_hash_setkey(void *hash,
+ 						keylen, DMA_TO_DEVICE);
+ 		if (unlikely(dma_mapping_error(dev,
+ 					       ctx->key_params.key_dma_addr))) {
+-			SSI_LOG_ERR("Mapping key va=0x%p len=%u for"
+-				   " DMA failed\n", key, keylen);
++			dev_err(dev, "Mapping key va=0x%p len=%u for DMA failed\n",
++				key, keylen);
+ 			return -ENOMEM;
+ 		}
+-		SSI_LOG_DEBUG("mapping key-buffer: key_dma_addr=%pad "
+-			     "keylen=%u\n", ctx->key_params.key_dma_addr,
+-			     ctx->key_params.keylen);
++		dev_dbg(dev, "mapping key-buffer: key_dma_addr=%pad keylen=%u\n",
++			&ctx->key_params.key_dma_addr, ctx->key_params.keylen);
+ 
+ 		if (keylen > blocksize) {
+ 			/* Load hash initial state */
+@@ -1080,7 +1082,7 @@ static int ssi_hash_setkey(void *hash,
+ 
+ 	rc = send_request(ctx->drvdata, &ssi_req, desc, idx, 0);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++		dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 		goto out;
+ 	}
+ 
+@@ -1142,9 +1144,8 @@ static int ssi_hash_setkey(void *hash,
+ 	if (ctx->key_params.key_dma_addr) {
+ 		dma_unmap_single(dev, ctx->key_params.key_dma_addr,
+ 				 ctx->key_params.keylen, DMA_TO_DEVICE);
+-		SSI_LOG_DEBUG("Unmapped key-buffer: key_dma_addr=%pad keylen=%u\n",
+-			      ctx->key_params.key_dma_addr,
+-			      ctx->key_params.keylen);
++		dev_dbg(dev, "Unmapped key-buffer: key_dma_addr=%pad keylen=%u\n",
++			&ctx->key_params.key_dma_addr, ctx->key_params.keylen);
+ 	}
+ 	return rc;
+ }
+@@ -1158,7 +1159,7 @@ static int ssi_xcbc_setkey(struct crypto_ahash *ahash,
+ 	int idx = 0, rc = 0;
+ 	struct cc_hw_desc desc[SSI_MAX_AHASH_SEQ_LEN];
+ 
+-	SSI_LOG_DEBUG("===== setkey (%d) ====\n", keylen);
++	dev_dbg(dev, "===== setkey (%d) ====\n", keylen);
+ 
+ 	switch (keylen) {
+ 	case AES_KEYSIZE_128:
+@@ -1175,14 +1176,12 @@ static int ssi_xcbc_setkey(struct crypto_ahash *ahash,
+ 					dev, (void *)key,
+ 					keylen, DMA_TO_DEVICE);
+ 	if (unlikely(dma_mapping_error(dev, ctx->key_params.key_dma_addr))) {
+-		SSI_LOG_ERR("Mapping key va=0x%p len=%u for"
+-			   " DMA failed\n", key, keylen);
++		dev_err(dev, "Mapping key va=0x%p len=%u for DMA failed\n",
++			key, keylen);
+ 		return -ENOMEM;
+ 	}
+-	SSI_LOG_DEBUG("mapping key-buffer: key_dma_addr=%pad "
+-		     "keylen=%u\n",
+-		     ctx->key_params.key_dma_addr,
+-		     ctx->key_params.keylen);
++	dev_dbg(dev, "mapping key-buffer: key_dma_addr=%pad keylen=%u\n",
++		&ctx->key_params.key_dma_addr, ctx->key_params.keylen);
+ 
+ 	ctx->is_hmac = true;
+ 	/* 1. Load the AES key */
+@@ -1227,9 +1226,8 @@ static int ssi_xcbc_setkey(struct crypto_ahash *ahash,
+ 
+ 	dma_unmap_single(dev, ctx->key_params.key_dma_addr,
+ 			 ctx->key_params.keylen, DMA_TO_DEVICE);
+-	SSI_LOG_DEBUG("Unmapped key-buffer: key_dma_addr=%pad keylen=%u\n",
+-		      ctx->key_params.key_dma_addr,
+-		      ctx->key_params.keylen);
++	dev_dbg(dev, "Unmapped key-buffer: key_dma_addr=%pad keylen=%u\n",
++		&ctx->key_params.key_dma_addr, ctx->key_params.keylen);
+ 
+ 	return rc;
+ }
+@@ -1241,7 +1239,7 @@ static int ssi_cmac_setkey(struct crypto_ahash *ahash,
+ 	struct ssi_hash_ctx *ctx = crypto_ahash_ctx(ahash);
+ 	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 
+-	SSI_LOG_DEBUG("===== setkey (%d) ====\n", keylen);
++	dev_dbg(dev, "===== setkey (%d) ====\n", keylen);
+ 
+ 	ctx->is_hmac = true;
+ 
+@@ -1281,18 +1279,16 @@ static void ssi_hash_free_ctx(struct ssi_hash_ctx *ctx)
+ 	if (ctx->digest_buff_dma_addr != 0) {
+ 		dma_unmap_single(dev, ctx->digest_buff_dma_addr,
+ 				 sizeof(ctx->digest_buff), DMA_BIDIRECTIONAL);
+-		SSI_LOG_DEBUG("Unmapped digest-buffer: "
+-			     "digest_buff_dma_addr=%pad\n",
+-			      ctx->digest_buff_dma_addr);
++		dev_dbg(dev, "Unmapped digest-buffer: digest_buff_dma_addr=%pad\n",
++			&ctx->digest_buff_dma_addr);
+ 		ctx->digest_buff_dma_addr = 0;
+ 	}
+ 	if (ctx->opad_tmp_keys_dma_addr != 0) {
+ 		dma_unmap_single(dev, ctx->opad_tmp_keys_dma_addr,
+ 				 sizeof(ctx->opad_tmp_keys_buff),
+ 				 DMA_BIDIRECTIONAL);
+-		SSI_LOG_DEBUG("Unmapped opad-digest: "
+-			     "opad_tmp_keys_dma_addr=%pad\n",
+-			      ctx->opad_tmp_keys_dma_addr);
++		dev_dbg(dev, "Unmapped opad-digest: opad_tmp_keys_dma_addr=%pad\n",
++			&ctx->opad_tmp_keys_dma_addr);
+ 		ctx->opad_tmp_keys_dma_addr = 0;
+ 	}
+ 
+@@ -1307,24 +1303,24 @@ static int ssi_hash_alloc_ctx(struct ssi_hash_ctx *ctx)
+ 
+ 	ctx->digest_buff_dma_addr = dma_map_single(dev, (void *)ctx->digest_buff, sizeof(ctx->digest_buff), DMA_BIDIRECTIONAL);
+ 	if (dma_mapping_error(dev, ctx->digest_buff_dma_addr)) {
+-		SSI_LOG_ERR("Mapping digest len %zu B at va=%pK for DMA failed\n",
+-			    sizeof(ctx->digest_buff), ctx->digest_buff);
++		dev_err(dev, "Mapping digest len %zu B at va=%pK for DMA failed\n",
++			sizeof(ctx->digest_buff), ctx->digest_buff);
+ 		goto fail;
+ 	}
+-	SSI_LOG_DEBUG("Mapped digest %zu B at va=%pK to dma=%pad\n",
+-		      sizeof(ctx->digest_buff), ctx->digest_buff,
+-		      ctx->digest_buff_dma_addr);
++	dev_dbg(dev, "Mapped digest %zu B at va=%pK to dma=%pad\n",
++		sizeof(ctx->digest_buff), ctx->digest_buff,
++		&ctx->digest_buff_dma_addr);
+ 
+ 	ctx->opad_tmp_keys_dma_addr = dma_map_single(dev, (void *)ctx->opad_tmp_keys_buff, sizeof(ctx->opad_tmp_keys_buff), DMA_BIDIRECTIONAL);
+ 	if (dma_mapping_error(dev, ctx->opad_tmp_keys_dma_addr)) {
+-		SSI_LOG_ERR("Mapping opad digest %zu B at va=%pK for DMA failed\n",
+-			    sizeof(ctx->opad_tmp_keys_buff),
+-			    ctx->opad_tmp_keys_buff);
++		dev_err(dev, "Mapping opad digest %zu B at va=%pK for DMA failed\n",
++			sizeof(ctx->opad_tmp_keys_buff),
++			ctx->opad_tmp_keys_buff);
+ 		goto fail;
+ 	}
+-	SSI_LOG_DEBUG("Mapped opad_tmp_keys %zu B at va=%pK to dma=%pad\n",
+-		      sizeof(ctx->opad_tmp_keys_buff), ctx->opad_tmp_keys_buff,
+-		      ctx->opad_tmp_keys_dma_addr);
++	dev_dbg(dev, "Mapped opad_tmp_keys %zu B at va=%pK to dma=%pad\n",
++		sizeof(ctx->opad_tmp_keys_buff), ctx->opad_tmp_keys_buff,
++		&ctx->opad_tmp_keys_dma_addr);
+ 
+ 	ctx->is_hmac = false;
+ 	return 0;
+@@ -1358,8 +1354,9 @@ static int ssi_ahash_cra_init(struct crypto_tfm *tfm)
+ static void ssi_hash_cra_exit(struct crypto_tfm *tfm)
+ {
+ 	struct ssi_hash_ctx *ctx = crypto_tfm_ctx(tfm);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 
+-	SSI_LOG_DEBUG("ssi_hash_cra_exit");
++	dev_dbg(dev, "ssi_hash_cra_exit");
+ 	ssi_hash_free_ctx(ctx);
+ }
+ 
+@@ -1385,12 +1382,12 @@ static int ssi_mac_update(struct ahash_request *req)
+ 	rc = ssi_buffer_mgr_map_hash_request_update(ctx->drvdata, state, req->src, req->nbytes, block_size);
+ 	if (unlikely(rc)) {
+ 		if (rc == 1) {
+-			SSI_LOG_DEBUG(" data size not require HW update %x\n",
+-				      req->nbytes);
++			dev_dbg(dev, " data size not require HW update %x\n",
++				req->nbytes);
+ 			/* No hardware updates are required */
+ 			return 0;
+ 		}
+-		SSI_LOG_ERR("map_ahash_request_update() failed\n");
++		dev_err(dev, "map_ahash_request_update() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 
+@@ -1417,7 +1414,7 @@ static int ssi_mac_update(struct ahash_request *req)
+ 
+ 	rc = send_request(ctx->drvdata, &ssi_req, desc, idx, 1);
+ 	if (unlikely(rc != -EINPROGRESS)) {
+-		SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++		dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 		ssi_buffer_mgr_unmap_hash_request(dev, state, req->src, true);
+ 	}
+ 	return rc;
+@@ -1448,15 +1445,15 @@ static int ssi_mac_final(struct ahash_request *req)
+ 		key_len =  ctx->key_params.keylen;
+ 	}
+ 
+-	SSI_LOG_DEBUG("===== final  xcbc reminder (%d) ====\n", rem_cnt);
++	dev_dbg(dev, "===== final  xcbc reminder (%d) ====\n", rem_cnt);
+ 
+ 	if (unlikely(ssi_buffer_mgr_map_hash_request_final(ctx->drvdata, state, req->src, req->nbytes, 0) != 0)) {
+-		SSI_LOG_ERR("map_ahash_request_final() failed\n");
++		dev_err(dev, "map_ahash_request_final() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 
+ 	if (unlikely(ssi_hash_map_result(dev, state, digestsize) != 0)) {
+-		SSI_LOG_ERR("map_ahash_digest() failed\n");
++		dev_err(dev, "map_ahash_digest() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 
+@@ -1527,7 +1524,7 @@ static int ssi_mac_final(struct ahash_request *req)
+ 
+ 	rc = send_request(ctx->drvdata, &ssi_req, desc, idx, 1);
+ 	if (unlikely(rc != -EINPROGRESS)) {
+-		SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++		dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 		ssi_buffer_mgr_unmap_hash_request(dev, state, req->src, true);
+ 		ssi_hash_unmap_result(dev, state, digestsize, req->result);
+ 	}
+@@ -1547,18 +1544,18 @@ static int ssi_mac_finup(struct ahash_request *req)
+ 	u32 key_len = 0;
+ 	u32 digestsize = crypto_ahash_digestsize(tfm);
+ 
+-	SSI_LOG_DEBUG("===== finup xcbc(%d) ====\n", req->nbytes);
++	dev_dbg(dev, "===== finup xcbc(%d) ====\n", req->nbytes);
+ 	if (state->xcbc_count > 0 && req->nbytes == 0) {
+-		SSI_LOG_DEBUG("No data to update. Call to fdx_mac_final\n");
++		dev_dbg(dev, "No data to update. Call to fdx_mac_final\n");
+ 		return ssi_mac_final(req);
+ 	}
+ 
+ 	if (unlikely(ssi_buffer_mgr_map_hash_request_final(ctx->drvdata, state, req->src, req->nbytes, 1) != 0)) {
+-		SSI_LOG_ERR("map_ahash_request_final() failed\n");
++		dev_err(dev, "map_ahash_request_final() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 	if (unlikely(ssi_hash_map_result(dev, state, digestsize) != 0)) {
+-		SSI_LOG_ERR("map_ahash_digest() failed\n");
++		dev_err(dev, "map_ahash_digest() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 
+@@ -1598,7 +1595,7 @@ static int ssi_mac_finup(struct ahash_request *req)
+ 
+ 	rc = send_request(ctx->drvdata, &ssi_req, desc, idx, 1);
+ 	if (unlikely(rc != -EINPROGRESS)) {
+-		SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++		dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 		ssi_buffer_mgr_unmap_hash_request(dev, state, req->src, true);
+ 		ssi_hash_unmap_result(dev, state, digestsize, req->result);
+ 	}
+@@ -1618,19 +1615,19 @@ static int ssi_mac_digest(struct ahash_request *req)
+ 	int idx = 0;
+ 	int rc;
+ 
+-	SSI_LOG_DEBUG("===== -digest mac (%d) ====\n",  req->nbytes);
++	dev_dbg(dev, "===== -digest mac (%d) ====\n",  req->nbytes);
+ 
+ 	if (unlikely(ssi_hash_map_request(dev, state, ctx) != 0)) {
+-		SSI_LOG_ERR("map_ahash_source() failed\n");
++		dev_err(dev, "map_ahash_source() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 	if (unlikely(ssi_hash_map_result(dev, state, digestsize) != 0)) {
+-		SSI_LOG_ERR("map_ahash_digest() failed\n");
++		dev_err(dev, "map_ahash_digest() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 
+ 	if (unlikely(ssi_buffer_mgr_map_hash_request_final(ctx->drvdata, state, req->src, req->nbytes, 1) != 0)) {
+-		SSI_LOG_ERR("map_ahash_request_final() failed\n");
++		dev_err(dev, "map_ahash_request_final() failed\n");
+ 		return -ENOMEM;
+ 	}
+ 
+@@ -1670,7 +1667,7 @@ static int ssi_mac_digest(struct ahash_request *req)
+ 
+ 	rc = send_request(ctx->drvdata, &ssi_req, desc, idx, 1);
+ 	if (unlikely(rc != -EINPROGRESS)) {
+-		SSI_LOG_ERR("send_request() failed (rc=%d)\n", rc);
++		dev_err(dev, "send_request() failed (rc=%d)\n", rc);
+ 		ssi_buffer_mgr_unmap_hash_request(dev, state, req->src, true);
+ 		ssi_hash_unmap_result(dev, state, digestsize, req->result);
+ 		ssi_hash_unmap_request(dev, state, ctx);
+@@ -1724,8 +1721,9 @@ static int ssi_ahash_init(struct ahash_request *req)
+ 	struct ahash_req_ctx *state = ahash_request_ctx(req);
+ 	struct crypto_ahash *tfm = crypto_ahash_reqtfm(req);
+ 	struct ssi_hash_ctx *ctx = crypto_ahash_ctx(tfm);
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 
+-	SSI_LOG_DEBUG("===== init (%d) ====\n", req->nbytes);
++	dev_dbg(dev, "===== init (%d) ====\n", req->nbytes);
+ 
+ 	return ssi_hash_init(state, ctx);
+ }
+@@ -2051,7 +2049,8 @@ static struct ssi_hash_template driver_hash[] = {
+ };
+ 
+ static struct ssi_hash_alg *
+-ssi_hash_create_alg(struct ssi_hash_template *template, bool keyed)
++ssi_hash_create_alg(struct ssi_hash_template *template, struct device *dev,
++		    bool keyed)
+ {
+ 	struct ssi_hash_alg *t_crypto_alg;
+ 	struct crypto_alg *alg;
+@@ -2059,7 +2058,7 @@ ssi_hash_create_alg(struct ssi_hash_template *template, bool keyed)
+ 
+ 	t_crypto_alg = kzalloc(sizeof(*t_crypto_alg), GFP_KERNEL);
+ 	if (!t_crypto_alg) {
+-		SSI_LOG_ERR("failed to allocate t_crypto_alg\n");
++		dev_dbg(dev, "failed to allocate t_crypto_alg\n");
+ 		return ERR_PTR(-ENOMEM);
+ 	}
+ 
+@@ -2104,6 +2103,7 @@ int ssi_hash_init_sram_digest_consts(struct ssi_drvdata *drvdata)
+ 	ssi_sram_addr_t sram_buff_ofs = hash_handle->digest_len_sram_addr;
+ 	unsigned int larval_seq_len = 0;
+ 	struct cc_hw_desc larval_seq[CC_DIGEST_SIZE_MAX / sizeof(u32)];
++	struct device *dev = drvdata_to_dev(drvdata);
+ 	int rc = 0;
+ #if (DX_DEV_SHA_MAX > 256)
+ 	int i;
+@@ -2188,7 +2188,7 @@ int ssi_hash_init_sram_digest_consts(struct ssi_drvdata *drvdata)
+ 	}
+ 	rc = send_request_init(drvdata, larval_seq, larval_seq_len);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("send_request() failed (rc = %d)\n", rc);
++		dev_err(dev, "send_request() failed (rc = %d)\n", rc);
+ 		goto init_digest_const_err;
+ 	}
+ 	larval_seq_len = 0;
+@@ -2206,7 +2206,7 @@ int ssi_hash_init_sram_digest_consts(struct ssi_drvdata *drvdata)
+ 	}
+ 	rc = send_request_init(drvdata, larval_seq, larval_seq_len);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("send_request() failed (rc = %d)\n", rc);
++		dev_err(dev, "send_request() failed (rc = %d)\n", rc);
+ 		goto init_digest_const_err;
+ 	}
+ #endif
+@@ -2220,13 +2220,14 @@ int ssi_hash_alloc(struct ssi_drvdata *drvdata)
+ 	struct ssi_hash_handle *hash_handle;
+ 	ssi_sram_addr_t sram_buff;
+ 	u32 sram_size_to_alloc;
++	struct device *dev = drvdata_to_dev(drvdata);
+ 	int rc = 0;
+ 	int alg;
+ 
+ 	hash_handle = kzalloc(sizeof(*hash_handle), GFP_KERNEL);
+ 	if (!hash_handle) {
+-		SSI_LOG_ERR("kzalloc failed to allocate %zu B\n",
+-			    sizeof(*hash_handle));
++		dev_err(dev, "kzalloc failed to allocate %zu B\n",
++			sizeof(*hash_handle));
+ 		rc = -ENOMEM;
+ 		goto fail;
+ 	}
+@@ -2247,7 +2248,7 @@ int ssi_hash_alloc(struct ssi_drvdata *drvdata)
+ 
+ 	sram_buff = ssi_sram_mgr_alloc(drvdata, sram_size_to_alloc);
+ 	if (sram_buff == NULL_SRAM_ADDR) {
+-		SSI_LOG_ERR("SRAM pool exhausted\n");
++		dev_err(dev, "SRAM pool exhausted\n");
+ 		rc = -ENOMEM;
+ 		goto fail;
+ 	}
+@@ -2258,7 +2259,7 @@ int ssi_hash_alloc(struct ssi_drvdata *drvdata)
+ 	/*must be set before the alg registration as it is being used there*/
+ 	rc = ssi_hash_init_sram_digest_consts(drvdata);
+ 	if (unlikely(rc != 0)) {
+-		SSI_LOG_ERR("Init digest CONST failed (rc=%d)\n", rc);
++		dev_err(dev, "Init digest CONST failed (rc=%d)\n", rc);
+ 		goto fail;
+ 	}
+ 
+@@ -2268,19 +2269,19 @@ int ssi_hash_alloc(struct ssi_drvdata *drvdata)
+ 		int hw_mode = driver_hash[alg].hw_mode;
+ 
+ 		/* register hmac version */
+-		t_alg = ssi_hash_create_alg(&driver_hash[alg], true);
++		t_alg = ssi_hash_create_alg(&driver_hash[alg], dev, true);
+ 		if (IS_ERR(t_alg)) {
+ 			rc = PTR_ERR(t_alg);
+-			SSI_LOG_ERR("%s alg allocation failed\n",
+-				    driver_hash[alg].driver_name);
++			dev_err(dev, "%s alg allocation failed\n",
++				driver_hash[alg].driver_name);
+ 			goto fail;
+ 		}
+ 		t_alg->drvdata = drvdata;
+ 
+ 		rc = crypto_register_ahash(&t_alg->ahash_alg);
+ 		if (unlikely(rc)) {
+-			SSI_LOG_ERR("%s alg registration failed\n",
+-				    driver_hash[alg].driver_name);
++			dev_err(dev, "%s alg registration failed\n",
++				driver_hash[alg].driver_name);
+ 			kfree(t_alg);
+ 			goto fail;
+ 		} else {
+@@ -2293,19 +2294,19 @@ int ssi_hash_alloc(struct ssi_drvdata *drvdata)
+ 			continue;
+ 
+ 		/* register hash version */
+-		t_alg = ssi_hash_create_alg(&driver_hash[alg], false);
++		t_alg = ssi_hash_create_alg(&driver_hash[alg], dev, false);
+ 		if (IS_ERR(t_alg)) {
+ 			rc = PTR_ERR(t_alg);
+-			SSI_LOG_ERR("%s alg allocation failed\n",
+-				    driver_hash[alg].driver_name);
++			dev_err(dev, "%s alg allocation failed\n",
++				driver_hash[alg].driver_name);
+ 			goto fail;
+ 		}
+ 		t_alg->drvdata = drvdata;
+ 
+ 		rc = crypto_register_ahash(&t_alg->ahash_alg);
+ 		if (unlikely(rc)) {
+-			SSI_LOG_ERR("%s alg registration failed\n",
+-				    driver_hash[alg].driver_name);
++			dev_err(dev, "%s alg registration failed\n",
++				driver_hash[alg].driver_name);
+ 			kfree(t_alg);
+ 			goto fail;
+ 		} else {
+@@ -2439,6 +2440,7 @@ static void ssi_hash_create_data_desc(struct ahash_req_ctx *areq_ctx,
+ 				      unsigned int *seq_size)
+ {
+ 	unsigned int idx = *seq_size;
++	struct device *dev = drvdata_to_dev(ctx->drvdata);
+ 
+ 	if (likely(areq_ctx->data_dma_buf_type == SSI_DMA_BUF_DLLI)) {
+ 		hw_desc_init(&desc[idx]);
+@@ -2449,7 +2451,7 @@ static void ssi_hash_create_data_desc(struct ahash_req_ctx *areq_ctx,
+ 		idx++;
+ 	} else {
+ 		if (areq_ctx->data_dma_buf_type == SSI_DMA_BUF_NULL) {
+-			SSI_LOG_DEBUG(" NULL mode\n");
++			dev_dbg(dev, " NULL mode\n");
+ 			/* nothing to build */
+ 			return;
+ 		}
+@@ -2489,6 +2491,7 @@ ssi_sram_addr_t ssi_ahash_get_larval_digest_sram_addr(void *drvdata, u32 mode)
+ {
+ 	struct ssi_drvdata *_drvdata = (struct ssi_drvdata *)drvdata;
+ 	struct ssi_hash_handle *hash_handle = _drvdata->hash_handle;
++	struct device *dev = drvdata_to_dev(_drvdata);
+ 
+ 	switch (mode) {
+ 	case DRV_HASH_NULL:
+@@ -2523,7 +2526,7 @@ ssi_sram_addr_t ssi_ahash_get_larval_digest_sram_addr(void *drvdata, u32 mode)
+ 			sizeof(sha384_init));
+ #endif
+ 	default:
+-		SSI_LOG_ERR("Invalid hash mode (%d)\n", mode);
++		dev_err(dev, "Invalid hash mode (%d)\n", mode);
+ 	}
+ 
+ 	/*This is valid wrong value to avoid kernel crash*/
+diff --git a/drivers/staging/ccree/ssi_ivgen.c b/drivers/staging/ccree/ssi_ivgen.c
+index b01e03231947..2982c8b463ac 100644
+--- a/drivers/staging/ccree/ssi_ivgen.c
++++ b/drivers/staging/ccree/ssi_ivgen.c
+@@ -194,8 +194,8 @@ int ssi_ivgen_init(struct ssi_drvdata *drvdata)
+ 	drvdata->ivgen_handle = kzalloc(sizeof(*drvdata->ivgen_handle),
+ 					GFP_KERNEL);
+ 	if (!drvdata->ivgen_handle) {
+-		SSI_LOG_ERR("Not enough memory to allocate IVGEN context "
+-			   "(%zu B)\n", sizeof(*drvdata->ivgen_handle));
++		dev_err(device, "Not enough memory to allocate IVGEN context (%zu B)\n",
++			sizeof(*drvdata->ivgen_handle));
+ 		rc = -ENOMEM;
+ 		goto out;
+ 	}
+@@ -206,15 +206,15 @@ int ssi_ivgen_init(struct ssi_drvdata *drvdata)
+ 						  &ivgen_ctx->pool_meta_dma,
+ 						  GFP_KERNEL);
+ 	if (!ivgen_ctx->pool_meta) {
+-		SSI_LOG_ERR("Not enough memory to allocate DMA of pool_meta "
+-			   "(%u B)\n", SSI_IVPOOL_META_SIZE);
++		dev_err(device, "Not enough memory to allocate DMA of pool_meta (%u B)\n",
++			SSI_IVPOOL_META_SIZE);
+ 		rc = -ENOMEM;
+ 		goto out;
+ 	}
+ 	/* Allocate IV pool in SRAM */
+ 	ivgen_ctx->pool = ssi_sram_mgr_alloc(drvdata, SSI_IVPOOL_SIZE);
+ 	if (ivgen_ctx->pool == NULL_SRAM_ADDR) {
+-		SSI_LOG_ERR("SRAM pool exhausted\n");
++		dev_err(device, "SRAM pool exhausted\n");
+ 		rc = -ENOMEM;
+ 		goto out;
+ 	}
+@@ -248,6 +248,7 @@ int ssi_ivgen_getiv(
+ {
+ 	struct ssi_ivgen_ctx *ivgen_ctx = drvdata->ivgen_handle;
+ 	unsigned int idx = *iv_seq_len;
++	struct device *dev = drvdata_to_dev(drvdata);
+ 	unsigned int t;
+ 
+ 	if ((iv_out_size != CC_AES_IV_SIZE) &&
+@@ -291,7 +292,7 @@ int ssi_ivgen_getiv(
+ 	ivgen_ctx->next_iv_ofs += iv_out_size;
+ 
+ 	if ((SSI_IVPOOL_SIZE - ivgen_ctx->next_iv_ofs) < CC_AES_IV_SIZE) {
+-		SSI_LOG_DEBUG("Pool exhausted, regenerating iv-pool\n");
++		dev_dbg(dev, "Pool exhausted, regenerating iv-pool\n");
+ 		/* pool is drained -regenerate it! */
+ 		return ssi_ivgen_generate_pool(ivgen_ctx, iv_seq, iv_seq_len);
+ 	}
+diff --git a/drivers/staging/ccree/ssi_pm.c b/drivers/staging/ccree/ssi_pm.c
+index 4f522a680721..11bbdbeec22e 100644
+--- a/drivers/staging/ccree/ssi_pm.c
++++ b/drivers/staging/ccree/ssi_pm.c
+@@ -40,11 +40,12 @@ int ssi_power_mgr_runtime_suspend(struct device *dev)
+ 		(struct ssi_drvdata *)dev_get_drvdata(dev);
+ 	int rc;
+ 
+-	SSI_LOG_DEBUG("set HOST_POWER_DOWN_EN\n");
++	dev_dbg(dev, "set HOST_POWER_DOWN_EN\n");
+ 	WRITE_REGISTER(drvdata->cc_base + CC_REG_OFFSET(HOST_RGF, HOST_POWER_DOWN_EN), POWER_DOWN_ENABLE);
+ 	rc = ssi_request_mgr_runtime_suspend_queue(drvdata);
+ 	if (rc != 0) {
+-		SSI_LOG_ERR("ssi_request_mgr_runtime_suspend_queue (%x)\n", rc);
++		dev_err(dev, "ssi_request_mgr_runtime_suspend_queue (%x)\n",
++			rc);
+ 		return rc;
+ 	}
+ 	fini_cc_regs(drvdata);
+@@ -58,24 +59,24 @@ int ssi_power_mgr_runtime_resume(struct device *dev)
+ 	struct ssi_drvdata *drvdata =
+ 		(struct ssi_drvdata *)dev_get_drvdata(dev);
+ 
+-	SSI_LOG_DEBUG("unset HOST_POWER_DOWN_EN\n");
++	dev_dbg(dev, "unset HOST_POWER_DOWN_EN\n");
+ 	WRITE_REGISTER(drvdata->cc_base + CC_REG_OFFSET(HOST_RGF, HOST_POWER_DOWN_EN), POWER_DOWN_DISABLE);
+ 
+ 	rc = cc_clk_on(drvdata);
+ 	if (rc) {
+-		SSI_LOG_ERR("failed getting clock back on. We're toast.\n");
++		dev_err(dev, "failed getting clock back on. We're toast.\n");
+ 		return rc;
+ 	}
+ 
+ 	rc = init_cc_regs(drvdata, false);
+ 	if (rc != 0) {
+-		SSI_LOG_ERR("init_cc_regs (%x)\n", rc);
++		dev_err(dev, "init_cc_regs (%x)\n", rc);
+ 		return rc;
+ 	}
+ 
+ 	rc = ssi_request_mgr_runtime_resume_queue(drvdata);
+ 	if (rc != 0) {
+-		SSI_LOG_ERR("ssi_request_mgr_runtime_resume_queue (%x)\n", rc);
++		dev_err(dev, "ssi_request_mgr_runtime_resume_queue (%x)\n", rc);
+ 		return rc;
+ 	}
+ 
+@@ -109,7 +110,7 @@ int ssi_power_mgr_runtime_put_suspend(struct device *dev)
+ 		rc = pm_runtime_put_autosuspend(dev);
+ 	} else {
+ 		/* Something wrong happens*/
+-		SSI_LOG_ERR("request to suspend already suspended queue");
++		dev_err(dev, "request to suspend already suspended queue");
+ 		rc = -EBUSY;
+ 	}
+ 	return rc;
+diff --git a/drivers/staging/ccree/ssi_request_mgr.c b/drivers/staging/ccree/ssi_request_mgr.c
+index ec69d9c830ae..066b6a6a1146 100644
+--- a/drivers/staging/ccree/ssi_request_mgr.c
++++ b/drivers/staging/ccree/ssi_request_mgr.c
+@@ -78,9 +78,9 @@ void request_mgr_fini(struct ssi_drvdata *drvdata)
+ 				  req_mgr_h->dummy_comp_buff_dma);
+ 	}
+ 
+-	SSI_LOG_DEBUG("max_used_hw_slots=%d\n", (req_mgr_h->hw_queue_size -
++	dev_dbg(dev, "max_used_hw_slots=%d\n", (req_mgr_h->hw_queue_size -
+ 						req_mgr_h->min_free_hw_slots));
+-	SSI_LOG_DEBUG("max_used_sw_slots=%d\n", req_mgr_h->max_used_sw_slots);
++	dev_dbg(dev, "max_used_sw_slots=%d\n", req_mgr_h->max_used_sw_slots);
+ 
+ #ifdef COMP_IN_WQ
+ 	flush_workqueue(req_mgr_h->workq);
+@@ -110,24 +110,24 @@ int request_mgr_init(struct ssi_drvdata *drvdata)
+ 
+ 	spin_lock_init(&req_mgr_h->hw_lock);
+ #ifdef COMP_IN_WQ
+-	SSI_LOG_DEBUG("Initializing completion workqueue\n");
++	dev_dbg(dev, "Initializing completion workqueue\n");
+ 	req_mgr_h->workq = create_singlethread_workqueue("arm_cc7x_wq");
+ 	if (unlikely(!req_mgr_h->workq)) {
+-		SSI_LOG_ERR("Failed creating work queue\n");
++		dev_err(dev, "Failed creating work queue\n");
+ 		rc = -ENOMEM;
+ 		goto req_mgr_init_err;
+ 	}
+ 	INIT_DELAYED_WORK(&req_mgr_h->compwork, comp_work_handler);
+ #else
+-	SSI_LOG_DEBUG("Initializing completion tasklet\n");
++	dev_dbg(dev, "Initializing completion tasklet\n");
+ 	tasklet_init(&req_mgr_h->comptask, comp_handler, (unsigned long)drvdata);
+ #endif
+ 	req_mgr_h->hw_queue_size = READ_REGISTER(drvdata->cc_base +
+ 		CC_REG_OFFSET(CRY_KERNEL, DSCRPTR_QUEUE_SRAM_SIZE));
+-	SSI_LOG_DEBUG("hw_queue_size=0x%08X\n", req_mgr_h->hw_queue_size);
++	dev_dbg(dev, "hw_queue_size=0x%08X\n", req_mgr_h->hw_queue_size);
+ 	if (req_mgr_h->hw_queue_size < MIN_HW_QUEUE_SIZE) {
+-		SSI_LOG_ERR("Invalid HW queue size = %u (Min. required is %u)\n",
+-			    req_mgr_h->hw_queue_size, MIN_HW_QUEUE_SIZE);
++		dev_err(dev, "Invalid HW queue size = %u (Min. required is %u)\n",
++			req_mgr_h->hw_queue_size, MIN_HW_QUEUE_SIZE);
+ 		rc = -ENOMEM;
+ 		goto req_mgr_init_err;
+ 	}
+@@ -139,8 +139,8 @@ int request_mgr_init(struct ssi_drvdata *drvdata)
+ 							&req_mgr_h->dummy_comp_buff_dma,
+ 							GFP_KERNEL);
+ 	if (!req_mgr_h->dummy_comp_buff) {
+-		SSI_LOG_ERR("Not enough memory to allocate DMA (%zu) dropped "
+-			   "buffer\n", sizeof(u32));
++		dev_err(dev, "Not enough memory to allocate DMA (%zu) dropped buffer\n",
++			sizeof(u32));
+ 		rc = -ENOMEM;
+ 		goto req_mgr_init_err;
+ 	}
+@@ -175,9 +175,9 @@ static inline void enqueue_seq(
+ 		wmb();
+ 		writel_relaxed(seq[i].word[5], (volatile void __iomem *)(cc_base + CC_REG_OFFSET(CRY_KERNEL, DSCRPTR_QUEUE_WORD0)));
+ #ifdef DX_DUMP_DESCS
+-		SSI_LOG_DEBUG("desc[%02d]: 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X\n", i,
+-			      seq[i].word[0], seq[i].word[1], seq[i].word[2],
+-			      seq[i].word[3], seq[i].word[4], seq[i].word[5]);
++		dev_dbg(dev, "desc[%02d]: 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X\n",
++			i, seq[i].word[0], seq[i].word[1], seq[i].word[2],
++			seq[i].word[3], seq[i].word[4], seq[i].word[5]);
+ #endif
+ 	}
+ }
+@@ -197,6 +197,7 @@ static void request_mgr_complete(struct device *dev, void *dx_compl_h, void __io
+ }
+ 
+ static inline int request_mgr_queues_status_check(
++		struct device *dev,
+ 		struct ssi_request_mgr_handle *req_mgr_h,
+ 		void __iomem *cc_base,
+ 		unsigned int total_seq_len)
+@@ -210,8 +211,8 @@ static inline int request_mgr_queues_status_check(
+ 	if (unlikely(((req_mgr_h->req_queue_head + 1) &
+ 		      (MAX_REQUEST_QUEUE_SIZE - 1)) ==
+ 		     req_mgr_h->req_queue_tail)) {
+-		SSI_LOG_ERR("SW FIFO is full. req_queue_head=%d sw_fifo_len=%d\n",
+-			    req_mgr_h->req_queue_head, MAX_REQUEST_QUEUE_SIZE);
++		dev_err(dev, "SW FIFO is full. req_queue_head=%d sw_fifo_len=%d\n",
++			req_mgr_h->req_queue_head, MAX_REQUEST_QUEUE_SIZE);
+ 		return -EBUSY;
+ 	}
+ 
+@@ -233,16 +234,13 @@ static inline int request_mgr_queues_status_check(
+ 			return 0;
+ 		}
+ 
+-		SSI_LOG_DEBUG("HW FIFO is full. q_free_slots=%d total_seq_len=%d\n",
+-			      req_mgr_h->q_free_slots, total_seq_len);
++		dev_dbg(dev, "HW FIFO is full. q_free_slots=%d total_seq_len=%d\n",
++			req_mgr_h->q_free_slots, total_seq_len);
+ 	}
+ 	/* No room in the HW queue try again later */
+-	SSI_LOG_DEBUG("HW FIFO full, timeout. req_queue_head=%d "
+-		   "sw_fifo_len=%d q_free_slots=%d total_seq_len=%d\n",
+-		     req_mgr_h->req_queue_head,
+-		   MAX_REQUEST_QUEUE_SIZE,
+-		   req_mgr_h->q_free_slots,
+-		   total_seq_len);
++	dev_dbg(dev, "HW FIFO full, timeout. req_queue_head=%d sw_fifo_len=%d q_free_slots=%d total_seq_len=%d\n",
++		req_mgr_h->req_queue_head, MAX_REQUEST_QUEUE_SIZE,
++		req_mgr_h->q_free_slots, total_seq_len);
+ 	return -EAGAIN;
+ }
+ 
+@@ -269,9 +267,7 @@ int send_request(
+ 	unsigned int iv_seq_len = 0;
+ 	unsigned int total_seq_len = len; /*initial sequence length*/
+ 	struct cc_hw_desc iv_seq[SSI_IVPOOL_SEQ_LEN];
+-#if defined(CONFIG_PM_RUNTIME) || defined(CONFIG_PM_SLEEP)
+ 	struct device *dev = drvdata_to_dev(drvdata);
+-#endif
+ 	int rc;
+ 	unsigned int max_required_seq_len = (total_seq_len +
+ 					((ssi_req->ivgen_dma_addr_len == 0) ? 0 :
+@@ -281,7 +277,7 @@ int send_request(
+ #if defined(CONFIG_PM_RUNTIME) || defined(CONFIG_PM_SLEEP)
+ 	rc = ssi_power_mgr_runtime_get(dev);
+ 	if (rc != 0) {
+-		SSI_LOG_ERR("ssi_power_mgr_runtime_get returned %x\n", rc);
++		dev_err(dev, "ssi_power_mgr_runtime_get returned %x\n", rc);
+ 		return rc;
+ 	}
+ #endif
+@@ -293,7 +289,7 @@ int send_request(
+ 		 * in case iv gen add the max size and in case of no dout add 1
+ 		 * for the internal completion descriptor
+ 		 */
+-		rc = request_mgr_queues_status_check(req_mgr_h, cc_base,
++		rc = request_mgr_queues_status_check(dev, req_mgr_h, cc_base,
+ 						     max_required_seq_len);
+ 		if (likely(rc == 0))
+ 			/* There is enough place in the queue */
+@@ -326,12 +322,12 @@ int send_request(
+ 	}
+ 
+ 	if (ssi_req->ivgen_dma_addr_len > 0) {
+-		SSI_LOG_DEBUG("Acquire IV from pool into %d DMA addresses %pad, %pad, %pad, IV-size=%u\n",
+-			      ssi_req->ivgen_dma_addr_len,
+-			      ssi_req->ivgen_dma_addr[0],
+-			      ssi_req->ivgen_dma_addr[1],
+-			      ssi_req->ivgen_dma_addr[2],
+-			      ssi_req->ivgen_size);
++		dev_dbg(dev, "Acquire IV from pool into %d DMA addresses %pad, %pad, %pad, IV-size=%u\n",
++			ssi_req->ivgen_dma_addr_len,
++			&ssi_req->ivgen_dma_addr[0],
++			&ssi_req->ivgen_dma_addr[1],
++			&ssi_req->ivgen_dma_addr[2],
++			ssi_req->ivgen_size);
+ 
+ 		/* Acquire IV from pool */
+ 		rc = ssi_ivgen_getiv(drvdata, ssi_req->ivgen_dma_addr,
+@@ -339,7 +335,7 @@ int send_request(
+ 				     ssi_req->ivgen_size, iv_seq, &iv_seq_len);
+ 
+ 		if (unlikely(rc != 0)) {
+-			SSI_LOG_ERR("Failed to generate IV (rc=%d)\n", rc);
++			dev_err(dev, "Failed to generate IV (rc=%d)\n", rc);
+ 			spin_unlock_bh(&req_mgr_h->hw_lock);
+ #if defined(CONFIG_PM_RUNTIME) || defined(CONFIG_PM_SLEEP)
+ 			ssi_power_mgr_runtime_put_suspend(dev);
+@@ -359,7 +355,7 @@ int send_request(
+ 	req_mgr_h->req_queue_head = (req_mgr_h->req_queue_head + 1) & (MAX_REQUEST_QUEUE_SIZE - 1);
+ 	/* TODO: Use circ_buf.h ? */
+ 
+-	SSI_LOG_DEBUG("Enqueue request head=%u\n", req_mgr_h->req_queue_head);
++	dev_dbg(dev, "Enqueue request head=%u\n", req_mgr_h->req_queue_head);
+ 
+ #ifdef FLUSH_CACHE_ALL
+ 	flush_cache_all();
+@@ -375,7 +371,7 @@ int send_request(
+ 		 * with resuming power. Set the free slot count to 0 and hope
+ 		 * for the best.
+ 		 */
+-		SSI_LOG_ERR("HW free slot count mismatch.");
++		dev_err(dev, "HW free slot count mismatch.");
+ 		req_mgr_h->q_free_slots = 0;
+ 	} else {
+ 		/* Update the free slots in HW queue */
+@@ -410,13 +406,15 @@ int send_request(
+ int send_request_init(
+ 	struct ssi_drvdata *drvdata, struct cc_hw_desc *desc, unsigned int len)
+ {
++	struct device *dev = drvdata_to_dev(drvdata);
+ 	void __iomem *cc_base = drvdata->cc_base;
+ 	struct ssi_request_mgr_handle *req_mgr_h = drvdata->request_mgr_handle;
+ 	unsigned int total_seq_len = len; /*initial sequence length*/
+ 	int rc = 0;
+ 
+ 	/* Wait for space in HW and SW FIFO. Poll for as much as FIFO_TIMEOUT. */
+-	rc = request_mgr_queues_status_check(req_mgr_h, cc_base, total_seq_len);
++	rc = request_mgr_queues_status_check(dev, req_mgr_h, cc_base,
++					     total_seq_len);
+ 	if (unlikely(rc != 0))
+ 		return rc;
+ 
+@@ -471,8 +469,8 @@ static void proc_completions(struct ssi_drvdata *drvdata)
+ 			 * queue is empty. This is not normal. Return and
+ 			 * hope for the best.
+ 			 */
+-			SSI_LOG_ERR("Request queue is empty head == tail %u\n",
+-				    request_mgr_handle->req_queue_head);
++			dev_err(dev, "Request queue is empty head == tail %u\n",
++				request_mgr_handle->req_queue_head);
+ 			break;
+ 		}
+ 
+@@ -488,7 +486,7 @@ static void proc_completions(struct ssi_drvdata *drvdata)
+ 			u32 axi_err;
+ 			int i;
+ 
+-			SSI_LOG_INFO("Delay\n");
++			dev_info(dev, "Delay\n");
+ 			for (i = 0; i < 1000000; i++)
+ 				axi_err = READ_REGISTER(drvdata->cc_base + CC_REG_OFFSET(CRY_KERNEL, AXIM_MON_ERR));
+ 		}
+@@ -498,12 +496,15 @@ static void proc_completions(struct ssi_drvdata *drvdata)
+ 			ssi_req->user_cb(dev, ssi_req->user_arg,
+ 					 drvdata->cc_base);
+ 		request_mgr_handle->req_queue_tail = (request_mgr_handle->req_queue_tail + 1) & (MAX_REQUEST_QUEUE_SIZE - 1);
+-		SSI_LOG_DEBUG("Dequeue request tail=%u\n", request_mgr_handle->req_queue_tail);
+-		SSI_LOG_DEBUG("Request completed. axi_completed=%d\n", request_mgr_handle->axi_completed);
++		dev_dbg(dev, "Dequeue request tail=%u\n",
++			request_mgr_handle->req_queue_tail);
++		dev_dbg(dev, "Request completed. axi_completed=%d\n",
++			request_mgr_handle->axi_completed);
+ #if defined(CONFIG_PM_RUNTIME) || defined(CONFIG_PM_SLEEP)
+ 		rc = ssi_power_mgr_runtime_put_suspend(dev);
+ 		if (rc != 0)
+-			SSI_LOG_ERR("Failed to set runtime suspension %d\n", rc);
++			dev_err(dev, "Failed to set runtime suspension %d\n",
++				rc);
+ #endif
+ 	}
+ }
+diff --git a/drivers/staging/ccree/ssi_sram_mgr.c b/drivers/staging/ccree/ssi_sram_mgr.c
+index f11116afe89a..25dfd7e974bc 100644
+--- a/drivers/staging/ccree/ssi_sram_mgr.c
++++ b/drivers/staging/ccree/ssi_sram_mgr.c
+@@ -51,14 +51,15 @@ void ssi_sram_mgr_fini(struct ssi_drvdata *drvdata)
+ int ssi_sram_mgr_init(struct ssi_drvdata *drvdata)
+ {
+ 	struct ssi_sram_mgr_ctx *smgr_ctx;
++	struct device *dev = drvdata_to_dev(drvdata);
+ 	int rc;
+ 
+ 	/* Allocate "this" context */
+ 	drvdata->sram_mgr_handle = kzalloc(
+ 			sizeof(struct ssi_sram_mgr_ctx), GFP_KERNEL);
+ 	if (!drvdata->sram_mgr_handle) {
+-		SSI_LOG_ERR("Not enough memory to allocate SRAM_MGR ctx (%zu)\n",
+-			    sizeof(struct ssi_sram_mgr_ctx));
++		dev_err(dev, "Not enough memory to allocate SRAM_MGR ctx (%zu)\n",
++			sizeof(struct ssi_sram_mgr_ctx));
+ 		rc = -ENOMEM;
+ 		goto out;
+ 	}
+@@ -86,22 +87,23 @@ int ssi_sram_mgr_init(struct ssi_drvdata *drvdata)
+ ssi_sram_addr_t ssi_sram_mgr_alloc(struct ssi_drvdata *drvdata, u32 size)
+ {
+ 	struct ssi_sram_mgr_ctx *smgr_ctx = drvdata->sram_mgr_handle;
++	struct device *dev = drvdata_to_dev(drvdata);
+ 	ssi_sram_addr_t p;
+ 
+ 	if (unlikely((size & 0x3) != 0)) {
+-		SSI_LOG_ERR("Requested buffer size (%u) is not multiple of 4",
+-			    size);
++		dev_err(dev, "Requested buffer size (%u) is not multiple of 4",
++			size);
+ 		return NULL_SRAM_ADDR;
+ 	}
+ 	if (unlikely(size > (SSI_CC_SRAM_SIZE - smgr_ctx->sram_free_offset))) {
+-		SSI_LOG_ERR("Not enough space to allocate %u B (at offset %llu)\n",
+-			    size, smgr_ctx->sram_free_offset);
++		dev_err(dev, "Not enough space to allocate %u B (at offset %llu)\n",
++			size, smgr_ctx->sram_free_offset);
+ 		return NULL_SRAM_ADDR;
+ 	}
+ 
+ 	p = smgr_ctx->sram_free_offset;
+ 	smgr_ctx->sram_free_offset += size;
+-	SSI_LOG_DEBUG("Allocated %u B @ %u\n", size, (unsigned int)p);
++	dev_dbg(dev, "Allocated %u B @ %u\n", size, (unsigned int)p);
+ 	return p;
+ }
+ 
+diff --git a/drivers/staging/ccree/ssi_sysfs.c b/drivers/staging/ccree/ssi_sysfs.c
+index e0810e29c9ff..c3c817ab7885 100644
+--- a/drivers/staging/ccree/ssi_sysfs.c
++++ b/drivers/staging/ccree/ssi_sysfs.c
+@@ -153,8 +153,9 @@ static void sys_free_dir(struct sys_dir *sys_dir)
+ int ssi_sysfs_init(struct kobject *sys_dev_obj, struct ssi_drvdata *drvdata)
+ {
+ 	int retval;
++	struct device *dev = drvdata_to_dev(drvdata);
+ 
+-	SSI_LOG_ERR("setup sysfs under %s\n", sys_dev_obj->name);
++	dev_info(dev, "setup sysfs under %s\n", sys_dev_obj->name);
+ 
+ 	/* Initialize top directory */
+ 	retval = sys_init_dir(&sys_top_dir, drvdata, sys_dev_obj, "cc_info",

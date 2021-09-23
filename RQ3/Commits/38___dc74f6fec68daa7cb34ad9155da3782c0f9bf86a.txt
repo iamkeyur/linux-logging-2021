@@ -1,0 +1,27 @@
+['dc74f6fec68daa7cb34ad9155da3782c0f9bf86a', '959.txt', 'Typo']
+commit dc74f6fec68daa7cb34ad9155da3782c0f9bf86a
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu May 3 16:45:10 2018 +0100
+
+    drm/i915/selftests: fix spelling mistake: "parmaters" -> "parameters"
+    
+    Trivial fix to spelling mistake in pr_err error message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Reviewed-by: Chris Wilson <chris@chris-wilson.co.uk>
+    Signed-off-by: Chris Wilson <chris@chris-wilson.co.uk>
+    Link: https://patchwork.freedesktop.org/patch/msgid/20180503154510.708-1-colin.king@canonical.com
+
+diff --git a/drivers/gpu/drm/i915/selftests/i915_vma.c b/drivers/gpu/drm/i915/selftests/i915_vma.c
+index eb89e301b602..e90f97236e50 100644
+--- a/drivers/gpu/drm/i915/selftests/i915_vma.c
++++ b/drivers/gpu/drm/i915/selftests/i915_vma.c
+@@ -81,7 +81,7 @@ checked_vma_instance(struct drm_i915_gem_object *obj,
+ 	}
+ 
+ 	if (i915_vma_compare(vma, vm, view)) {
+-		pr_err("i915_vma_compare failed with create parmaters!\n");
++		pr_err("i915_vma_compare failed with create parameters!\n");
+ 		return ERR_PTR(-EINVAL);
+ 	}
+ 

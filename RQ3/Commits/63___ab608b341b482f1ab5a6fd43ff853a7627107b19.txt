@@ -1,0 +1,38 @@
+['ab608b341b482f1ab5a6fd43ff853a7627107b19', '932.txt', 'Formatting']
+commit ab608b341b482f1ab5a6fd43ff853a7627107b19
+Author: Matthias Wolf <der_wolf_@web.de>
+Date:   Mon Jul 16 11:30:00 2018 +0200
+
+    staging: fbtft: Fix line continuation
+    
+    Fix checkpatch warning: avoid unnecessary line continuation
+    to allow grepping of whole error message.
+    
+    Signed-off-by: Matthias Wolf <der_wolf_@web.de>
+    Signed-off-by: Felix Siegel <felix.siegel@stud.uni-hannover.de>
+    Signed-off-by: Tim Cofala <cofala@stud.uni-hannover.de>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/fbtft/fb_ssd1351.c b/drivers/staging/fbtft/fb_ssd1351.c
+index b8ef75f5e856..1b92691ac7cc 100644
+--- a/drivers/staging/fbtft/fb_ssd1351.c
++++ b/drivers/staging/fbtft/fb_ssd1351.c
+@@ -126,16 +126,14 @@ static int set_gamma(struct fbtft_par *par, u32 *curves)
+ 	for (i = 0; i < 63; i++) {
+ 		if (i > 0 && curves[i] < 2) {
+ 			dev_err(par->info->device,
+-				"Illegal value in Grayscale Lookup Table at index %d. " \
+-				"Must be greater than 1\n", i);
++				"Illegal value in Grayscale Lookup Table at index %d. Must be greater than 1\n", i);
+ 			return -EINVAL;
+ 		}
+ 		acc += curves[i];
+ 		tmp[i] = acc;
+ 		if (acc > 180) {
+ 			dev_err(par->info->device,
+-				"Illegal value(s) in Grayscale Lookup Table. " \
+-				"At index=%d, the accumulated value has exceeded 180\n", i);
++				"Illegal value(s) in Grayscale Lookup Table. At index=%d, the accumulated value has exceeded 180\n", i);
+ 			return -EINVAL;
+ 		}
+ 	}

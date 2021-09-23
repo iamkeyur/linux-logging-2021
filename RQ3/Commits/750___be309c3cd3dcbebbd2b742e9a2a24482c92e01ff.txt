@@ -1,0 +1,28 @@
+['be309c3cd3dcbebbd2b742e9a2a24482c92e01ff', '167.txt', 'AddInfo']
+commit be309c3cd3dcbebbd2b742e9a2a24482c92e01ff
+Author: Wolfram Sang <wsa-dev@sang-engineering.com>
+Date:   Sat Jul 9 13:35:03 2016 +0900
+
+    i2c: print more info when acpi_i2c_space_handler() fails
+    
+    Use a warning loglevel instead of info and switch to dev_* for device
+    info. Also print which client was accessed.
+    
+    Signed-off-by: Wolfram Sang <wsa-dev@sang-engineering.com>
+    Acked-by: Mika Westerberg <mika.westerberg@linux.intel.com>
+    Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
+
+diff --git a/drivers/i2c/i2c-core.c b/drivers/i2c/i2c-core.c
+index a2f69db4f4df..4b3d760b3f51 100644
+--- a/drivers/i2c/i2c-core.c
++++ b/drivers/i2c/i2c-core.c
+@@ -400,7 +400,8 @@ acpi_i2c_space_handler(u32 function, acpi_physical_address command,
+ 		break;
+ 
+ 	default:
+-		pr_info("protocol(0x%02x) is not supported.\n", accessor_type);
++		dev_warn(&adapter->dev, "protocol 0x%02x not supported for client 0x%02x\n",
++			 accessor_type, client->addr);
+ 		ret = AE_BAD_PARAMETER;
+ 		goto err;
+ 	}

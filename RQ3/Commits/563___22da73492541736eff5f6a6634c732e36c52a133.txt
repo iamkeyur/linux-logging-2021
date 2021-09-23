@@ -1,0 +1,36 @@
+['22da73492541736eff5f6a6634c732e36c52a133', '379.txt', 'Formatting']
+commit 22da73492541736eff5f6a6634c732e36c52a133
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Fri Sep 16 10:43:38 2016 +0100
+
+    net: r6040: add in missing white space in error message text
+    
+    A couple of dev_err messages span two lines and the literal
+    string is missing a white space between words. Add the white
+    space and join the two lines into one.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Acked-by: FLorian Fainelli <f.fainelli@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/rdc/r6040.c b/drivers/net/ethernet/rdc/r6040.c
+index cb29ee24cf1b..5ef5d728c250 100644
+--- a/drivers/net/ethernet/rdc/r6040.c
++++ b/drivers/net/ethernet/rdc/r6040.c
+@@ -1062,14 +1062,12 @@ static int r6040_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
+ 	/* this should always be supported */
+ 	err = pci_set_dma_mask(pdev, DMA_BIT_MASK(32));
+ 	if (err) {
+-		dev_err(&pdev->dev, "32-bit PCI DMA addresses"
+-				"not supported by the card\n");
++		dev_err(&pdev->dev, "32-bit PCI DMA addresses not supported by the card\n");
+ 		goto err_out_disable_dev;
+ 	}
+ 	err = pci_set_consistent_dma_mask(pdev, DMA_BIT_MASK(32));
+ 	if (err) {
+-		dev_err(&pdev->dev, "32-bit PCI DMA addresses"
+-				"not supported by the card\n");
++		dev_err(&pdev->dev, "32-bit PCI DMA addresses not supported by the card\n");
+ 		goto err_out_disable_dev;
+ 	}
+ 

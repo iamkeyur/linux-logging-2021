@@ -1,0 +1,34 @@
+['852041d1ce474a9e3ab81abc851985a6d05b05ba', '915.txt', 'Typo']
+commit 852041d1ce474a9e3ab81abc851985a6d05b05ba
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Fri Mar 16 14:33:01 2018 +0000
+
+    HSI: ssi_protocol: fix spelling mistake: "trigerred" -> "triggered"
+    
+    Trivial fix to spelling mistake in dev_err error message text.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.co.uk>
+
+diff --git a/drivers/hsi/clients/ssi_protocol.c b/drivers/hsi/clients/ssi_protocol.c
+index 6dbead863d07..561abf7bdf1f 100644
+--- a/drivers/hsi/clients/ssi_protocol.c
++++ b/drivers/hsi/clients/ssi_protocol.c
+@@ -495,7 +495,7 @@ static void ssip_rx_wd(struct timer_list *t)
+ 	struct ssi_protocol *ssi = from_timer(ssi, t, rx_wd);
+ 	struct hsi_client *cl = ssi->cl;
+ 
+-	dev_err(&cl->device, "Watchdog trigerred\n");
++	dev_err(&cl->device, "Watchdog triggered\n");
+ 	ssip_error(cl);
+ }
+ 
+@@ -504,7 +504,7 @@ static void ssip_tx_wd(struct timer_list *t)
+ 	struct ssi_protocol *ssi = from_timer(ssi, t, tx_wd);
+ 	struct hsi_client *cl = ssi->cl;
+ 
+-	dev_err(&cl->device, "Watchdog trigerred\n");
++	dev_err(&cl->device, "Watchdog triggered\n");
+ 	ssip_error(cl);
+ }
+ 

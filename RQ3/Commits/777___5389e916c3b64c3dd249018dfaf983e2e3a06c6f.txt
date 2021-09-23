@@ -1,0 +1,43 @@
+['5389e916c3b64c3dd249018dfaf983e2e3a06c6f', '196.txt', 'Typo']
+commit 5389e916c3b64c3dd249018dfaf983e2e3a06c6f
+Author: Lukas Wunner <lukas@wunner.de>
+Date:   Fri Sep 4 21:06:15 2015 +0200
+
+    drm/i915: Spell vga_switcheroo consistently
+    
+    Currently everyone and their dog has their own favourite spelling
+    for vga_switcheroo. This makes it hard to grep dmesg for log entries
+    relating to vga_switcheroo. It also makes it hard to find related
+    source files in the tree.
+    
+    vga_switcheroo.c uses pr_fmt "vga_switcheroo". Use that everywhere.
+    
+    Signed-off-by: Lukas Wunner <lukas@wunner.de>
+    Signed-off-by: Daniel Vetter <daniel.vetter@ffwll.ch>
+
+diff --git a/drivers/gpu/drm/i915/intel_acpi.c b/drivers/gpu/drm/i915/intel_acpi.c
+index d96eee1ae9c5..8b13b9d0373a 100644
+--- a/drivers/gpu/drm/i915/intel_acpi.c
++++ b/drivers/gpu/drm/i915/intel_acpi.c
+@@ -146,7 +146,7 @@ static bool intel_dsm_detect(void)
+ 
+ 	if (vga_count == 2 && has_dsm) {
+ 		acpi_get_name(intel_dsm_priv.dhandle, ACPI_FULL_PATHNAME, &buffer);
+-		DRM_DEBUG_DRIVER("VGA switcheroo: detected DSM switching method %s handle\n",
++		DRM_DEBUG_DRIVER("vga_switcheroo: detected DSM switching method %s handle\n",
+ 				 acpi_method_name);
+ 		return true;
+ 	}
+diff --git a/drivers/gpu/drm/i915/intel_panel.c b/drivers/gpu/drm/i915/intel_panel.c
+index 2034438a0664..2c11b4eedfc6 100644
+--- a/drivers/gpu/drm/i915/intel_panel.c
++++ b/drivers/gpu/drm/i915/intel_panel.c
+@@ -821,7 +821,7 @@ void intel_panel_disable_backlight(struct intel_connector *connector)
+ 		return;
+ 
+ 	/*
+-	 * Do not disable backlight on the vgaswitcheroo path. When switching
++	 * Do not disable backlight on the vga_switcheroo path. When switching
+ 	 * away from i915, the other client may depend on i915 to handle the
+ 	 * backlight. This will leave the backlight on unnecessarily when
+ 	 * another client is not activated.

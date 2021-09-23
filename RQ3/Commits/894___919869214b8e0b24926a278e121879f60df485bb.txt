@@ -1,0 +1,49 @@
+['919869214b8e0b24926a278e121879f60df485bb', '1506.txt', 'Mislead/Ambiguous']
+commit 919869214b8e0b24926a278e121879f60df485bb
+Author: Andrew F. Davis <afd@ti.com>
+Date:   Fri Aug 31 10:14:06 2018 -0500
+
+    ASoC: tas6424: Print full register name in error message
+    
+    The current short version of the register name may be
+    ambiguous when another fault register detection is added.
+    Use the full name.
+    
+    While here fix comment about clearing faults, the CLEAR_FAULT
+    register actually only clears sticky bits, which are only
+    warnings, fault bits can only cleared by resolving the fault.
+    
+    Signed-off-by: Andrew F. Davis <afd@ti.com>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/sound/soc/codecs/tas6424.c b/sound/soc/codecs/tas6424.c
+index 14999b999fd3..3315ce8a15e6 100644
+--- a/sound/soc/codecs/tas6424.c
++++ b/sound/soc/codecs/tas6424.c
+@@ -408,7 +408,7 @@ static void tas6424_fault_check_work(struct work_struct *work)
+ 
+ 	ret = regmap_read(tas6424->regmap, TAS6424_GLOB_FAULT1, &reg);
+ 	if (ret < 0) {
+-		dev_err(dev, "failed to read FAULT1 register: %d\n", ret);
++		dev_err(dev, "failed to read GLOB_FAULT1 register: %d\n", ret);
+ 		goto out;
+ 	}
+ 
+@@ -451,7 +451,7 @@ static void tas6424_fault_check_work(struct work_struct *work)
+ check_global_fault2_reg:
+ 	ret = regmap_read(tas6424->regmap, TAS6424_GLOB_FAULT2, &reg);
+ 	if (ret < 0) {
+-		dev_err(dev, "failed to read FAULT2 register: %d\n", ret);
++		dev_err(dev, "failed to read GLOB_FAULT2 register: %d\n", ret);
+ 		goto out;
+ 	}
+ 
+@@ -524,7 +524,7 @@ static void tas6424_fault_check_work(struct work_struct *work)
+ 	/* Store current warn value so we can detect any changes next time */
+ 	tas6424->last_warn = reg;
+ 
+-	/* Clear any faults by toggling the CLEAR_FAULT control bit */
++	/* Clear any warnings by toggling the CLEAR_FAULT control bit */
+ 	ret = regmap_write_bits(tas6424->regmap, TAS6424_MISC_CTRL3,
+ 				TAS6424_CLEAR_FAULT, TAS6424_CLEAR_FAULT);
+ 	if (ret < 0)

@@ -1,0 +1,30 @@
+['19f0edb980a0f66ccd80b712dadb0239782f8af5', '937.txt', 'Typo']
+commit 19f0edb980a0f66ccd80b712dadb0239782f8af5
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Tue Jun 27 13:49:17 2017 +0100
+
+    perf jit: fix typo: "incalid" -> "invalid"
+    
+    Trivial fix to typo in jvmti_close() warnx warning message.
+    
+    Signed-off-by: Colin King <colin.king@canonical.com>
+    Cc: Alexander Shishkin <alexander.shishkin@linux.intel.com>
+    Cc: Dan Carpenter <dan.carpenter@oracle.com>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Stephane Eranian <eranian@google.com>
+    Link: http://lkml.kernel.org/r/20170627124917.19151-1-colin.king@canonical.com
+    Signed-off-by: Arnaldo Carvalho de Melo <acme@redhat.com>
+
+diff --git a/tools/perf/jvmti/jvmti_agent.c b/tools/perf/jvmti/jvmti_agent.c
+index e9651a9d670e..cf36de7ea255 100644
+--- a/tools/perf/jvmti/jvmti_agent.c
++++ b/tools/perf/jvmti/jvmti_agent.c
+@@ -304,7 +304,7 @@ jvmti_close(void *agent)
+ 	FILE *fp = agent;
+ 
+ 	if (!fp) {
+-		warnx("jvmti: incalid fd in close_agent");
++		warnx("jvmti: invalid fd in close_agent");
+ 		return -1;
+ 	}
+ 

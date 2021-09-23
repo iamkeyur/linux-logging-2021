@@ -1,0 +1,163 @@
+['5548cbf7f148b9a039b19fa4697f1b9beaba2c78', '435.txt', 'FixFormatSpecifier']
+commit 5548cbf7f148b9a039b19fa4697f1b9beaba2c78
+Author: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Date:   Tue Dec 4 23:23:12 2018 +0200
+
+    rtc: Switch to use %ptR
+    
+    Use %ptR instead of open coded variant to print content of
+    struct rtc_time in human readable format.
+    
+    Note, we drop the validation option. This is only used in
+    a deprecated ABI and is mostly wrong as many RTCs will still be valid
+    after 2100.
+    
+    Cc: Arnd Bergmann <arnd@arndb.de>
+    Acked-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+    Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+    Signed-off-by: Alexandre Belloni <alexandre.belloni@bootlin.com>
+
+diff --git a/drivers/char/rtc.c b/drivers/char/rtc.c
+index 4948c8bda6b1..0cde96822a87 100644
+--- a/drivers/char/rtc.c
++++ b/drivers/char/rtc.c
+@@ -1125,11 +1125,10 @@ static int rtc_proc_show(struct seq_file *seq, void *v)
+ 	 * time or for Universal Standard Time (GMT). Probably local though.
+ 	 */
+ 	seq_printf(seq,
+-		   "rtc_time\t: %02d:%02d:%02d\n"
+-		   "rtc_date\t: %04d-%02d-%02d\n"
++		   "rtc_time\t: %ptRt\n"
++		   "rtc_date\t: %ptRd\n"
+ 		   "rtc_epoch\t: %04lu\n",
+-		   tm.tm_hour, tm.tm_min, tm.tm_sec,
+-		   tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, epoch);
++		   &tm, &tm, epoch);
+ 
+ 	get_rtc_alm_time(&tm);
+ 
+diff --git a/drivers/rtc/hctosys.c b/drivers/rtc/hctosys.c
+index e79f2a181ad2..23efbe6949a3 100644
+--- a/drivers/rtc/hctosys.c
++++ b/drivers/rtc/hctosys.c
+@@ -56,12 +56,8 @@ static int __init rtc_hctosys(void)
+ 
+ 	err = do_settimeofday64(&tv64);
+ 
+-	dev_info(rtc->dev.parent,
+-		"setting system clock to "
+-		"%d-%02d-%02d %02d:%02d:%02d UTC (%lld)\n",
+-		tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
+-		tm.tm_hour, tm.tm_min, tm.tm_sec,
+-		(long long) tv64.tv_sec);
++	dev_info(rtc->dev.parent, "setting system clock to %ptR UTC (%lld)\n",
++		 &tm, (long long)tv64.tv_sec);
+ 
+ err_read:
+ 	rtc_class_close(rtc);
+diff --git a/drivers/rtc/interface.c b/drivers/rtc/interface.c
+index 612a83d3ddcc..e8d77b1eaeb2 100644
+--- a/drivers/rtc/interface.c
++++ b/drivers/rtc/interface.c
+@@ -368,12 +368,8 @@ int __rtc_read_alarm(struct rtc_device *rtc, struct rtc_wkalrm *alarm)
+ 	err = rtc_valid_tm(&alarm->time);
+ 
+ done:
+-	if (err) {
+-		dev_warn(&rtc->dev, "invalid alarm value: %d-%d-%d %d:%d:%d\n",
+-			alarm->time.tm_year + 1900, alarm->time.tm_mon + 1,
+-			alarm->time.tm_mday, alarm->time.tm_hour, alarm->time.tm_min,
+-			alarm->time.tm_sec);
+-	}
++	if (err)
++		dev_warn(&rtc->dev, "invalid alarm value: %ptR\n", &alarm->time);
+ 
+ 	return err;
+ }
+diff --git a/drivers/rtc/rtc-proc.c b/drivers/rtc/rtc-proc.c
+index a9dd9218fae2..4d74e4f4ff30 100644
+--- a/drivers/rtc/rtc-proc.c
++++ b/drivers/rtc/rtc-proc.c
+@@ -50,41 +50,15 @@ static int rtc_proc_show(struct seq_file *seq, void *offset)
+ 	err = rtc_read_time(rtc, &tm);
+ 	if (err == 0) {
+ 		seq_printf(seq,
+-			"rtc_time\t: %02d:%02d:%02d\n"
+-			"rtc_date\t: %04d-%02d-%02d\n",
+-			tm.tm_hour, tm.tm_min, tm.tm_sec,
+-			tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
++			   "rtc_time\t: %ptRt\n"
++			   "rtc_date\t: %ptRd\n",
++			   &tm, &tm);
+ 	}
+ 
+ 	err = rtc_read_alarm(rtc, &alrm);
+ 	if (err == 0) {
+-		seq_printf(seq, "alrm_time\t: ");
+-		if ((unsigned int)alrm.time.tm_hour <= 24)
+-			seq_printf(seq, "%02d:", alrm.time.tm_hour);
+-		else
+-			seq_printf(seq, "**:");
+-		if ((unsigned int)alrm.time.tm_min <= 59)
+-			seq_printf(seq, "%02d:", alrm.time.tm_min);
+-		else
+-			seq_printf(seq, "**:");
+-		if ((unsigned int)alrm.time.tm_sec <= 59)
+-			seq_printf(seq, "%02d\n", alrm.time.tm_sec);
+-		else
+-			seq_printf(seq, "**\n");
+-
+-		seq_printf(seq, "alrm_date\t: ");
+-		if ((unsigned int)alrm.time.tm_year <= 200)
+-			seq_printf(seq, "%04d-", alrm.time.tm_year + 1900);
+-		else
+-			seq_printf(seq, "****-");
+-		if ((unsigned int)alrm.time.tm_mon <= 11)
+-			seq_printf(seq, "%02d-", alrm.time.tm_mon + 1);
+-		else
+-			seq_printf(seq, "**-");
+-		if (alrm.time.tm_mday && (unsigned int)alrm.time.tm_mday <= 31)
+-			seq_printf(seq, "%02d\n", alrm.time.tm_mday);
+-		else
+-			seq_printf(seq, "**\n");
++		seq_printf(seq, "alrm_time\t: %ptRt\n", &alrm.time);
++		seq_printf(seq, "alrm_date\t: %ptRd\n", &alrm.time);
+ 		seq_printf(seq, "alarm_IRQ\t: %s\n",
+ 				alrm.enabled ? "yes" : "no");
+ 		seq_printf(seq, "alrm_pending\t: %s\n",
+diff --git a/drivers/rtc/rtc-sysfs.c b/drivers/rtc/rtc-sysfs.c
+index 9746c32eee2e..a8f22ee726bb 100644
+--- a/drivers/rtc/rtc-sysfs.c
++++ b/drivers/rtc/rtc-sysfs.c
+@@ -39,12 +39,10 @@ date_show(struct device *dev, struct device_attribute *attr, char *buf)
+ 	struct rtc_time tm;
+ 
+ 	retval = rtc_read_time(to_rtc_device(dev), &tm);
+-	if (retval == 0) {
+-		retval = sprintf(buf, "%04d-%02d-%02d\n",
+-			tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+-	}
++	if (retval)
++		return retval;
+ 
+-	return retval;
++	return sprintf(buf, "%ptRd\n", &tm);
+ }
+ static DEVICE_ATTR_RO(date);
+ 
+@@ -55,12 +53,10 @@ time_show(struct device *dev, struct device_attribute *attr, char *buf)
+ 	struct rtc_time tm;
+ 
+ 	retval = rtc_read_time(to_rtc_device(dev), &tm);
+-	if (retval == 0) {
+-		retval = sprintf(buf, "%02d:%02d:%02d\n",
+-			tm.tm_hour, tm.tm_min, tm.tm_sec);
+-	}
++	if (retval)
++		return retval;
+ 
+-	return retval;
++	return sprintf(buf, "%ptRt\n", &tm);
+ }
+ static DEVICE_ATTR_RO(time);
+ 

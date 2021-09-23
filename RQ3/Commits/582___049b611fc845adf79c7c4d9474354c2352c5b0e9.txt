@@ -1,0 +1,34 @@
+['049b611fc845adf79c7c4d9474354c2352c5b0e9', '358.txt', 'ModernizeLog']
+commit 049b611fc845adf79c7c4d9474354c2352c5b0e9
+Author: Pushkar Jambhlekar <pushkar.iit@gmail.com>
+Date:   Fri Mar 24 12:58:45 2017 +0530
+
+    drivers/staging/wilc1000: Using __func__ instead of hardcoded function name
+    
+    dev_err: replacing hardcoded function name with '%s' and __func__
+    
+    Signed-off-by: Pushkar Jambhlekar <pushkar.iit@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/wilc1000/wilc_sdio.c b/drivers/staging/wilc1000/wilc_sdio.c
+index ad4eb0fe371e..ce6c3b4fe704 100644
+--- a/drivers/staging/wilc1000/wilc_sdio.c
++++ b/drivers/staging/wilc1000/wilc_sdio.c
+@@ -74,7 +74,7 @@ static int wilc_sdio_cmd52(struct wilc *wilc, struct sdio_cmd52 *cmd)
+ 	sdio_release_host(func);
+ 
+ 	if (ret)
+-		dev_err(&func->dev, "wilc_sdio_cmd52..failed, err(%d)\n", ret);
++		dev_err(&func->dev, "%s..failed, err(%d)\n", __func__, ret);
+ 	return ret;
+ }
+ 
+@@ -103,7 +103,7 @@ static int wilc_sdio_cmd53(struct wilc *wilc, struct sdio_cmd53 *cmd)
+ 	sdio_release_host(func);
+ 
+ 	if (ret)
+-		dev_err(&func->dev, "wilc_sdio_cmd53..failed, err(%d)\n", ret);
++		dev_err(&func->dev, "%s..failed, err(%d)\n", __func__,  ret);
+ 
+ 	return ret;
+ }

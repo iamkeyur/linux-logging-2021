@@ -1,0 +1,26 @@
+['10c7ae04e36f05a82dd23eb314092c77df2c2049', '574.txt', 'Clarify/Reword']
+commit 10c7ae04e36f05a82dd23eb314092c77df2c2049
+Author: Viresh Kumar <viresh.kumar@linaro.org>
+Date:   Tue Aug 11 07:29:18 2015 +0530
+
+    greybus: audio: Add '<' to the print message for short messages
+    
+    This increases readability a bit more, as it tells which value is actual
+    size and which one is expected size.
+    
+    Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@google.com>
+
+diff --git a/drivers/staging/greybus/audio.c b/drivers/staging/greybus/audio.c
+index 9f5f95913e8f..0e9bec5089b2 100644
+--- a/drivers/staging/greybus/audio.c
++++ b/drivers/staging/greybus/audio.c
+@@ -357,7 +357,7 @@ static int gb_i2s_mgmt_report_event_recv(u8 type, struct gb_operation *op)
+ 	}
+ 
+ 	if (op->request->payload_size < sizeof(*req)) {
+-		dev_err(&connection->dev, "Short request received: %zu, %zu\n",
++		dev_err(&connection->dev, "Short request received (%zu < %zu)\n",
+ 			op->request->payload_size, sizeof(*req));
+ 		return -EINVAL;
+ 	}

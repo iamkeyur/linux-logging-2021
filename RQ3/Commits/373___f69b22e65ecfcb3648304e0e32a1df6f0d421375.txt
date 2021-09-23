@@ -1,0 +1,29 @@
+['f69b22e65ecfcb3648304e0e32a1df6f0d421375', '592.txt', 'AddInfo']
+commit f69b22e65ecfcb3648304e0e32a1df6f0d421375
+Author: Santosh Shilimkar <santosh.shilimkar@oracle.com>
+Date:   Wed Nov 4 13:42:39 2015 -0800
+
+    RDS: log the address on bind failure
+    
+    It's useful to know the IP address when RDS fails to bind a
+    connection. Thus, adding it to the error message.
+    
+    Orabug: 21894138
+    Reviewed-by: Wei Lin Guay <wei.lin.guay@oracle.com>
+    Signed-off-by: Santosh Shilimkar <santosh.shilimkar@oracle.com>
+
+diff --git a/net/rds/bind.c b/net/rds/bind.c
+index 095f6ce583fe..3a915bedb76c 100644
+--- a/net/rds/bind.c
++++ b/net/rds/bind.c
+@@ -176,8 +176,8 @@ int rds_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
+ 	if (!trans) {
+ 		ret = -EADDRNOTAVAIL;
+ 		rds_remove_bound(rs);
+-		printk_ratelimited(KERN_INFO "RDS: rds_bind() could not find a transport, "
+-				"load rds_tcp or rds_rdma?\n");
++		pr_info_ratelimited("RDS: %s could not find a transport for %pI4, load rds_tcp or rds_rdma?\n",
++				    __func__, &sin->sin_addr.s_addr);
+ 		goto out;
+ 	}
+ 

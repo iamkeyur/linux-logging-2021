@@ -1,0 +1,36 @@
+['9a1f490f358e44a1cf463ba8124ca39fcc042992', '809.txt', 'Formatting']
+commit 9a1f490f358e44a1cf463ba8124ca39fcc042992
+Author: Michael Ellerman <mpe@ellerman.id.au>
+Date:   Wed Nov 2 22:20:46 2016 +1100
+
+    powerpc/oops: Fix missing pr_cont()s in show_stack()
+    
+    Previously we got away with printing the stack trace in multiple pieces
+    and it usually looked right.  But since commit 4bcc595ccd80 ("printk:
+    reinstate KERN_CONT for printing continuation lines"), KERN_CONT is now
+    required when printing continuation lines. Use pr_cont() as appropriate.
+    
+    Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+
+diff --git a/arch/powerpc/kernel/process.c b/arch/powerpc/kernel/process.c
+index ce6dc61b15b2..621d9b23df72 100644
+--- a/arch/powerpc/kernel/process.c
++++ b/arch/powerpc/kernel/process.c
+@@ -1900,14 +1900,14 @@ void show_stack(struct task_struct *tsk, unsigned long *stack)
+ 			printk("["REG"] ["REG"] %pS", sp, ip, (void *)ip);
+ #ifdef CONFIG_FUNCTION_GRAPH_TRACER
+ 			if ((ip == rth) && curr_frame >= 0) {
+-				printk(" (%pS)",
++				pr_cont(" (%pS)",
+ 				       (void *)current->ret_stack[curr_frame].ret);
+ 				curr_frame--;
+ 			}
+ #endif
+ 			if (firstframe)
+-				printk(" (unreliable)");
+-			printk("\n");
++				pr_cont(" (unreliable)");
++			pr_cont("\n");
+ 		}
+ 		firstframe = 0;
+ 

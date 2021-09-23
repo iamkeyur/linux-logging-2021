@@ -1,0 +1,25 @@
+['4a22b00b288649f6d697b350ec606574479a2df3', '103.txt', 'Typo']
+commit 4a22b00b288649f6d697b350ec606574479a2df3
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Fri May 11 14:25:42 2018 +0100
+
+    cfg80211: fix spelling mistake: "uknown" -> "unknown"
+    
+    Trivial fix to spelling mistake in pr_debug message text
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+
+diff --git a/net/wireless/reg.c b/net/wireless/reg.c
+index 69cf79165d43..9806380ec671 100644
+--- a/net/wireless/reg.c
++++ b/net/wireless/reg.c
+@@ -3399,7 +3399,7 @@ bool reg_supported_dfs_region(enum nl80211_dfs_regions dfs_region)
+ 	case NL80211_DFS_JP:
+ 		return true;
+ 	default:
+-		pr_debug("Ignoring uknown DFS master region: %d\n", dfs_region);
++		pr_debug("Ignoring unknown DFS master region: %d\n", dfs_region);
+ 		return false;
+ 	}
+ }

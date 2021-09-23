@@ -1,0 +1,28 @@
+['7b5acd11a3ffec027abf4df2b30690a974873174', '716.txt', 'LogLevel']
+commit 7b5acd11a3ffec027abf4df2b30690a974873174
+Author: Larry Finger <Larry.Finger@lwfinger.net>
+Date:   Thu Feb 11 10:56:22 2016 -0600
+
+    rtlwifi: rtl8821ae: Silence useless log output
+    
+    When driver rtl8821ae is loaded but not connected to any AP, it logs
+    a "firmware not ready to run" message roughly once a minute. To
+    eliminate logging this massage under normal debug conditions, the
+    degug level needed to print this message is increased.
+    
+    Signed-off-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: Kalle Valo <kvalo@codeaurora.org>
+
+diff --git a/drivers/net/wireless/realtek/rtlwifi/rtl8821ae/fw.c b/drivers/net/wireless/realtek/rtlwifi/rtl8821ae/fw.c
+index 525eb234627c..a4fc70e8c9c0 100644
+--- a/drivers/net/wireless/realtek/rtlwifi/rtl8821ae/fw.c
++++ b/drivers/net/wireless/realtek/rtlwifi/rtl8821ae/fw.c
+@@ -271,7 +271,7 @@ int rtl8821ae_download_fw(struct ieee80211_hw *hw, bool buse_wake_on_wlan_fw)
+ 
+ 	err = _rtl8821ae_fw_free_to_go(hw);
+ 	if (err) {
+-		RT_TRACE(rtlpriv, COMP_ERR, DBG_EMERG,
++		RT_TRACE(rtlpriv, COMP_ERR, DBG_DMESG,
+ 			 "Firmware is not ready to run!\n");
+ 	} else {
+ 		RT_TRACE(rtlpriv, COMP_FW, DBG_LOUD,

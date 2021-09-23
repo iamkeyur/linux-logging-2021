@@ -1,0 +1,25 @@
+['60133867f1f111aaf3a8c00375b8026142a9a591', '391.txt', 'Typo']
+commit 60133867f1f111aaf3a8c00375b8026142a9a591
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Wed Dec 28 16:44:23 2016 +0000
+
+    net: wan: slic_ds26522: fix spelling mistake: "configurated" -> "configured"
+    
+    trivial fix to spelling mistake in pr_info message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/wan/slic_ds26522.c b/drivers/net/wan/slic_ds26522.c
+index b776a0ab106c..9d9b4e0def2a 100644
+--- a/drivers/net/wan/slic_ds26522.c
++++ b/drivers/net/wan/slic_ds26522.c
+@@ -218,7 +218,7 @@ static int slic_ds26522_probe(struct spi_device *spi)
+ 
+ 	ret = slic_ds26522_init_configure(spi);
+ 	if (ret == 0)
+-		pr_info("DS26522 cs%d configurated\n", spi->chip_select);
++		pr_info("DS26522 cs%d configured\n", spi->chip_select);
+ 
+ 	return ret;
+ }

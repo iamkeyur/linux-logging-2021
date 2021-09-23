@@ -1,0 +1,30 @@
+['0442d7b08600625e0bd310fb02894840fa35f070', '106.txt', 'LogLevel']
+commit 0442d7b08600625e0bd310fb02894840fa35f070
+Author: Tomeu Vizoso <tomeu.vizoso@collabora.com>
+Date:   Thu Mar 22 16:18:32 2018 +0100
+
+    usb: hub: Reduce warning to notice on power loss
+    
+    Currently we warn the user when the root hub lost power after resume,
+    but the user cannot do anything about it so it should probably be a
+    notice.
+    
+    This will reduce the noise in the console during suspend and resume,
+    which is already quite significant in many systems.
+    
+    Signed-off-by: Tomeu Vizoso <tomeu.vizoso@collabora.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
+index aaeef03c0d83..793eda1cfe49 100644
+--- a/drivers/usb/core/hub.c
++++ b/drivers/usb/core/hub.c
+@@ -3655,7 +3655,7 @@ static int hub_reset_resume(struct usb_interface *intf)
+  */
+ void usb_root_hub_lost_power(struct usb_device *rhdev)
+ {
+-	dev_warn(&rhdev->dev, "root hub lost power or was reset\n");
++	dev_notice(&rhdev->dev, "root hub lost power or was reset\n");
+ 	rhdev->reset_resume = 1;
+ }
+ EXPORT_SYMBOL_GPL(usb_root_hub_lost_power);

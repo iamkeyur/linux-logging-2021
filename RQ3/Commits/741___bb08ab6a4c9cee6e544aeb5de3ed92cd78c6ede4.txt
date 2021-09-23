@@ -1,0 +1,39 @@
+['bb08ab6a4c9cee6e544aeb5de3ed92cd78c6ede4', '158.txt', 'RedundantInformation']
+commit bb08ab6a4c9cee6e544aeb5de3ed92cd78c6ede4
+Author: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Date:   Tue Apr 26 12:03:23 2016 +0300
+
+    ata: sata_dwc_460ex: make debug messages neat
+    
+    There is a duplication in the debug messages when accessing SCR registers.
+    Remove duplication to make the messages neat.
+    
+    Tested-by: Christian Lamparter <chunkeey@googlemail.com>
+    Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+    Signed-off-by: Tejun Heo <tj@kernel.org>
+
+diff --git a/drivers/ata/sata_dwc_460ex.c b/drivers/ata/sata_dwc_460ex.c
+index 6f145f8ae312..00c2af1d211b 100644
+--- a/drivers/ata/sata_dwc_460ex.c
++++ b/drivers/ata/sata_dwc_460ex.c
+@@ -414,16 +414,16 @@ static int sata_dwc_scr_read(struct ata_link *link, unsigned int scr, u32 *val)
+ 	}
+ 
+ 	*val = sata_dwc_readl(link->ap->ioaddr.scr_addr + (scr * 4));
+-	dev_dbg(link->ap->dev, "%s: id=%d reg=%d val=val=0x%08x\n",
+-		__func__, link->ap->print_id, scr, *val);
++	dev_dbg(link->ap->dev, "%s: id=%d reg=%d val=0x%08x\n", __func__,
++		link->ap->print_id, scr, *val);
+ 
+ 	return 0;
+ }
+ 
+ static int sata_dwc_scr_write(struct ata_link *link, unsigned int scr, u32 val)
+ {
+-	dev_dbg(link->ap->dev, "%s: id=%d reg=%d val=val=0x%08x\n",
+-		__func__, link->ap->print_id, scr, val);
++	dev_dbg(link->ap->dev, "%s: id=%d reg=%d val=0x%08x\n", __func__,
++		link->ap->print_id, scr, val);
+ 	if (scr > SCR_NOTIFICATION) {
+ 		dev_err(link->ap->dev, "%s: Incorrect SCR offset 0x%02x\n",
+ 			 __func__, scr);

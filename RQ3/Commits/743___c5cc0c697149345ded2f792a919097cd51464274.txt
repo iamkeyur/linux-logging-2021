@@ -1,0 +1,55 @@
+['c5cc0c697149345ded2f792a919097cd51464274', '16.txt', 'FixFormatSpecifier']
+commit c5cc0c697149345ded2f792a919097cd51464274
+Author: Helge Deller <deller@gmx.de>
+Date:   Wed Sep 6 22:28:00 2017 +0200
+
+    netfilter: ipvs: Use %pS printk format for direct addresses
+    
+    The debug and error printk functions in ipvs uses wrongly the %pF instead of
+    the %pS printk format specifier for printing symbols for the address returned
+    by _builtin_return_address(0). Fix it for the ia64, ppc64 and parisc64
+    architectures.
+    
+    Signed-off-by: Helge Deller <deller@gmx.de>
+    Cc: Wensong Zhang <wensong@linux-vs.org>
+    Cc: netdev@vger.kernel.org
+    Cc: lvs-devel@vger.kernel.org
+    Cc: netfilter-devel@vger.kernel.org
+    Acked-by: Simon Horman <horms@verge.net.au>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+diff --git a/net/netfilter/ipvs/ip_vs_conn.c b/net/netfilter/ipvs/ip_vs_conn.c
+index 3d2ac71a83ec..f73561ca982d 100644
+--- a/net/netfilter/ipvs/ip_vs_conn.c
++++ b/net/netfilter/ipvs/ip_vs_conn.c
+@@ -185,7 +185,7 @@ static inline int ip_vs_conn_hash(struct ip_vs_conn *cp)
+ 		hlist_add_head_rcu(&cp->c_list, &ip_vs_conn_tab[hash]);
+ 		ret = 1;
+ 	} else {
+-		pr_err("%s(): request for already hashed, called from %pF\n",
++		pr_err("%s(): request for already hashed, called from %pS\n",
+ 		       __func__, __builtin_return_address(0));
+ 		ret = 0;
+ 	}
+diff --git a/net/netfilter/ipvs/ip_vs_ctl.c b/net/netfilter/ipvs/ip_vs_ctl.c
+index 4f940d7eb2f7..b825835752e6 100644
+--- a/net/netfilter/ipvs/ip_vs_ctl.c
++++ b/net/netfilter/ipvs/ip_vs_ctl.c
+@@ -300,7 +300,7 @@ static int ip_vs_svc_hash(struct ip_vs_service *svc)
+ 	unsigned int hash;
+ 
+ 	if (svc->flags & IP_VS_SVC_F_HASHED) {
+-		pr_err("%s(): request for already hashed, called from %pF\n",
++		pr_err("%s(): request for already hashed, called from %pS\n",
+ 		       __func__, __builtin_return_address(0));
+ 		return 0;
+ 	}
+@@ -334,7 +334,7 @@ static int ip_vs_svc_hash(struct ip_vs_service *svc)
+ static int ip_vs_svc_unhash(struct ip_vs_service *svc)
+ {
+ 	if (!(svc->flags & IP_VS_SVC_F_HASHED)) {
+-		pr_err("%s(): request for unhash flagged, called from %pF\n",
++		pr_err("%s(): request for unhash flagged, called from %pS\n",
+ 		       __func__, __builtin_return_address(0));
+ 		return 0;
+ 	}

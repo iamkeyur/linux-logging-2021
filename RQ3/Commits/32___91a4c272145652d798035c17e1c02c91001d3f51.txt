@@ -1,0 +1,36 @@
+['91a4c272145652d798035c17e1c02c91001d3f51', '966.txt', 'LogLevel']
+commit 91a4c272145652d798035c17e1c02c91001d3f51
+Author: Shuah Khan <shuah@kernel.org>
+Date:   Wed Jun 8 15:33:45 2016 -0700
+
+    kasan: change memory hot-add error messages to info messages
+    
+    Change the following memory hot-add error messages to info messages.
+    There is no need for these to be errors.
+    
+       kasan: WARNING: KASAN doesn't support memory hot-add
+       kasan: Memory hot-add will be disabled
+    
+    Link: http://lkml.kernel.org/r/1464794430-5486-1-git-send-email-shuahkh@osg.samsung.com
+    Signed-off-by: Shuah Khan <shuahkh@osg.samsung.com>
+    Acked-by: Andrey Ryabinin <aryabinin@virtuozzo.com>
+    Cc: Alexander Potapenko <glider@google.com>
+    Cc: Dmitry Vyukov <dvyukov@google.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+diff --git a/mm/kasan/kasan.c b/mm/kasan/kasan.c
+index 18b6a2b8d183..28439acda6ec 100644
+--- a/mm/kasan/kasan.c
++++ b/mm/kasan/kasan.c
+@@ -763,8 +763,8 @@ static int kasan_mem_notifier(struct notifier_block *nb,
+ 
+ static int __init kasan_memhotplug_init(void)
+ {
+-	pr_err("WARNING: KASAN doesn't support memory hot-add\n");
+-	pr_err("Memory hot-add will be disabled\n");
++	pr_info("WARNING: KASAN doesn't support memory hot-add\n");
++	pr_info("Memory hot-add will be disabled\n");
+ 
+ 	hotplug_memory_notifier(kasan_mem_notifier, 0);
+ 

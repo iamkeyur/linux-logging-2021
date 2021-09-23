@@ -1,0 +1,28 @@
+['b4eb7393683d70976a0736b37f1562e8421e3120', '441.txt', 'FixFormatSpecifier']
+commit b4eb7393683d70976a0736b37f1562e8421e3120
+Author: Florian Fainelli <f.fainelli@gmail.com>
+Date:   Mon May 21 11:45:51 2018 -0700
+
+    ti: ethernet: cpdma: Use correct format for genpool_*
+    
+    Now that we can compile davinci_cpdma.c on 64-bit hosts, we can see that
+    the format used for printing a size_t type is incorrect, use %zd
+    accordingly.
+    
+    Fixes: aeec3021043b ("net: ethernet: ti: cpdma: remove used_desc counter")
+    Signed-off-by: Florian Fainelli <f.fainelli@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/ti/davinci_cpdma.c b/drivers/net/ethernet/ti/davinci_cpdma.c
+index 31ae04117f0a..9ec49213de5e 100644
+--- a/drivers/net/ethernet/ti/davinci_cpdma.c
++++ b/drivers/net/ethernet/ti/davinci_cpdma.c
+@@ -191,7 +191,7 @@ static void cpdma_desc_pool_destroy(struct cpdma_ctlr *ctlr)
+ 		return;
+ 
+ 	WARN(gen_pool_size(pool->gen_pool) != gen_pool_avail(pool->gen_pool),
+-	     "cpdma_desc_pool size %d != avail %d",
++	     "cpdma_desc_pool size %zd != avail %zd",
+ 	     gen_pool_size(pool->gen_pool),
+ 	     gen_pool_avail(pool->gen_pool));
+ 	if (pool->cpumap)

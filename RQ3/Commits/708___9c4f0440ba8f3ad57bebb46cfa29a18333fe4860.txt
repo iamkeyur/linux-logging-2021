@@ -1,0 +1,41 @@
+['9c4f0440ba8f3ad57bebb46cfa29a18333fe4860', '121.txt', 'Formatting']
+commit 9c4f0440ba8f3ad57bebb46cfa29a18333fe4860
+Author: Markus Elfring <elfring@users.sourceforge.net>
+Date:   Fri Jan 13 14:14:45 2017 +0100
+
+    spi/mpc52xx: Combine substrings for two messages
+    
+    The script "checkpatch.pl" pointed information out like the following.
+    
+    WARNING: quoted string split across lines
+    
+    Thus fix the affected source code places.
+    
+    Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/drivers/spi/spi-mpc52xx.c b/drivers/spi/spi-mpc52xx.c
+index 8cc129efe7ba..e8b59ce4dc3a 100644
+--- a/drivers/spi/spi-mpc52xx.c
++++ b/drivers/spi/spi-mpc52xx.c
+@@ -449,8 +449,7 @@ static int mpc52xx_spi_probe(struct platform_device *op)
+ 			gpio_cs = of_get_gpio(op->dev.of_node, i);
+ 			if (gpio_cs < 0) {
+ 				dev_err(&op->dev,
+-					"could not parse the gpio field "
+-					"in oftree\n");
++					"could not parse the gpio field in oftree\n");
+ 				rc = -ENODEV;
+ 				goto err_gpio;
+ 			}
+@@ -458,8 +457,8 @@ static int mpc52xx_spi_probe(struct platform_device *op)
+ 			rc = gpio_request(gpio_cs, dev_name(&op->dev));
+ 			if (rc) {
+ 				dev_err(&op->dev,
+-					"can't request spi cs gpio #%d "
+-					"on gpio line %d\n", i, gpio_cs);
++					"can't request spi cs gpio #%d on gpio line %d\n",
++					i, gpio_cs);
+ 				goto err_gpio;
+ 			}
+ 

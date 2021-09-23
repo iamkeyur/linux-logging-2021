@@ -1,0 +1,456 @@
+['fcbf7637e6647e00de04d4b2e05ece2484bb3062', '873.txt', 'FixFormatSpecifier']
+commit fcbf7637e6647e00de04d4b2e05ece2484bb3062
+Author: Steve Magnani <steve.magnani@digidescorp.com>
+Date:   Thu Oct 12 08:48:41 2017 -0500
+
+    udf: Fix signed/unsigned format specifiers
+    
+    Fix problems noted in compilion with -Wformat=2 -Wformat-signedness.
+    In particular, a mismatch between the signedness of a value and the
+    signedness of its format specifier can result in unsigned values being
+    printed as negative numbers, e.g.:
+    
+      Partition (0 type 1511) starts at physical 460, block length -1779968542
+    
+    ...which occurs when mounting a large (> 1 TiB) UDF partition.
+    
+    Changes since V1:
+    * Fixed additional issues noted in udf_bitmap_free_blocks(),
+      udf_get_fileident(), udf_show_options()
+    
+    Signed-off-by: Steven J. Magnani <steve@digidescorp.com>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+diff --git a/fs/udf/balloc.c b/fs/udf/balloc.c
+index cbfd6043274b..1b961b1d9699 100644
+--- a/fs/udf/balloc.c
++++ b/fs/udf/balloc.c
+@@ -58,7 +58,7 @@ static int __load_block_bitmap(struct super_block *sb,
+ 	int nr_groups = bitmap->s_nr_groups;
+ 
+ 	if (block_group >= nr_groups) {
+-		udf_debug("block_group (%d) > nr_groups (%d)\n",
++		udf_debug("block_group (%u) > nr_groups (%d)\n",
+ 			  block_group, nr_groups);
+ 	}
+ 
+@@ -122,7 +122,7 @@ static void udf_bitmap_free_blocks(struct super_block *sb,
+ 	partmap = &sbi->s_partmaps[bloc->partitionReferenceNum];
+ 	if (bloc->logicalBlockNum + count < count ||
+ 	    (bloc->logicalBlockNum + count) > partmap->s_partition_len) {
+-		udf_debug("%d < %d || %d + %d > %d\n",
++		udf_debug("%u < %d || %u + %u > %u\n",
+ 			  bloc->logicalBlockNum, 0,
+ 			  bloc->logicalBlockNum, count,
+ 			  partmap->s_partition_len);
+@@ -151,9 +151,9 @@ static void udf_bitmap_free_blocks(struct super_block *sb,
+ 		bh = bitmap->s_block_bitmap[bitmap_nr];
+ 		for (i = 0; i < count; i++) {
+ 			if (udf_set_bit(bit + i, bh->b_data)) {
+-				udf_debug("bit %ld already set\n", bit + i);
++				udf_debug("bit %lu already set\n", bit + i);
+ 				udf_debug("byte=%2x\n",
+-					  ((char *)bh->b_data)[(bit + i) >> 3]);
++					  ((__u8 *)bh->b_data)[(bit + i) >> 3]);
+ 			}
+ 		}
+ 		udf_add_free_space(sb, sbi->s_partition, count);
+@@ -364,7 +364,7 @@ static void udf_table_free_blocks(struct super_block *sb,
+ 	partmap = &sbi->s_partmaps[bloc->partitionReferenceNum];
+ 	if (bloc->logicalBlockNum + count < count ||
+ 	    (bloc->logicalBlockNum + count) > partmap->s_partition_len) {
+-		udf_debug("%d < %d || %d + %d > %d\n",
++		udf_debug("%u < %d || %u + %u > %u\n",
+ 			  bloc->logicalBlockNum, 0,
+ 			  bloc->logicalBlockNum, count,
+ 			  partmap->s_partition_len);
+@@ -517,7 +517,7 @@ static int udf_table_prealloc_blocks(struct super_block *sb,
+ 
+ 	while (first_block != eloc.logicalBlockNum &&
+ 	       (etype = udf_next_aext(table, &epos, &eloc, &elen, 1)) != -1) {
+-		udf_debug("eloc=%d, elen=%d, first_block=%d\n",
++		udf_debug("eloc=%u, elen=%u, first_block=%u\n",
+ 			  eloc.logicalBlockNum, elen, first_block);
+ 		; /* empty loop body */
+ 	}
+diff --git a/fs/udf/directory.c b/fs/udf/directory.c
+index c41c3cc8e5c6..ebed5c60982e 100644
+--- a/fs/udf/directory.c
++++ b/fs/udf/directory.c
+@@ -176,7 +176,7 @@ struct fileIdentDesc *udf_get_fileident(void *buffer, int bufsize, int *offset)
+ 	if (fi->descTag.tagIdent != cpu_to_le16(TAG_IDENT_FID)) {
+ 		udf_debug("0x%x != TAG_IDENT_FID\n",
+ 			  le16_to_cpu(fi->descTag.tagIdent));
+-		udf_debug("offset: %u sizeof: %lu bufsize: %u\n",
++		udf_debug("offset: %d sizeof: %lu bufsize: %d\n",
+ 			  *offset, (unsigned long)sizeof(struct fileIdentDesc),
+ 			  bufsize);
+ 		return NULL;
+diff --git a/fs/udf/inode.c b/fs/udf/inode.c
+index 1d8324a99e37..7d2a95c9d670 100644
+--- a/fs/udf/inode.c
++++ b/fs/udf/inode.c
+@@ -1278,14 +1278,14 @@ static int udf_read_inode(struct inode *inode, bool hidden_inode)
+ 
+ reread:
+ 	if (iloc->partitionReferenceNum >= sbi->s_partitions) {
+-		udf_debug("partition reference: %d > logical volume partitions: %d\n",
++		udf_debug("partition reference: %u > logical volume partitions: %u\n",
+ 			  iloc->partitionReferenceNum, sbi->s_partitions);
+ 		return -EIO;
+ 	}
+ 
+ 	if (iloc->logicalBlockNum >=
+ 	    sbi->s_partmaps[iloc->partitionReferenceNum].s_partition_len) {
+-		udf_debug("block=%d, partition=%d out of range\n",
++		udf_debug("block=%u, partition=%u out of range\n",
+ 			  iloc->logicalBlockNum, iloc->partitionReferenceNum);
+ 		return -EIO;
+ 	}
+@@ -1304,13 +1304,13 @@ static int udf_read_inode(struct inode *inode, bool hidden_inode)
+ 	 */
+ 	bh = udf_read_ptagged(inode->i_sb, iloc, 0, &ident);
+ 	if (!bh) {
+-		udf_err(inode->i_sb, "(ino %ld) failed !bh\n", inode->i_ino);
++		udf_err(inode->i_sb, "(ino %lu) failed !bh\n", inode->i_ino);
+ 		return -EIO;
+ 	}
+ 
+ 	if (ident != TAG_IDENT_FE && ident != TAG_IDENT_EFE &&
+ 	    ident != TAG_IDENT_USE) {
+-		udf_err(inode->i_sb, "(ino %ld) failed ident=%d\n",
++		udf_err(inode->i_sb, "(ino %lu) failed ident=%u\n",
+ 			inode->i_ino, ident);
+ 		goto out;
+ 	}
+@@ -1346,7 +1346,7 @@ static int udf_read_inode(struct inode *inode, bool hidden_inode)
+ 		}
+ 		brelse(ibh);
+ 	} else if (fe->icbTag.strategyType != cpu_to_le16(4)) {
+-		udf_err(inode->i_sb, "unsupported strategy type: %d\n",
++		udf_err(inode->i_sb, "unsupported strategy type: %u\n",
+ 			le16_to_cpu(fe->icbTag.strategyType));
+ 		goto out;
+ 	}
+@@ -1547,7 +1547,7 @@ static int udf_read_inode(struct inode *inode, bool hidden_inode)
+ 		udf_debug("METADATA BITMAP FILE-----\n");
+ 		break;
+ 	default:
+-		udf_err(inode->i_sb, "(ino %ld) failed unknown file type=%d\n",
++		udf_err(inode->i_sb, "(ino %lu) failed unknown file type=%u\n",
+ 			inode->i_ino, fe->icbTag.fileType);
+ 		goto out;
+ 	}
+@@ -2091,7 +2091,7 @@ int8_t udf_next_aext(struct inode *inode, struct extent_position *epos,
+ 		block = udf_get_lb_pblock(inode->i_sb, &epos->block, 0);
+ 		epos->bh = udf_tread(inode->i_sb, block);
+ 		if (!epos->bh) {
+-			udf_debug("reading block %d failed!\n", block);
++			udf_debug("reading block %u failed!\n", block);
+ 			return -1;
+ 		}
+ 	}
+@@ -2146,7 +2146,7 @@ int8_t udf_current_aext(struct inode *inode, struct extent_position *epos,
+ 		*elen = le32_to_cpu(lad->extLength) & UDF_EXTENT_LENGTH_MASK;
+ 		break;
+ 	default:
+-		udf_debug("alloc_type = %d unsupported\n", iinfo->i_alloc_type);
++		udf_debug("alloc_type = %u unsupported\n", iinfo->i_alloc_type);
+ 		return -1;
+ 	}
+ 
+diff --git a/fs/udf/misc.c b/fs/udf/misc.c
+index 97f3258a7483..401e64cde1be 100644
+--- a/fs/udf/misc.c
++++ b/fs/udf/misc.c
+@@ -209,7 +209,7 @@ struct buffer_head *udf_read_tagged(struct super_block *sb, uint32_t block,
+ 
+ 	bh = udf_tread(sb, block);
+ 	if (!bh) {
+-		udf_err(sb, "read failed, block=%u, location=%d\n",
++		udf_err(sb, "read failed, block=%u, location=%u\n",
+ 			block, location);
+ 		return NULL;
+ 	}
+@@ -247,7 +247,7 @@ struct buffer_head *udf_read_tagged(struct super_block *sb, uint32_t block,
+ 					le16_to_cpu(tag_p->descCRCLength)))
+ 		return bh;
+ 
+-	udf_debug("Crc failure block %d: crc = %d, crclen = %d\n", block,
++	udf_debug("Crc failure block %u: crc = %u, crclen = %u\n", block,
+ 		  le16_to_cpu(tag_p->descCRC),
+ 		  le16_to_cpu(tag_p->descCRCLength));
+ error_out:
+diff --git a/fs/udf/namei.c b/fs/udf/namei.c
+index d3f18a6fbe40..0458dd47e105 100644
+--- a/fs/udf/namei.c
++++ b/fs/udf/namei.c
+@@ -840,7 +840,7 @@ static int udf_rmdir(struct inode *dir, struct dentry *dentry)
+ 	if (retval)
+ 		goto end_rmdir;
+ 	if (inode->i_nlink != 2)
+-		udf_warn(inode->i_sb, "empty directory has nlink != 2 (%d)\n",
++		udf_warn(inode->i_sb, "empty directory has nlink != 2 (%u)\n",
+ 			 inode->i_nlink);
+ 	clear_nlink(inode);
+ 	inode->i_size = 0;
+@@ -882,7 +882,7 @@ static int udf_unlink(struct inode *dir, struct dentry *dentry)
+ 		goto end_unlink;
+ 
+ 	if (!inode->i_nlink) {
+-		udf_debug("Deleting nonexistent file (%lu), %d\n",
++		udf_debug("Deleting nonexistent file (%lu), %u\n",
+ 			  inode->i_ino, inode->i_nlink);
+ 		set_nlink(inode, 1);
+ 	}
+diff --git a/fs/udf/partition.c b/fs/udf/partition.c
+index 888c364b2fe9..090baff83990 100644
+--- a/fs/udf/partition.c
++++ b/fs/udf/partition.c
+@@ -32,7 +32,7 @@ uint32_t udf_get_pblock(struct super_block *sb, uint32_t block,
+ 	struct udf_sb_info *sbi = UDF_SB(sb);
+ 	struct udf_part_map *map;
+ 	if (partition >= sbi->s_partitions) {
+-		udf_debug("block=%d, partition=%d, offset=%d: invalid partition\n",
++		udf_debug("block=%u, partition=%u, offset=%u: invalid partition\n",
+ 			  block, partition, offset);
+ 		return 0xFFFFFFFF;
+ 	}
+@@ -59,7 +59,7 @@ uint32_t udf_get_pblock_virt15(struct super_block *sb, uint32_t block,
+ 	vdata = &map->s_type_specific.s_virtual;
+ 
+ 	if (block > vdata->s_num_entries) {
+-		udf_debug("Trying to access block beyond end of VAT (%d max %d)\n",
++		udf_debug("Trying to access block beyond end of VAT (%u max %u)\n",
+ 			  block, vdata->s_num_entries);
+ 		return 0xFFFFFFFF;
+ 	}
+@@ -83,7 +83,7 @@ uint32_t udf_get_pblock_virt15(struct super_block *sb, uint32_t block,
+ 
+ 	bh = sb_bread(sb, loc);
+ 	if (!bh) {
+-		udf_debug("get_pblock(UDF_VIRTUAL_MAP:%p,%d,%d) VAT: %d[%d]\n",
++		udf_debug("get_pblock(UDF_VIRTUAL_MAP:%p,%u,%u) VAT: %u[%u]\n",
+ 			  sb, block, partition, loc, index);
+ 		return 0xFFFFFFFF;
+ 	}
+diff --git a/fs/udf/super.c b/fs/udf/super.c
+index 7ea0592e7f7c..f80e0a0f24d3 100644
+--- a/fs/udf/super.c
++++ b/fs/udf/super.c
+@@ -366,7 +366,7 @@ static int udf_show_options(struct seq_file *seq, struct dentry *root)
+ 	if (sbi->s_dmode != UDF_INVALID_MODE)
+ 		seq_printf(seq, ",dmode=%ho", sbi->s_dmode);
+ 	if (UDF_QUERY_FLAG(sb, UDF_FLAG_SESSION_SET))
+-		seq_printf(seq, ",session=%u", sbi->s_session);
++		seq_printf(seq, ",session=%d", sbi->s_session);
+ 	if (UDF_QUERY_FLAG(sb, UDF_FLAG_LASTBLOCK_SET))
+ 		seq_printf(seq, ",lastblock=%u", sbi->s_last_block);
+ 	if (sbi->s_anchor != 0)
+@@ -705,7 +705,7 @@ static loff_t udf_check_vsd(struct super_block *sb)
+ 
+ 	sector += (((loff_t)sbi->s_session) << sb->s_blocksize_bits);
+ 
+-	udf_debug("Starting at sector %u (%ld byte sectors)\n",
++	udf_debug("Starting at sector %u (%lu byte sectors)\n",
+ 		  (unsigned int)(sector >> sb->s_blocksize_bits),
+ 		  sb->s_blocksize);
+ 	/* Process the sequence (if applicable). The hard limit on the sector
+@@ -868,7 +868,7 @@ static int udf_find_fileset(struct super_block *sb,
+ 
+ 	if ((fileset->logicalBlockNum != 0xFFFFFFFF ||
+ 	     fileset->partitionReferenceNum != 0xFFFF) && bh) {
+-		udf_debug("Fileset at block=%d, partition=%d\n",
++		udf_debug("Fileset at block=%u, partition=%u\n",
+ 			  fileset->logicalBlockNum,
+ 			  fileset->partitionReferenceNum);
+ 
+@@ -981,14 +981,14 @@ static int udf_load_metadata_files(struct super_block *sb, int partition,
+ 	mdata->s_phys_partition_ref = type1_index;
+ 
+ 	/* metadata address */
+-	udf_debug("Metadata file location: block = %d part = %d\n",
++	udf_debug("Metadata file location: block = %u part = %u\n",
+ 		  mdata->s_meta_file_loc, mdata->s_phys_partition_ref);
+ 
+ 	fe = udf_find_metadata_inode_efe(sb, mdata->s_meta_file_loc,
+ 					 mdata->s_phys_partition_ref);
+ 	if (IS_ERR(fe)) {
+ 		/* mirror file entry */
+-		udf_debug("Mirror metadata file location: block = %d part = %d\n",
++		udf_debug("Mirror metadata file location: block = %u part = %u\n",
+ 			  mdata->s_mirror_file_loc, mdata->s_phys_partition_ref);
+ 
+ 		fe = udf_find_metadata_inode_efe(sb, mdata->s_mirror_file_loc,
+@@ -1012,7 +1012,7 @@ static int udf_load_metadata_files(struct super_block *sb, int partition,
+ 		addr.logicalBlockNum = mdata->s_bitmap_file_loc;
+ 		addr.partitionReferenceNum = mdata->s_phys_partition_ref;
+ 
+-		udf_debug("Bitmap file location: block = %d part = %d\n",
++		udf_debug("Bitmap file location: block = %u part = %u\n",
+ 			  addr.logicalBlockNum, addr.partitionReferenceNum);
+ 
+ 		fe = udf_iget_special(sb, &addr);
+@@ -1042,7 +1042,7 @@ static void udf_load_fileset(struct super_block *sb, struct buffer_head *bh,
+ 
+ 	UDF_SB(sb)->s_serial_number = le16_to_cpu(fset->descTag.tagSerialNum);
+ 
+-	udf_debug("Rootdir at block=%d, partition=%d\n",
++	udf_debug("Rootdir at block=%u, partition=%u\n",
+ 		  root->logicalBlockNum, root->partitionReferenceNum);
+ }
+ 
+@@ -1097,7 +1097,7 @@ static int udf_fill_partdesc_info(struct super_block *sb,
+ 	if (p->accessType == cpu_to_le32(PD_ACCESS_TYPE_OVERWRITABLE))
+ 		map->s_partition_flags |= UDF_PART_FLAG_OVERWRITABLE;
+ 
+-	udf_debug("Partition (%d type %x) starts at physical %d, block length %d\n",
++	udf_debug("Partition (%d type %x) starts at physical %u, block length %u\n",
+ 		  p_index, map->s_partition_type,
+ 		  map->s_partition_root, map->s_partition_len);
+ 
+@@ -1122,7 +1122,7 @@ static int udf_fill_partdesc_info(struct super_block *sb,
+ 		}
+ 		map->s_uspace.s_table = inode;
+ 		map->s_partition_flags |= UDF_PART_FLAG_UNALLOC_TABLE;
+-		udf_debug("unallocSpaceTable (part %d) @ %ld\n",
++		udf_debug("unallocSpaceTable (part %d) @ %lu\n",
+ 			  p_index, map->s_uspace.s_table->i_ino);
+ 	}
+ 
+@@ -1134,7 +1134,7 @@ static int udf_fill_partdesc_info(struct super_block *sb,
+ 		bitmap->s_extPosition = le32_to_cpu(
+ 				phd->unallocSpaceBitmap.extPosition);
+ 		map->s_partition_flags |= UDF_PART_FLAG_UNALLOC_BITMAP;
+-		udf_debug("unallocSpaceBitmap (part %d) @ %d\n",
++		udf_debug("unallocSpaceBitmap (part %d) @ %u\n",
+ 			  p_index, bitmap->s_extPosition);
+ 	}
+ 
+@@ -1157,7 +1157,7 @@ static int udf_fill_partdesc_info(struct super_block *sb,
+ 		}
+ 		map->s_fspace.s_table = inode;
+ 		map->s_partition_flags |= UDF_PART_FLAG_FREED_TABLE;
+-		udf_debug("freedSpaceTable (part %d) @ %ld\n",
++		udf_debug("freedSpaceTable (part %d) @ %lu\n",
+ 			  p_index, map->s_fspace.s_table->i_ino);
+ 	}
+ 
+@@ -1169,7 +1169,7 @@ static int udf_fill_partdesc_info(struct super_block *sb,
+ 		bitmap->s_extPosition = le32_to_cpu(
+ 				phd->freedSpaceBitmap.extPosition);
+ 		map->s_partition_flags |= UDF_PART_FLAG_FREED_BITMAP;
+-		udf_debug("freedSpaceBitmap (part %d) @ %d\n",
++		udf_debug("freedSpaceBitmap (part %d) @ %u\n",
+ 			  p_index, bitmap->s_extPosition);
+ 	}
+ 	return 0;
+@@ -1282,7 +1282,7 @@ static int udf_load_partdesc(struct super_block *sb, sector_t block)
+ 	/* First scan for TYPE1 and SPARABLE partitions */
+ 	for (i = 0; i < sbi->s_partitions; i++) {
+ 		map = &sbi->s_partmaps[i];
+-		udf_debug("Searching map: (%d == %d)\n",
++		udf_debug("Searching map: (%u == %u)\n",
+ 			  map->s_partition_num, partitionNumber);
+ 		if (map->s_partition_num == partitionNumber &&
+ 		    (map->s_partition_type == UDF_TYPE1_MAP15 ||
+@@ -1291,7 +1291,7 @@ static int udf_load_partdesc(struct super_block *sb, sector_t block)
+ 	}
+ 
+ 	if (i >= sbi->s_partitions) {
+-		udf_debug("Partition (%d) not found in partition map\n",
++		udf_debug("Partition (%u) not found in partition map\n",
+ 			  partitionNumber);
+ 		ret = 0;
+ 		goto out_bh;
+@@ -1483,7 +1483,7 @@ static int udf_load_logicalvol(struct super_block *sb, sector_t block,
+ 				struct metadataPartitionMap *mdm =
+ 						(struct metadataPartitionMap *)
+ 						&(lvd->partitionMaps[offset]);
+-				udf_debug("Parsing Logical vol part %d type %d  id=%s\n",
++				udf_debug("Parsing Logical vol part %d type %u  id=%s\n",
+ 					  i, type, UDF_ID_METADATA);
+ 
+ 				map->s_partition_type = UDF_METADATA_MAP25;
+@@ -1505,17 +1505,17 @@ static int udf_load_logicalvol(struct super_block *sb, sector_t block,
+ 				udf_debug("Metadata Ident suffix=0x%x\n",
+ 					  le16_to_cpu(*(__le16 *)
+ 						      mdm->partIdent.identSuffix));
+-				udf_debug("Metadata part num=%d\n",
++				udf_debug("Metadata part num=%u\n",
+ 					  le16_to_cpu(mdm->partitionNum));
+-				udf_debug("Metadata part alloc unit size=%d\n",
++				udf_debug("Metadata part alloc unit size=%u\n",
+ 					  le32_to_cpu(mdm->allocUnitSize));
+-				udf_debug("Metadata file loc=%d\n",
++				udf_debug("Metadata file loc=%u\n",
+ 					  le32_to_cpu(mdm->metadataFileLoc));
+-				udf_debug("Mirror file loc=%d\n",
++				udf_debug("Mirror file loc=%u\n",
+ 					  le32_to_cpu(mdm->metadataMirrorFileLoc));
+-				udf_debug("Bitmap file loc=%d\n",
++				udf_debug("Bitmap file loc=%u\n",
+ 					  le32_to_cpu(mdm->metadataBitmapFileLoc));
+-				udf_debug("Flags: %d %d\n",
++				udf_debug("Flags: %d %u\n",
+ 					  mdata->s_flags, mdm->flags);
+ 			} else {
+ 				udf_debug("Unknown ident: %s\n",
+@@ -1525,7 +1525,7 @@ static int udf_load_logicalvol(struct super_block *sb, sector_t block,
+ 			map->s_volumeseqnum = le16_to_cpu(upm2->volSeqNum);
+ 			map->s_partition_num = le16_to_cpu(upm2->partitionNum);
+ 		}
+-		udf_debug("Partition (%d:%d) type %d on volume %d\n",
++		udf_debug("Partition (%d:%u) type %u on volume %u\n",
+ 			  i, map->s_partition_num, type, map->s_volumeseqnum);
+ 	}
+ 
+@@ -1533,7 +1533,7 @@ static int udf_load_logicalvol(struct super_block *sb, sector_t block,
+ 		struct long_ad *la = (struct long_ad *)&(lvd->logicalVolContentsUse[0]);
+ 
+ 		*fileset = lelb_to_cpu(la->extLocation);
+-		udf_debug("FileSet found in LogicalVolDesc at block=%d, partition=%d\n",
++		udf_debug("FileSet found in LogicalVolDesc at block=%u, partition=%u\n",
+ 			  fileset->logicalBlockNum,
+ 			  fileset->partitionReferenceNum);
+ 	}
+@@ -2159,7 +2159,7 @@ static int udf_fill_super(struct super_block *sb, void *options, int silent)
+ 			ret = udf_load_vrs(sb, &uopt, silent, &fileset);
+ 			if (ret < 0) {
+ 				if (!silent && ret != -EACCES) {
+-					pr_notice("Scanning with blocksize %d failed\n",
++					pr_notice("Scanning with blocksize %u failed\n",
+ 						  uopt.blocksize);
+ 				}
+ 				brelse(sbi->s_lvid_bh);
+@@ -2184,7 +2184,7 @@ static int udf_fill_super(struct super_block *sb, void *options, int silent)
+ 		goto error_out;
+ 	}
+ 
+-	udf_debug("Lastblock=%d\n", sbi->s_last_block);
++	udf_debug("Lastblock=%u\n", sbi->s_last_block);
+ 
+ 	if (sbi->s_lvid_bh) {
+ 		struct logicalVolIntegrityDescImpUse *lvidiu =
+@@ -2255,7 +2255,7 @@ static int udf_fill_super(struct super_block *sb, void *options, int silent)
+ 	/* perhaps it's not extensible enough, but for now ... */
+ 	inode = udf_iget(sb, &rootdir);
+ 	if (IS_ERR(inode)) {
+-		udf_err(sb, "Error in udf_iget, block=%d, partition=%d\n",
++		udf_err(sb, "Error in udf_iget, block=%u, partition=%u\n",
+ 		       rootdir.logicalBlockNum, rootdir.partitionReferenceNum);
+ 		ret = PTR_ERR(inode);
+ 		goto error_out;
+diff --git a/fs/udf/unicode.c b/fs/udf/unicode.c
+index 695389a4fc23..f897e55f2cd0 100644
+--- a/fs/udf/unicode.c
++++ b/fs/udf/unicode.c
+@@ -200,7 +200,7 @@ static int udf_name_from_CS0(uint8_t *str_o, int str_max_len,
+ 	cmp_id = ocu[0];
+ 	if (cmp_id != 8 && cmp_id != 16) {
+ 		memset(str_o, 0, str_max_len);
+-		pr_err("unknown compression code (%d)\n", cmp_id);
++		pr_err("unknown compression code (%u)\n", cmp_id);
+ 		return -EINVAL;
+ 	}
+ 	u_ch = cmp_id >> 3;

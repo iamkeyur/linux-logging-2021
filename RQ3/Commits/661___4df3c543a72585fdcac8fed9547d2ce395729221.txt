@@ -1,0 +1,44 @@
+['4df3c543a72585fdcac8fed9547d2ce395729221', '271.txt', 'Formatting']
+commit 4df3c543a72585fdcac8fed9547d2ce395729221
+Author: Joe Perches <joe@perches.com>
+Date:   Thu Nov 1 00:03:31 2018 -0700
+
+    igb: Fix format with line continuation whitespace
+    
+    The line continuation unintentionally adds whitespace so
+    instead use a coalesced format to remove the whitespace.
+    
+    Miscellanea:
+    
+    o Use a more typical style for ternaries and arguments
+      for this logging message
+    
+    Signed-off-by: Joe Perches <joe@perches.com>
+    Tested-by: Aaron Brown <aaron.f.brown@intel.com>
+    Acked-by: Vinicius Costa Gomes <vinicius.gomes@intel.com>
+    Signed-off-by: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+
+diff --git a/drivers/net/ethernet/intel/igb/igb_main.c b/drivers/net/ethernet/intel/igb/igb_main.c
+index 4584ebc9e8fe..4331ea71b86e 100644
+--- a/drivers/net/ethernet/intel/igb/igb_main.c
++++ b/drivers/net/ethernet/intel/igb/igb_main.c
+@@ -1850,13 +1850,12 @@ static void igb_config_tx_modes(struct igb_adapter *adapter, int queue)
+ 	 * configuration' in respect to these parameters.
+ 	 */
+ 
+-	netdev_dbg(netdev, "Qav Tx mode: cbs %s, launchtime %s, queue %d \
+-			    idleslope %d sendslope %d hiCredit %d \
+-			    locredit %d\n",
+-		   (ring->cbs_enable) ? "enabled" : "disabled",
+-		   (ring->launchtime_enable) ? "enabled" : "disabled", queue,
+-		   ring->idleslope, ring->sendslope, ring->hicredit,
+-		   ring->locredit);
++	netdev_dbg(netdev, "Qav Tx mode: cbs %s, launchtime %s, queue %d idleslope %d sendslope %d hiCredit %d locredit %d\n",
++		   ring->cbs_enable ? "enabled" : "disabled",
++		   ring->launchtime_enable ? "enabled" : "disabled",
++		   queue,
++		   ring->idleslope, ring->sendslope,
++		   ring->hicredit, ring->locredit);
+ }
+ 
+ static int igb_save_txtime_params(struct igb_adapter *adapter, int queue,

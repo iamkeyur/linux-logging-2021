@@ -1,0 +1,86 @@
+['e3494af5ce5f7c657e84588de10d0c777ccea8f8', '1504.txt', 'Clarify/Reword']
+commit e3494af5ce5f7c657e84588de10d0c777ccea8f8
+Author: Stuart Yoder <stuart.yoder@nxp.com>
+Date:   Wed Oct 26 11:20:31 2016 -0500
+
+    staging: fsl-mc: cleanup: improve clarity of messages
+    
+    improve some messages by shortening and rewording
+    
+    Signed-off-by: Stuart Yoder <stuart.yoder@nxp.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/fsl-mc/bus/fsl-mc-allocator.c b/drivers/staging/fsl-mc/bus/fsl-mc-allocator.c
+index cf1014822906..e92c7804daab 100644
+--- a/drivers/staging/fsl-mc/bus/fsl-mc-allocator.c
++++ b/drivers/staging/fsl-mc/bus/fsl-mc-allocator.c
+@@ -605,7 +605,7 @@ static int fsl_mc_allocator_probe(struct fsl_mc_device *mc_dev)
+ 		return error;
+ 
+ 	dev_dbg(&mc_dev->dev,
+-		"Allocatable MC object device bound to fsl_mc_allocator driver");
++		"Allocatable fsl-mc device bound to fsl_mc_allocator driver");
+ 	return 0;
+ }
+ 
+@@ -627,7 +627,7 @@ static int fsl_mc_allocator_remove(struct fsl_mc_device *mc_dev)
+ 	}
+ 
+ 	dev_dbg(&mc_dev->dev,
+-		"Allocatable MC object device unbound from fsl_mc_allocator driver");
++		"Allocatable fsl-mc device unbound from fsl_mc_allocator driver");
+ 	return 0;
+ }
+ 
+diff --git a/drivers/staging/fsl-mc/bus/fsl-mc-bus.c b/drivers/staging/fsl-mc/bus/fsl-mc-bus.c
+index 5267c503c75b..fb062d39503f 100644
+--- a/drivers/staging/fsl-mc/bus/fsl-mc-bus.c
++++ b/drivers/staging/fsl-mc/bus/fsl-mc-bus.c
+@@ -231,8 +231,7 @@ int __fsl_mc_driver_register(struct fsl_mc_driver *mc_driver,
+ 		return error;
+ 	}
+ 
+-	pr_info("MC object device driver %s registered\n",
+-		mc_driver->driver.name);
++	pr_info("driver %s registered\n", mc_driver->driver.name);
+ 	return 0;
+ }
+ EXPORT_SYMBOL_GPL(__fsl_mc_driver_register);
+@@ -571,8 +570,7 @@ int fsl_mc_device_add(struct dprc_obj_desc *obj_desc,
+ 	}
+ 
+ 	(void)get_device(&mc_dev->dev);
+-	dev_dbg(parent_dev, "Added MC object device %s\n",
+-		dev_name(&mc_dev->dev));
++	dev_dbg(parent_dev, "added %s\n", dev_name(&mc_dev->dev));
+ 
+ 	*new_mc_dev = mc_dev;
+ 	return 0;
+@@ -748,7 +746,7 @@ static int fsl_mc_bus_probe(struct platform_device *pdev)
+ 	struct mc_version mc_version;
+ 	struct resource res;
+ 
+-	dev_info(&pdev->dev, "Root MC bus device probed");
++	dev_info(&pdev->dev, "root DPRC probed");
+ 
+ 	mc = devm_kzalloc(&pdev->dev, sizeof(*mc), GFP_KERNEL);
+ 	if (!mc)
+@@ -782,8 +780,7 @@ static int fsl_mc_bus_probe(struct platform_device *pdev)
+ 		goto error_cleanup_mc_io;
+ 	}
+ 
+-	dev_info(&pdev->dev,
+-		 "Freescale Management Complex Firmware version: %u.%u.%u\n",
++	dev_info(&pdev->dev, "MC firmware version: %u.%u.%u\n",
+ 		 mc_version.major, mc_version.minor, mc_version.revision);
+ 
+ 	error = get_mc_addr_translation_ranges(&pdev->dev,
+@@ -839,7 +836,7 @@ static int fsl_mc_bus_remove(struct platform_device *pdev)
+ 	fsl_destroy_mc_io(mc->root_mc_bus_dev->mc_io);
+ 	mc->root_mc_bus_dev->mc_io = NULL;
+ 
+-	dev_info(&pdev->dev, "Root MC bus device removed");
++	dev_info(&pdev->dev, "root DPRC removed");
+ 	return 0;
+ }
+ 

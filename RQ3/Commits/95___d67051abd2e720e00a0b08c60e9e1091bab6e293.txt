@@ -1,0 +1,38 @@
+['d67051abd2e720e00a0b08c60e9e1091bab6e293', '899.txt', 'Typo']
+commit d67051abd2e720e00a0b08c60e9e1091bab6e293
+Author: Masanari Iida <standby24x7@gmail.com>
+Date:   Tue Oct 10 22:47:23 2017 +0900
+
+    staging: rtl8723bs: Fix typos in printk
+    
+    This patch fixes typos found in rtl8723bs_xmit.c and odm_DIG.c.
+    
+    Signed-off-by: Masanari Iida <standby24x7@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/rtl8723bs/hal/odm_DIG.c b/drivers/staging/rtl8723bs/hal/odm_DIG.c
+index 0bde9444471d..f02eb63a45ce 100644
+--- a/drivers/staging/rtl8723bs/hal/odm_DIG.c
++++ b/drivers/staging/rtl8723bs/hal/odm_DIG.c
+@@ -553,7 +553,7 @@ void odm_DIG(void *pDM_VOID)
+ 	dm_dig_min = DM_DIG_MIN_NIC;
+ 	DIG_MaxOfMin = DM_DIG_MAX_AP;
+ 
+-	ODM_RT_TRACE(pDM_Odm, ODM_COMP_DIG, ODM_DBG_LOUD, ("odm_DIG(): Absolutly upper bound = 0x%x, lower bound = 0x%x\n", dm_dig_max, dm_dig_min));
++	ODM_RT_TRACE(pDM_Odm, ODM_COMP_DIG, ODM_DBG_LOUD, ("odm_DIG(): Absolutely upper bound = 0x%x, lower bound = 0x%x\n", dm_dig_max, dm_dig_min));
+ 
+ 	/* 1 Adjust boundary by RSSI */
+ 	if (pDM_Odm->bLinked && bPerformance) {
+diff --git a/drivers/staging/rtl8723bs/hal/rtl8723bs_xmit.c b/drivers/staging/rtl8723bs/hal/rtl8723bs_xmit.c
+index d0b317077511..6281dfa1a3ca 100644
+--- a/drivers/staging/rtl8723bs/hal/rtl8723bs_xmit.c
++++ b/drivers/staging/rtl8723bs/hal/rtl8723bs_xmit.c
+@@ -113,7 +113,7 @@ static s32 rtl8723_dequeue_writeport(struct adapter *padapter)
+ 		RT_TRACE(
+ 			_module_hal_xmit_c_,
+ 			_drv_notice_,
+-			("%s: bSurpriseRemoved(wirte port)\n", __func__)
++			("%s: bSurpriseRemoved(write port)\n", __func__)
+ 		);
+ 		goto free_xmitbuf;
+ 	}

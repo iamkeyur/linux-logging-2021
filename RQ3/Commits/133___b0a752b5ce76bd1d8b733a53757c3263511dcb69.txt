@@ -1,0 +1,25 @@
+['b0a752b5ce76bd1d8b733a53757c3263511dcb69', '855.txt', 'LogLevel']
+commit b0a752b5ce76bd1d8b733a53757c3263511dcb69
+Author: Pavel Shilovsky <pshilov@microsoft.com>
+Date:   Wed Nov 16 15:17:15 2016 -0800
+
+    CIFS: Decrease verbosity of ioctl call
+    
+    Cc: Stable <stable@vger.kernel.org> # v4.9+
+    Reviewed-by: Aurelien Aptel <aaptel@suse.com>
+    Acked-by: Sachin Prabhu <sprabhu@redhat.com>
+    Signed-off-by: Pavel Shilovsky <pshilov@microsoft.com>
+
+diff --git a/fs/cifs/ioctl.c b/fs/cifs/ioctl.c
+index 9f51b81119f2..001528781b6b 100644
+--- a/fs/cifs/ioctl.c
++++ b/fs/cifs/ioctl.c
+@@ -189,7 +189,7 @@ long cifs_ioctl(struct file *filep, unsigned int command, unsigned long arg)
+ 	xid = get_xid();
+ 
+ 	cifs_sb = CIFS_SB(inode->i_sb);
+-	cifs_dbg(VFS, "cifs ioctl 0x%x\n", command);
++	cifs_dbg(FYI, "cifs ioctl 0x%x\n", command);
+ 	switch (command) {
+ 		case FS_IOC_GETFLAGS:
+ 			if (pSMBFile == NULL)

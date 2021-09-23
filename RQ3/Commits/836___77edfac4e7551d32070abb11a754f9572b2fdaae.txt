@@ -1,0 +1,38 @@
+['77edfac4e7551d32070abb11a754f9572b2fdaae', '44.txt', 'ModernizeLog']
+commit 77edfac4e7551d32070abb11a754f9572b2fdaae
+Author: Bjorn Helgaas <bhelgaas@google.com>
+Date:   Tue May 22 07:56:22 2018 -0500
+
+    MIPS: PCI: Use dev_printk() when possible
+    
+    Use the pci_info() and pci_err() wrappers for dev_printk() when possible.
+    
+    Signed-off-by: Bjorn Helgaas <bhelgaas@google.com>
+    Acked-by: James Hogan <jhogan@kernel.org>
+
+diff --git a/arch/mips/pci/pci-legacy.c b/arch/mips/pci/pci-legacy.c
+index 0c65c38e05d6..f1e92bf743c2 100644
+--- a/arch/mips/pci/pci-legacy.c
++++ b/arch/mips/pci/pci-legacy.c
+@@ -263,9 +263,8 @@ static int pcibios_enable_resources(struct pci_dev *dev, int mask)
+ 				(!(r->flags & IORESOURCE_ROM_ENABLE)))
+ 			continue;
+ 		if (!r->start && r->end) {
+-			printk(KERN_ERR "PCI: Device %s not available "
+-			       "because of resource collisions\n",
+-			       pci_name(dev));
++			pci_err(dev,
++				"can't enable device: resource collisions\n");
+ 			return -EINVAL;
+ 		}
+ 		if (r->flags & IORESOURCE_IO)
+@@ -274,8 +273,7 @@ static int pcibios_enable_resources(struct pci_dev *dev, int mask)
+ 			cmd |= PCI_COMMAND_MEMORY;
+ 	}
+ 	if (cmd != old_cmd) {
+-		printk("PCI: Enabling device %s (%04x -> %04x)\n",
+-		       pci_name(dev), old_cmd, cmd);
++		pci_info(dev, "enabling device (%04x -> %04x)\n", old_cmd, cmd);
+ 		pci_write_config_word(dev, PCI_COMMAND, cmd);
+ 	}
+ 	return 0;

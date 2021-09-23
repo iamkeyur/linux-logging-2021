@@ -1,0 +1,150 @@
+['8c7003a3b4b4afd3734cdcc39217ef22d78a4a16', '507.txt', 'NullPtr']
+commit 8c7003a3b4b4afd3734cdcc39217ef22d78a4a16
+Author: Alexander Popov <alpopov@ptsecurity.com>
+Date:   Thu Apr 28 13:07:22 2016 +0300
+
+    usbip: fix NULL pointer dereference on errors
+    
+    Fix NULL pointer dereference and obsolete comments forgotten when
+    usbip server was converted from an interface driver to a device driver.
+    
+    Signed-off-by: Alexander Popov <alpopov@ptsecurity.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/usb/usbip/stub.h b/drivers/usb/usbip/stub.h
+index 266e2b0ce9a8..910f027773aa 100644
+--- a/drivers/usb/usbip/stub.h
++++ b/drivers/usb/usbip/stub.h
+@@ -33,7 +33,6 @@
+ #define STUB_BUSID_ALLOC 3
+ 
+ struct stub_device {
+-	struct usb_interface *interface;
+ 	struct usb_device *udev;
+ 
+ 	struct usbip_device ud;
+diff --git a/drivers/usb/usbip/stub_dev.c b/drivers/usb/usbip/stub_dev.c
+index e286346041f6..c653ce533430 100644
+--- a/drivers/usb/usbip/stub_dev.c
++++ b/drivers/usb/usbip/stub_dev.c
+@@ -219,7 +219,7 @@ static void stub_device_reset(struct usbip_device *ud)
+ 
+ 	dev_dbg(&udev->dev, "device reset");
+ 
+-	ret = usb_lock_device_for_reset(udev, sdev->interface);
++	ret = usb_lock_device_for_reset(udev, NULL);
+ 	if (ret < 0) {
+ 		dev_err(&udev->dev, "lock for reset\n");
+ 		spin_lock_irq(&ud->lock);
+@@ -252,7 +252,7 @@ static void stub_device_unusable(struct usbip_device *ud)
+ 
+ /**
+  * stub_device_alloc - allocate a new stub_device struct
+- * @interface: usb_interface of a new device
++ * @udev: usb_device of a new device
+  *
+  * Allocates and initializes a new stub_device struct.
+  */
+diff --git a/drivers/usb/usbip/stub_rx.c b/drivers/usb/usbip/stub_rx.c
+index 00e475c51a12..2df63e305722 100644
+--- a/drivers/usb/usbip/stub_rx.c
++++ b/drivers/usb/usbip/stub_rx.c
+@@ -165,12 +165,7 @@ static int tweak_reset_device_cmd(struct urb *urb)
+ 
+ 	dev_info(&urb->dev->dev, "usb_queue_reset_device\n");
+ 
+-	/*
+-	 * With the implementation of pre_reset and post_reset the driver no
+-	 * longer unbinds. This allows the use of synchronous reset.
+-	 */
+-
+-	if (usb_lock_device_for_reset(sdev->udev, sdev->interface) < 0) {
++	if (usb_lock_device_for_reset(sdev->udev, NULL) < 0) {
+ 		dev_err(&urb->dev->dev, "could not obtain lock to reset device\n");
+ 		return 0;
+ 	}
+@@ -321,7 +316,7 @@ static struct stub_priv *stub_priv_alloc(struct stub_device *sdev,
+ 
+ 	priv = kmem_cache_zalloc(stub_priv_cache, GFP_ATOMIC);
+ 	if (!priv) {
+-		dev_err(&sdev->interface->dev, "alloc stub_priv\n");
++		dev_err(&sdev->udev->dev, "alloc stub_priv\n");
+ 		spin_unlock_irqrestore(&sdev->priv_lock, flags);
+ 		usbip_event_add(ud, SDEV_EVENT_ERROR_MALLOC);
+ 		return NULL;
+@@ -352,7 +347,7 @@ static int get_pipe(struct stub_device *sdev, int epnum, int dir)
+ 	else
+ 		ep = udev->ep_out[epnum & 0x7f];
+ 	if (!ep) {
+-		dev_err(&sdev->interface->dev, "no such endpoint?, %d\n",
++		dev_err(&sdev->udev->dev, "no such endpoint?, %d\n",
+ 			epnum);
+ 		BUG();
+ 	}
+@@ -387,7 +382,7 @@ static int get_pipe(struct stub_device *sdev, int epnum, int dir)
+ 	}
+ 
+ 	/* NOT REACHED */
+-	dev_err(&sdev->interface->dev, "get pipe, epnum %d\n", epnum);
++	dev_err(&sdev->udev->dev, "get pipe, epnum %d\n", epnum);
+ 	return 0;
+ }
+ 
+@@ -466,7 +461,7 @@ static void stub_recv_cmd_submit(struct stub_device *sdev,
+ 		priv->urb = usb_alloc_urb(0, GFP_KERNEL);
+ 
+ 	if (!priv->urb) {
+-		dev_err(&sdev->interface->dev, "malloc urb\n");
++		dev_err(&udev->dev, "malloc urb\n");
+ 		usbip_event_add(ud, SDEV_EVENT_ERROR_MALLOC);
+ 		return;
+ 	}
+@@ -486,7 +481,7 @@ static void stub_recv_cmd_submit(struct stub_device *sdev,
+ 	priv->urb->setup_packet = kmemdup(&pdu->u.cmd_submit.setup, 8,
+ 					  GFP_KERNEL);
+ 	if (!priv->urb->setup_packet) {
+-		dev_err(&sdev->interface->dev, "allocate setup_packet\n");
++		dev_err(&udev->dev, "allocate setup_packet\n");
+ 		usbip_event_add(ud, SDEV_EVENT_ERROR_MALLOC);
+ 		return;
+ 	}
+@@ -517,7 +512,7 @@ static void stub_recv_cmd_submit(struct stub_device *sdev,
+ 		usbip_dbg_stub_rx("submit urb ok, seqnum %u\n",
+ 				  pdu->base.seqnum);
+ 	else {
+-		dev_err(&sdev->interface->dev, "submit_urb error, %d\n", ret);
++		dev_err(&udev->dev, "submit_urb error, %d\n", ret);
+ 		usbip_dump_header(pdu);
+ 		usbip_dump_urb(priv->urb);
+ 
+diff --git a/drivers/usb/usbip/stub_tx.c b/drivers/usb/usbip/stub_tx.c
+index dbcabc9dbe0d..af1edad4683a 100644
+--- a/drivers/usb/usbip/stub_tx.c
++++ b/drivers/usb/usbip/stub_tx.c
+@@ -229,7 +229,7 @@ static int stub_send_ret_submit(struct stub_device *sdev)
+ 			}
+ 
+ 			if (txsize != sizeof(pdu_header) + urb->actual_length) {
+-				dev_err(&sdev->interface->dev,
++				dev_err(&sdev->udev->dev,
+ 					"actual length of urb %d does not match iso packet sizes %zu\n",
+ 					urb->actual_length,
+ 					txsize-sizeof(pdu_header));
+@@ -261,7 +261,7 @@ static int stub_send_ret_submit(struct stub_device *sdev)
+ 		ret = kernel_sendmsg(sdev->ud.tcp_socket, &msg,
+ 						iov,  iovnum, txsize);
+ 		if (ret != txsize) {
+-			dev_err(&sdev->interface->dev,
++			dev_err(&sdev->udev->dev,
+ 				"sendmsg failed!, retval %d for %zd\n",
+ 				ret, txsize);
+ 			kfree(iov);
+@@ -336,7 +336,7 @@ static int stub_send_ret_unlink(struct stub_device *sdev)
+ 		ret = kernel_sendmsg(sdev->ud.tcp_socket, &msg, iov,
+ 				     1, txsize);
+ 		if (ret != txsize) {
+-			dev_err(&sdev->interface->dev,
++			dev_err(&sdev->udev->dev,
+ 				"sendmsg failed!, retval %d for %zd\n",
+ 				ret, txsize);
+ 			usbip_event_add(&sdev->ud, SDEV_EVENT_ERROR_TCP);

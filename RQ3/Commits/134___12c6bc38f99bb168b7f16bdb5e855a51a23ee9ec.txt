@@ -1,0 +1,24 @@
+['12c6bc38f99bb168b7f16bdb5e855a51a23ee9ec', '854.txt', 'CopyPasteMistakes']
+commit 12c6bc38f99bb168b7f16bdb5e855a51a23ee9ec
+Author: Yi-Hung Wei <yihung.wei@gmail.com>
+Date:   Wed Aug 21 17:16:10 2019 -0700
+
+    openvswitch: Fix log message in ovs conntrack
+    
+    Fixes: 06bd2bdf19d2 ("openvswitch: Add timeout support to ct action")
+    Signed-off-by: Yi-Hung Wei <yihung.wei@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/net/openvswitch/conntrack.c b/net/openvswitch/conntrack.c
+index 848c6eb55064..a1852e035ebb 100644
+--- a/net/openvswitch/conntrack.c
++++ b/net/openvswitch/conntrack.c
+@@ -1565,7 +1565,7 @@ static int parse_ct(const struct nlattr *attr, struct ovs_conntrack_info *info,
+ 		case OVS_CT_ATTR_TIMEOUT:
+ 			memcpy(info->timeout, nla_data(a), nla_len(a));
+ 			if (!memchr(info->timeout, '\0', nla_len(a))) {
+-				OVS_NLERR(log, "Invalid conntrack helper");
++				OVS_NLERR(log, "Invalid conntrack timeout");
+ 				return -EINVAL;
+ 			}
+ 			break;

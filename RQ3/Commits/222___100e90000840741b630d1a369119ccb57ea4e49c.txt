@@ -1,0 +1,129 @@
+['100e90000840741b630d1a369119ccb57ea4e49c', '758.txt', 'FixFormatSpecifier']
+commit 100e90000840741b630d1a369119ccb57ea4e49c
+Author: Johan Hovold <johan@kernel.org>
+Date:   Mon Dec 7 15:05:38 2015 +0100
+
+    greybus: use decimal notation for interfaces, bundles and cports
+    
+    Fix up the last few places where hexadecimal rather than decimal
+    notation was used for interface, bundle and cport ids.
+    
+    Signed-off-by: Johan Hovold <johan@hovoldconsulting.com>
+    Reviewed-by: Viresh Kumar <viresh.kumar@linaro.org>
+    Reviewed-by: Bryan O'Donoghue <bryan.odonoghue@linaro.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@google.com>
+
+diff --git a/drivers/staging/greybus/bundle.c b/drivers/staging/greybus/bundle.c
+index e53833697a56..d7975edb3230 100644
+--- a/drivers/staging/greybus/bundle.c
++++ b/drivers/staging/greybus/bundle.c
+@@ -98,7 +98,7 @@ struct gb_bundle *gb_bundle_create(struct gb_interface *intf, u8 bundle_id,
+ 	 * the interface bundle list locked here.
+ 	 */
+ 	if (gb_bundle_find(intf, bundle_id)) {
+-		pr_err("duplicate bundle id 0x%02x\n", bundle_id);
++		pr_err("duplicate bundle id %u\n", bundle_id);
+ 		return NULL;
+ 	}
+ 
+@@ -122,8 +122,7 @@ struct gb_bundle *gb_bundle_create(struct gb_interface *intf, u8 bundle_id,
+ 
+ 	retval = device_add(&bundle->dev);
+ 	if (retval) {
+-		pr_err("failed to add bundle device for id 0x%02x\n",
+-			bundle_id);
++		pr_err("failed to add bundle device for id %u\n", bundle_id);
+ 		put_device(&bundle->dev);
+ 		return NULL;
+ 	}
+diff --git a/drivers/staging/greybus/connection.c b/drivers/staging/greybus/connection.c
+index 38604e8971d1..5a24dbef98f2 100644
+--- a/drivers/staging/greybus/connection.c
++++ b/drivers/staging/greybus/connection.c
+@@ -133,7 +133,7 @@ gb_connection_create(struct gb_host_device *hd, int hd_cport_id,
+ 	 * about holding the connection lock.
+ 	 */
+ 	if (bundle && gb_connection_intf_find(bundle->intf, cport_id)) {
+-		dev_err(&bundle->dev, "cport 0x%04x already connected\n",
++		dev_err(&bundle->dev, "cport %u already connected\n",
+ 				cport_id);
+ 		return NULL;
+ 	}
+diff --git a/drivers/staging/greybus/es2.c b/drivers/staging/greybus/es2.c
+index 02cd2f6b8d3b..b1b6ad3a512b 100644
+--- a/drivers/staging/greybus/es2.c
++++ b/drivers/staging/greybus/es2.c
+@@ -348,8 +348,7 @@ static int message_send(struct gb_host_device *hd, u16 cport_id,
+ 	 * the target CPort id before filling it in.
+ 	 */
+ 	if (!cport_id_valid(hd, cport_id)) {
+-		dev_err(&udev->dev, "invalid destination cport 0x%02x\n",
+-				cport_id);
++		dev_err(&udev->dev, "invalid cport %u\n", cport_id);
+ 		return -EINVAL;
+ 	}
+ 
+@@ -470,8 +469,7 @@ static int latency_tag_enable(struct gb_host_device *hd, u16 cport_id)
+ 	struct usb_device *udev = es2->usb_dev;
+ 
+ 	if (!cport_id_valid(hd, cport_id)) {
+-		dev_err(&udev->dev, "invalid destination cport 0x%02x\n",
+-			cport_id);
++		dev_err(&udev->dev, "invalid cport %u\n", cport_id);
+ 		return -EINVAL;
+ 	}
+ 
+@@ -494,8 +492,7 @@ static int latency_tag_disable(struct gb_host_device *hd, u16 cport_id)
+ 	struct usb_device *udev = es2->usb_dev;
+ 
+ 	if (!cport_id_valid(hd, cport_id)) {
+-		dev_err(&udev->dev, "invalid destination cport 0x%02x\n",
+-			cport_id);
++		dev_err(&udev->dev, "invalid cport %u\n", cport_id);
+ 		return -EINVAL;
+ 	}
+ 
+@@ -632,7 +629,7 @@ static void cport_in_callback(struct urb *urb)
+ 		greybus_data_rcvd(hd, cport_id, urb->transfer_buffer,
+ 							urb->actual_length);
+ 	} else {
+-		dev_err(dev, "invalid cport id 0x%02x received\n", cport_id);
++		dev_err(dev, "invalid cport id %u received\n", cport_id);
+ 	}
+ exit:
+ 	/* put our urb back in the request pool */
+diff --git a/drivers/staging/greybus/greybus_trace.h b/drivers/staging/greybus/greybus_trace.h
+index 1ca07064f5de..96c515113b98 100644
+--- a/drivers/staging/greybus/greybus_trace.h
++++ b/drivers/staging/greybus/greybus_trace.h
+@@ -41,7 +41,7 @@ DECLARE_EVENT_CLASS(gb_message,
+ 		__entry->payload_size = message->payload_size;
+ 	),
+ 
+-	TP_printk("greybus:%s op=%04x if_id=%04x hd_id=%04x l=%zu",
++	TP_printk("greybus:%s op=%04x if_id=%u hd_id=%u l=%zu",
+ 		  __get_str(name), __entry->op_id, __entry->intf_cport_id,
+ 		  __entry->hd_cport_id, __entry->payload_size)
+ );
+@@ -125,7 +125,7 @@ DECLARE_EVENT_CLASS(gb_host_device,
+ 		__entry->payload_size = payload_size;
+ 	),
+ 
+-	TP_printk("greybus:%s if_id=%04x l=%zu", __get_str(name),
++	TP_printk("greybus:%s if_id=%u l=%zu", __get_str(name),
+ 		  __entry->intf_cport_id, __entry->payload_size)
+ );
+ 
+diff --git a/drivers/staging/greybus/manifest.c b/drivers/staging/greybus/manifest.c
+index 2d470500222e..8310f199f0f1 100644
+--- a/drivers/staging/greybus/manifest.c
++++ b/drivers/staging/greybus/manifest.c
+@@ -323,7 +323,7 @@ static u32 gb_manifest_parse_bundles(struct gb_interface *intf)
+ 		/* Nothing else should have its class set to control class */
+ 		if (class == GREYBUS_CLASS_CONTROL) {
+ 			dev_err(&intf->dev,
+-				"bundle 0x%02x cannot use control class\n",
++				"bundle %u cannot use control class\n",
+ 				bundle_id);
+ 			goto cleanup;
+ 		}

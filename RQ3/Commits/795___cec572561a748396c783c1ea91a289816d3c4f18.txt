@@ -1,0 +1,43 @@
+['cec572561a748396c783c1ea91a289816d3c4f18', '215.txt', 'LogLevel']
+commit cec572561a748396c783c1ea91a289816d3c4f18
+Author: Darrick J. Wong <darrick.wong@oracle.com>
+Date:   Fri May 4 15:31:21 2018 -0700
+
+    xfs: bmap debugging should never panic the system
+    
+    Don't panic() the system if the bmap records are garbage, just call
+    ASSERT which gives us the same backtrace but enables developers to
+    control if the system goes down or not.  This makes debugging with
+    generic/388 much easier because it won't reboot the machine midway
+    through a run just because btree_read_bufl returns EIO when the fs has
+    already shut down.
+    
+    Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+    Reviewed-by: Christoph Hellwig <hch@lst.de>
+    Reviewed-by: Brian Foster <bfoster@redhat.com>
+
+diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
+index 040eeda8426f..ddb5f5336ecf 100644
+--- a/fs/xfs/libxfs/xfs_bmap.c
++++ b/fs/xfs/libxfs/xfs_bmap.c
+@@ -312,8 +312,9 @@ xfs_check_block(
+ 				xfs_warn(mp, "%s: thispa(%d) == pp(%d) %Ld",
+ 					__func__, j, i,
+ 					(unsigned long long)be64_to_cpu(*thispa));
+-				panic("%s: ptrs are equal in node\n",
++				xfs_err(mp, "%s: ptrs are equal in node\n",
+ 					__func__);
++				xfs_force_shutdown(mp, SHUTDOWN_CORRUPT_INCORE);
+ 			}
+ 		}
+ 	}
+@@ -483,7 +484,8 @@ xfs_bmap_check_leaf_extents(
+ error_norelse:
+ 	xfs_warn(mp, "%s: BAD after btree leaves for %d extents",
+ 		__func__, i);
+-	panic("%s: CORRUPTED BTREE OR SOMETHING", __func__);
++	xfs_err(mp, "%s: CORRUPTED BTREE OR SOMETHING", __func__);
++	xfs_force_shutdown(mp, SHUTDOWN_CORRUPT_INCORE);
+ 	return;
+ }
+ 

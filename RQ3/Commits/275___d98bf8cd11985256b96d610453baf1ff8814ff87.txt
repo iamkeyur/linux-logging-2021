@@ -1,0 +1,27 @@
+['d98bf8cd11985256b96d610453baf1ff8814ff87', '701.txt', 'Clarify/Reword']
+commit d98bf8cd11985256b96d610453baf1ff8814ff87
+Author: Simon Ruderich <simon@ruderich.org>
+Date:   Wed Oct 18 13:06:37 2017 -0400
+
+    ext4: mention noload when recovering on read-only device
+    
+    Help the user to find the appropriate mount option to continue mounting
+    the file system on a read-only device if the journal requires recovery.
+    
+    Signed-off-by: Simon Ruderich <simon@ruderich.org>
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+
+diff --git a/fs/ext4/super.c b/fs/ext4/super.c
+index 64d5e9e78dbc..3a278faf5868 100644
+--- a/fs/ext4/super.c
++++ b/fs/ext4/super.c
+@@ -4616,7 +4616,8 @@ static int ext4_load_journal(struct super_block *sb,
+ 					"required on readonly filesystem");
+ 			if (really_read_only) {
+ 				ext4_msg(sb, KERN_ERR, "write access "
+-					"unavailable, cannot proceed");
++					"unavailable, cannot proceed "
++					"(try mounting with noload)");
+ 				return -EROFS;
+ 			}
+ 			ext4_msg(sb, KERN_INFO, "write access will "

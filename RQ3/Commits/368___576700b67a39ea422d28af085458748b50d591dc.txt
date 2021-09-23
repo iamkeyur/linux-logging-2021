@@ -1,0 +1,45 @@
+['576700b67a39ea422d28af085458748b50d591dc', '599.txt', 'ModernizeLog']
+commit 576700b67a39ea422d28af085458748b50d591dc
+Author: Bjorn Helgaas <bhelgaas@google.com>
+Date:   Mon Nov 21 15:24:25 2016 -0600
+
+    PCI/AER: Log errors with PCI device, not PCIe service device
+    
+    All other AER-related log messages use the PCI device, e.g.,
+    "pci 0000:00:1c.0", not the PCIe service device, e.g.,
+    "aer 0000:00:1c.0:pcie02".
+    
+    Change the probe error messages to match the rest and include a little
+    context.
+    
+    Signed-off-by: Bjorn Helgaas <bhelgaas@google.com>
+
+diff --git a/drivers/pci/pcie/aer/aerdrv.c b/drivers/pci/pcie/aer/aerdrv.c
+index 1c189e61039d..60e63d60bb31 100644
+--- a/drivers/pci/pcie/aer/aerdrv.c
++++ b/drivers/pci/pcie/aer/aerdrv.c
+@@ -290,12 +290,12 @@ static int aer_probe(struct pcie_device *dev)
+ {
+ 	int status;
+ 	struct aer_rpc *rpc;
+-	struct device *device = &dev->device;
++	struct device *device = &dev->port->dev;
+ 
+ 	/* Alloc rpc data structure */
+ 	rpc = aer_alloc_rpc(dev);
+ 	if (!rpc) {
+-		dev_printk(KERN_DEBUG, device, "alloc rpc failed\n");
++		dev_printk(KERN_DEBUG, device, "alloc AER rpc failed\n");
+ 		aer_remove(dev);
+ 		return -ENOMEM;
+ 	}
+@@ -303,7 +303,8 @@ static int aer_probe(struct pcie_device *dev)
+ 	/* Request IRQ ISR */
+ 	status = request_irq(dev->irq, aer_irq, IRQF_SHARED, "aerdrv", dev);
+ 	if (status) {
+-		dev_printk(KERN_DEBUG, device, "request IRQ failed\n");
++		dev_printk(KERN_DEBUG, device, "request AER IRQ %d failed\n",
++			   dev->irq);
+ 		aer_remove(dev);
+ 		return status;
+ 	}

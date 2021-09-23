@@ -1,0 +1,38 @@
+['6aba9c65649e5ef137bce7a958c0749f13af88a1', '231.txt', 'LogLevel']
+commit 6aba9c65649e5ef137bce7a958c0749f13af88a1
+Author: Baruch Siach <baruch@tkos.co.il>
+Date:   Tue May 30 08:33:30 2017 +0300
+
+    spi: atmel: print version only after successful registration
+    
+    Don't print the version at the beginning of atmel_spi_probe(). This avoids
+    spamming the log whenever a deferred probe runs.
+    
+    Signed-off-by: Baruch Siach <baruch@tkos.co.il>
+    Acked-by: Nicolas Ferre <nicolas.ferre@microchip.com>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/drivers/spi/spi-atmel.c b/drivers/spi/spi-atmel.c
+index 1eb83c9613d5..4e5e51fe6f73 100644
+--- a/drivers/spi/spi-atmel.c
++++ b/drivers/spi/spi-atmel.c
+@@ -1422,7 +1422,6 @@ static void atmel_get_caps(struct atmel_spi *as)
+ 	unsigned int version;
+ 
+ 	version = atmel_get_version(as);
+-	dev_info(&as->pdev->dev, "version: 0x%x\n", version);
+ 
+ 	as->caps.is_spi2 = version > 0x121;
+ 	as->caps.has_wdrbt = version >= 0x210;
+@@ -1609,8 +1608,9 @@ static int atmel_spi_probe(struct platform_device *pdev)
+ 		goto out_free_dma;
+ 
+ 	/* go! */
+-	dev_info(&pdev->dev, "Atmel SPI Controller at 0x%08lx (irq %d)\n",
+-			(unsigned long)regs->start, irq);
++	dev_info(&pdev->dev, "Atmel SPI Controller version 0x%x at 0x%08lx (irq %d)\n",
++			atmel_get_version(as), (unsigned long)regs->start,
++			irq);
+ 
+ 	return 0;
+ 

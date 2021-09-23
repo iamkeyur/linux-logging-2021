@@ -1,0 +1,29 @@
+['f38d3104688025b8157cf4e5a4b6fe37f4f7fd66', '829.txt', 'ModernizeLog']
+commit f38d3104688025b8157cf4e5a4b6fe37f4f7fd66
+Author: Justin Skists <j.skists@gmail.com>
+Date:   Wed Sep 6 13:14:25 2017 +0100
+
+    staging/speakup: fix checkpatch.pl warning in speak_char()
+    
+    correct the following warning from checkpatch.pl:-
+    
+    WARNING: Prefer using '"%s...", __func__' to using 'speak_char', this
+    function's name, in a string
+    
+    Signed-off-by: Justin Skists <j.skists@gmail.com>
+    Acked-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/speakup/main.c b/drivers/staging/speakup/main.c
+index 67956e24779c..938a0aed7de5 100644
+--- a/drivers/staging/speakup/main.c
++++ b/drivers/staging/speakup/main.c
+@@ -447,7 +447,7 @@ static void speak_char(u16 ch)
+ 
+ 	cp = spk_characters[ch];
+ 	if (!cp) {
+-		pr_info("speak_char: cp == NULL!\n");
++		pr_info("%s: cp == NULL!\n", __func__);
+ 		return;
+ 	}
+ 	if (IS_CHAR(ch, B_CAP)) {

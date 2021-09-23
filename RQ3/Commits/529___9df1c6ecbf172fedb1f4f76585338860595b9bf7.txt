@@ -1,0 +1,29 @@
+['9df1c6ecbf172fedb1f4f76585338860595b9bf7', '421.txt', 'NullPtr']
+commit 9df1c6ecbf172fedb1f4f76585338860595b9bf7
+Author: Shawn Lin <shawn.lin@rock-chips.com>
+Date:   Thu Mar 1 09:26:55 2018 +0800
+
+    PCI: Fix NULL pointer dereference in of_pci_bus_find_domain_nr()
+    
+    If the "parent" pointer passed to of_pci_bus_find_domain_nr() is NULL,
+    don't dereference it.
+    
+    Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+    Signed-off-by: Bjorn Helgaas <bhelgaas@google.com>
+
+diff --git a/drivers/pci/pci.c b/drivers/pci/pci.c
+index f6a4dd10d9b0..b7ff5786b76b 100644
+--- a/drivers/pci/pci.c
++++ b/drivers/pci/pci.c
+@@ -5611,8 +5611,9 @@ static int of_pci_bus_find_domain_nr(struct device *parent)
+ 		use_dt_domains = 0;
+ 		domain = pci_get_new_domain_nr();
+ 	} else {
+-		dev_err(parent, "Node %pOF has inconsistent \"linux,pci-domain\" property in DT\n",
+-			parent->of_node);
++		if (parent)
++			pr_err("Node %pOF has ", parent->of_node);
++		pr_err("Inconsistent \"linux,pci-domain\" property in DT\n");
+ 		domain = -1;
+ 	}
+ 

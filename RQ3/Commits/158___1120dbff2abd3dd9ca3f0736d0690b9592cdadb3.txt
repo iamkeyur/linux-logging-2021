@@ -1,0 +1,24 @@
+['1120dbff2abd3dd9ca3f0736d0690b9592cdadb3', '828.txt', 'AddInfo']
+commit 1120dbff2abd3dd9ca3f0736d0690b9592cdadb3
+Author: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Date:   Thu Feb 18 08:14:09 2016 +0000
+
+    ASoC: rsnd: indicates status failed SSI
+    
+    Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/sound/soc/sh/rcar/ssi.c b/sound/soc/sh/rcar/ssi.c
+index 592505a4bc13..a72ce284e34b 100644
+--- a/sound/soc/sh/rcar/ssi.c
++++ b/sound/soc/sh/rcar/ssi.c
+@@ -140,7 +140,8 @@ static void rsnd_ssi_status_check(struct rsnd_mod *mod,
+ 		udelay(50);
+ 	}
+ 
+-	dev_warn(dev, "status check failed\n");
++	dev_warn(dev, "%s[%d] status check failed\n",
++		 rsnd_mod_name(mod), rsnd_mod_id(mod));
+ }
+ 
+ static int rsnd_ssi_irq(struct rsnd_mod *mod,

@@ -1,0 +1,30 @@
+['21b7245034aa83c80fb8d0011e18d597a62a91f1', '381.txt', 'Typo']
+commit 21b7245034aa83c80fb8d0011e18d597a62a91f1
+Author: Andrey Smirnov <andrew.smirnov@gmail.com>
+Date:   Tue Feb 7 07:50:25 2017 -0800
+
+    PCI: imx6: Fix a typo in error message
+    
+    Fix a typo in the "pcie_inbound_axi clock missing or invalid" error
+    message.
+    
+    Signed-off-by: Andrey Smirnov <andrew.smirnov@gmail.com>
+    Signed-off-by: Bjorn Helgaas <bhelgaas@google.com>
+    Acked-by: Lucas Stach <l.stach@pengutronix.de>
+    CC: yurovsky@gmail.com
+    CC: Fabio Estevam <fabio.estevam@nxp.com>
+
+diff --git a/drivers/pci/host/pci-imx6.c b/drivers/pci/host/pci-imx6.c
+index 0f4f7c6eabfd..ac34011dba02 100644
+--- a/drivers/pci/host/pci-imx6.c
++++ b/drivers/pci/host/pci-imx6.c
+@@ -646,8 +646,7 @@ static int __init imx6_pcie_probe(struct platform_device *pdev)
+ 		imx6_pcie->pcie_inbound_axi = devm_clk_get(dev,
+ 							   "pcie_inbound_axi");
+ 		if (IS_ERR(imx6_pcie->pcie_inbound_axi)) {
+-			dev_err(dev,
+-				"pcie_incbound_axi clock missing or invalid\n");
++			dev_err(dev, "pcie_inbound_axi clock missing or invalid\n");
+ 			return PTR_ERR(imx6_pcie->pcie_inbound_axi);
+ 		}
+ 	}

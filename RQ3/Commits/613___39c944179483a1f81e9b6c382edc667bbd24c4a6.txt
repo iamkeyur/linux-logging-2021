@@ -1,0 +1,27 @@
+['39c944179483a1f81e9b6c382edc667bbd24c4a6', '325.txt', 'WrongInformation']
+commit 39c944179483a1f81e9b6c382edc667bbd24c4a6
+Author: Qianqian Xie <xieqianqian@huawei.com>
+Date:   Tue Jun 21 11:56:26 2016 +0800
+
+    net: hns: fix the error info when dma_set_mask_and_coherent fail
+    
+    The error info should be printed as "set mask to 64bit fail!" instead of
+    "set mask to 32bit fail!" in dma_set_mask_and_coherent().
+    
+    Signed-off-by: Qianqian Xie <xieqianqian@huawei.com>
+    Signed-off-by: Yisen Zhuang <Yisen.Zhuang@huawei.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/hisilicon/hns/hns_enet.c b/drivers/net/ethernet/hisilicon/hns/hns_enet.c
+index b978db46435e..00e529f2f153 100644
+--- a/drivers/net/ethernet/hisilicon/hns/hns_enet.c
++++ b/drivers/net/ethernet/hisilicon/hns/hns_enet.c
+@@ -1972,7 +1972,7 @@ static int hns_nic_dev_probe(struct platform_device *pdev)
+ 	if (!dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64)))
+ 		dev_dbg(dev, "set mask to 64bit\n");
+ 	else
+-		dev_err(dev, "set mask to 32bit fail!\n");
++		dev_err(dev, "set mask to 64bit fail!\n");
+ 
+ 	/* carrier off reporting is important to ethtool even BEFORE open */
+ 	netif_carrier_off(ndev);

@@ -1,0 +1,26 @@
+['4cd1a64a3b2a1290e6abb560db0dcc8260d1e274', '878.txt', 'FixFormatSpecifier']
+commit 4cd1a64a3b2a1290e6abb560db0dcc8260d1e274
+Author: Eva Rachel Retuya <eraretuya@gmail.com>
+Date:   Fri Oct 23 01:09:56 2015 +0800
+
+    Staging: mt29f_spinand: Remove redundant cast on 'retval'
+    
+    Remove the unneeded cast to 'int' since 'retval' is originally declared as
+    'int'.
+    
+    Signed-off-by: Eva Rachel Retuya <eraretuya@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/mt29f_spinand/mt29f_spinand.c b/drivers/staging/mt29f_spinand/mt29f_spinand.c
+index 3d1696c8e9e5..a8292a1a8e41 100644
+--- a/drivers/staging/mt29f_spinand/mt29f_spinand.c
++++ b/drivers/staging/mt29f_spinand/mt29f_spinand.c
+@@ -595,7 +595,7 @@ static int spinand_erase_block(struct spi_device *spi_nand, u16 block_id)
+ 		if (retval < 0) {
+ 			dev_err(&spi_nand->dev,
+ 					"error %d reading status register\n",
+-					(int)retval);
++					retval);
+ 			return retval;
+ 		}
+ 

@@ -1,0 +1,22 @@
+['b5bbc84328556bb653412b8e9682b8fdb091866a', '343.txt', 'WrongInformation']
+commit b5bbc84328556bb653412b8e9682b8fdb091866a
+Author: Mike Marshall <hubcap@omnibond.com>
+Date:   Fri Nov 13 14:39:15 2015 -0500
+
+    Orangefs: fix gossip statement
+    
+    Signed-off-by: Mike Marshall <hubcap@omnibond.com>
+
+diff --git a/fs/orangefs/devpvfs2-req.c b/fs/orangefs/devpvfs2-req.c
+index 7a719900235f..dbf52ab1e569 100644
+--- a/fs/orangefs/devpvfs2-req.c
++++ b/fs/orangefs/devpvfs2-req.c
+@@ -356,7 +356,7 @@ static ssize_t pvfs2_devreq_writev(struct file *file,
+ 			size_t size;
+ 			gossip_debug(GOSSIP_DEV_DEBUG,
+ 				     "writev: trailer size %ld\n",
+-				     (unsigned long)size);
++				     (unsigned long)trailer_size);
+ 			if (count != (notrailer_count + 1)) {
+ 				gossip_err("Error: trailer size (%ld) is non-zero, no trailer elements though? (%zu)\n", (unsigned long)trailer_size, count);
+ 				dev_req_release(buffer);

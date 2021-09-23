@@ -1,0 +1,26 @@
+['c5ee19c8663750456cf4121a1f1c7e24b23ed972', '490.txt', 'Typo']
+commit c5ee19c8663750456cf4121a1f1c7e24b23ed972
+Author: Julia Lawall <Julia.Lawall@lip6.fr>
+Date:   Tue May 17 11:38:41 2016 -0300
+
+    [media] mn88473: fix typo
+    
+    firmare -> firmware
+    
+    Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
+    Signed-off-by: Antti Palosaari <crope@iki.fi>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@osg.samsung.com>
+
+diff --git a/drivers/media/dvb-frontends/mn88473.c b/drivers/media/dvb-frontends/mn88473.c
+index e6933d4cd582..451974a1d7ed 100644
+--- a/drivers/media/dvb-frontends/mn88473.c
++++ b/drivers/media/dvb-frontends/mn88473.c
+@@ -330,7 +330,7 @@ static int mn88473_init(struct dvb_frontend *fe)
+ 	/* Request the firmware, this will block and timeout */
+ 	ret = request_firmware(&fw, name, &client->dev);
+ 	if (ret) {
+-		dev_err(&client->dev, "firmare file '%s' not found\n", name);
++		dev_err(&client->dev, "firmware file '%s' not found\n", name);
+ 		goto err;
+ 	}
+ 

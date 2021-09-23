@@ -1,0 +1,48 @@
+['09d75ecb122d8b600d76e3b8d53a10ffbe3bcec2', '350.txt', 'FixFormatSpecifier']
+commit 09d75ecb122d8b600d76e3b8d53a10ffbe3bcec2
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Thu Feb 14 15:00:36 2019 -0800
+
+    locking/lockdep: Fix two 32-bit compiler warnings
+    
+    Use %zu to format size_t instead of %lu to avoid that the compiler
+    complains about a mismatch between format specifier and argument on
+    32-bit systems.
+    
+    Signed-off-by: Bart Van Assche <bvanassche@acm.org>
+    Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+    Cc: Andrew Morton <akpm@linux-foundation.org>
+    Cc: Johannes Berg <johannes@sipsolutions.net>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: Waiman Long <longman@redhat.com>
+    Cc: Will Deacon <will.deacon@arm.com>
+    Cc: johannes.berg@intel.com
+    Cc: tj@kernel.org
+    Link: https://lkml.kernel.org/r/20190214230058.196511-2-bvanassche@acm.org
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+diff --git a/kernel/locking/lockdep.c b/kernel/locking/lockdep.c
+index 7f7db23fc002..5c5283bf499c 100644
+--- a/kernel/locking/lockdep.c
++++ b/kernel/locking/lockdep.c
+@@ -4266,7 +4266,7 @@ void __init lockdep_init(void)
+ 	printk("... MAX_LOCKDEP_CHAINS:      %lu\n", MAX_LOCKDEP_CHAINS);
+ 	printk("... CHAINHASH_SIZE:          %lu\n", CHAINHASH_SIZE);
+ 
+-	printk(" memory used by lock dependency info: %lu kB\n",
++	printk(" memory used by lock dependency info: %zu kB\n",
+ 		(sizeof(struct lock_class) * MAX_LOCKDEP_KEYS +
+ 		sizeof(struct list_head) * CLASSHASH_SIZE +
+ 		sizeof(struct lock_list) * MAX_LOCKDEP_ENTRIES +
+@@ -4278,7 +4278,7 @@ void __init lockdep_init(void)
+ 		) / 1024
+ 		);
+ 
+-	printk(" per task-struct memory footprint: %lu bytes\n",
++	printk(" per task-struct memory footprint: %zu bytes\n",
+ 		sizeof(struct held_lock) * MAX_LOCK_DEPTH);
+ }
+ 

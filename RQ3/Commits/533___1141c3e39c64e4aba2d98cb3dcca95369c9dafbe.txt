@@ -1,0 +1,42 @@
+['1141c3e39c64e4aba2d98cb3dcca95369c9dafbe', '417.txt', 'RedundantInformation']
+commit 1141c3e39c64e4aba2d98cb3dcca95369c9dafbe
+Author: Josh Poimboeuf <jpoimboe@redhat.com>
+Date:   Thu Oct 20 11:34:44 2016 -0500
+
+    x86/dumpstack: Fix duplicate RIP address display in __show_regs()
+    
+    The RIP address is shown twice in __show_regs().  Before:
+    
+      RIP: 0010:[<ffffffff81070446>]  [<ffffffff81070446>] native_write_msr+0x6/0x30
+    
+    After:
+    
+      RIP: 0010:[<ffffffff81070446>] native_write_msr+0x6/0x30
+    
+    Signed-off-by: Josh Poimboeuf <jpoimboe@redhat.com>
+    Cc: Andy Lutomirski <luto@kernel.org>
+    Cc: Borislav Petkov <bp@alien8.de>
+    Cc: Brian Gerst <brgerst@gmail.com>
+    Cc: Denys Vlasenko <dvlasenk@redhat.com>
+    Cc: H. Peter Anvin <hpa@zytor.com>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Link: http://lkml.kernel.org/r/b3fda66f36761759b000883b059cdd9a7649dcc1.1476973742.git.jpoimboe@redhat.com
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+diff --git a/arch/x86/kernel/process_64.c b/arch/x86/kernel/process_64.c
+index b3760b3c1ca0..b3b50ac6a302 100644
+--- a/arch/x86/kernel/process_64.c
++++ b/arch/x86/kernel/process_64.c
+@@ -61,8 +61,8 @@ void __show_regs(struct pt_regs *regs, int all)
+ 	unsigned int fsindex, gsindex;
+ 	unsigned int ds, cs, es;
+ 
+-	printk(KERN_DEFAULT "RIP: %04lx:[<%016lx>] ", regs->cs & 0xffff, regs->ip);
+-	printk_address(regs->ip);
++	printk(KERN_DEFAULT "RIP: %04lx:[<%016lx>] %pS\n", regs->cs & 0xffff,
++			regs->ip, (void *)regs->ip);
+ 	printk(KERN_DEFAULT "RSP: %04lx:%016lx  EFLAGS: %08lx\n", regs->ss,
+ 			regs->sp, regs->flags);
+ 	printk(KERN_DEFAULT "RAX: %016lx RBX: %016lx RCX: %016lx\n",

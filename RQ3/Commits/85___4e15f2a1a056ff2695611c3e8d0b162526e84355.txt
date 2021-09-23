@@ -1,0 +1,47 @@
+['4e15f2a1a056ff2695611c3e8d0b162526e84355', '909.txt', 'FixFormatSpecifier']
+commit 4e15f2a1a056ff2695611c3e8d0b162526e84355
+Author: Jani Nikula <jani.nikula@intel.com>
+Date:   Thu Dec 3 14:00:03 2015 +0200
+
+    drm: keep connector status change logging human readable
+    
+    We've had human readable connector status change debug logging since
+    
+    commit ed7951dc13aad4a14695ec8122e9f0e2ef25d39e
+    Author: Lespiau, Damien <damien.lespiau@intel.com>
+    Date:   Fri May 10 12:36:42 2013 +0000
+    
+        drm: Make the HPD status updates debug logs more readable
+    
+    but
+    
+    commit 162b6a57ac50eec236530a16c071ffa50e87362a
+    Author: Daniel Vetter <daniel.vetter@ffwll.ch>
+    Date:   Wed Jan 21 08:45:21 2015 +0100
+    
+        drm/probe-helper: don't lose hotplug event
+    
+    added a new one with just the numbers. Fix it.
+    
+    Signed-off-by: Jani Nikula <jani.nikula@intel.com>
+    Signed-off-by: Daniel Vetter <daniel.vetter@ffwll.ch>
+    Link: http://patchwork.freedesktop.org/patch/msgid/1449144003-2877-1-git-send-email-jani.nikula@intel.com
+
+diff --git a/drivers/gpu/drm/drm_probe_helper.c b/drivers/gpu/drm/drm_probe_helper.c
+index 94ba39e34299..eee3b6f38cfb 100644
+--- a/drivers/gpu/drm/drm_probe_helper.c
++++ b/drivers/gpu/drm/drm_probe_helper.c
+@@ -168,10 +168,11 @@ static int drm_helper_probe_single_connector_modes_merge_bits(struct drm_connect
+ 	 * check here, and if anything changed start the hotplug code.
+ 	 */
+ 	if (old_status != connector->status) {
+-		DRM_DEBUG_KMS("[CONNECTOR:%d:%s] status updated from %d to %d\n",
++		DRM_DEBUG_KMS("[CONNECTOR:%d:%s] status updated from %s to %s\n",
+ 			      connector->base.id,
+ 			      connector->name,
+-			      old_status, connector->status);
++			      drm_get_connector_status_name(old_status),
++			      drm_get_connector_status_name(connector->status));
+ 
+ 		/*
+ 		 * The hotplug event code might call into the fb

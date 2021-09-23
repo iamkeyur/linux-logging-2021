@@ -1,0 +1,134 @@
+['f2294482ff65dd9c9c3c6ae1447f908c6aa60f52', '657.txt', 'ModernizeLog']
+commit f2294482ff65dd9c9c3c6ae1447f908c6aa60f52
+Author: Kirill Smelkov <kirr@nexedi.com>
+Date:   Wed Mar 27 09:15:17 2019 +0000
+
+    fuse: convert printk -> pr_*
+    
+    Functions, like pr_err, are a more modern variant of printing compared to
+    printk. They could be used to denoise sources by using needed level in
+    the print function name, and by automatically inserting per-driver /
+    function / ... print prefix as defined by pr_fmt macro. pr_* are also
+    said to be used in Documentation/process/coding-style.rst and more
+    recent code - for example overlayfs - uses them instead of printk.
+    
+    Convert CUSE and FUSE to use the new pr_* functions.
+    
+    CUSE output stays completely unchanged, while FUSE output is amended a
+    bit for "trying to steal weird page" warning - the second line now comes
+    also with "fuse:" prefix. I hope it is ok.
+    
+    Suggested-by: Kirill Tkhai <ktkhai@virtuozzo.com>
+    Signed-off-by: Kirill Smelkov <kirr@nexedi.com>
+    Reviewed-by: Kirill Tkhai <ktkhai@virtuozzo.com>
+    Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
+
+diff --git a/fs/fuse/cuse.c b/fs/fuse/cuse.c
+index 55a26f351467..4b41df1d4642 100644
+--- a/fs/fuse/cuse.c
++++ b/fs/fuse/cuse.c
+@@ -33,6 +33,8 @@
+  * closed.
+  */
+ 
++#define pr_fmt(fmt) "CUSE: " fmt
++
+ #include <linux/fuse.h>
+ #include <linux/cdev.h>
+ #include <linux/device.h>
+@@ -225,7 +227,7 @@ static int cuse_parse_one(char **pp, char *end, char **keyp, char **valp)
+ 		return 0;
+ 
+ 	if (end[-1] != '\0') {
+-		printk(KERN_ERR "CUSE: info not properly terminated\n");
++		pr_err("info not properly terminated\n");
+ 		return -EINVAL;
+ 	}
+ 
+@@ -242,7 +244,7 @@ static int cuse_parse_one(char **pp, char *end, char **keyp, char **valp)
+ 		key = strstrip(key);
+ 
+ 	if (!strlen(key)) {
+-		printk(KERN_ERR "CUSE: zero length info key specified\n");
++		pr_err("zero length info key specified\n");
+ 		return -EINVAL;
+ 	}
+ 
+@@ -282,12 +284,11 @@ static int cuse_parse_devinfo(char *p, size_t len, struct cuse_devinfo *devinfo)
+ 		if (strcmp(key, "DEVNAME") == 0)
+ 			devinfo->name = val;
+ 		else
+-			printk(KERN_WARNING "CUSE: unknown device info \"%s\"\n",
+-			       key);
++			pr_warn("unknown device info \"%s\"\n", key);
+ 	}
+ 
+ 	if (!devinfo->name || !strlen(devinfo->name)) {
+-		printk(KERN_ERR "CUSE: DEVNAME unspecified\n");
++		pr_err("DEVNAME unspecified\n");
+ 		return -EINVAL;
+ 	}
+ 
+@@ -341,7 +342,7 @@ static void cuse_process_init_reply(struct fuse_conn *fc, struct fuse_req *req)
+ 	else
+ 		rc = register_chrdev_region(devt, 1, devinfo.name);
+ 	if (rc) {
+-		printk(KERN_ERR "CUSE: failed to register chrdev region\n");
++		pr_err("failed to register chrdev region\n");
+ 		goto err;
+ 	}
+ 
+diff --git a/fs/fuse/dev.c b/fs/fuse/dev.c
+index 9971a35cf1ef..2d65a00740ad 100644
+--- a/fs/fuse/dev.c
++++ b/fs/fuse/dev.c
+@@ -906,8 +906,8 @@ static int fuse_check_page(struct page *page)
+ 	       1 << PG_lru |
+ 	       1 << PG_active |
+ 	       1 << PG_reclaim))) {
+-		printk(KERN_WARNING "fuse: trying to steal weird page\n");
+-		printk(KERN_WARNING "  page=%p index=%li flags=%08lx, count=%i, mapcount=%i, mapping=%p\n", page, page->index, page->flags, page_count(page), page_mapcount(page), page->mapping);
++		pr_warn("trying to steal weird page\n");
++		pr_warn("  page=%p index=%li flags=%08lx, count=%i, mapcount=%i, mapping=%p\n", page, page->index, page->flags, page_count(page), page_mapcount(page), page->mapping);
+ 		return 1;
+ 	}
+ 	return 0;
+diff --git a/fs/fuse/fuse_i.h b/fs/fuse/fuse_i.h
+index 0920c0c032a0..e6195bc8f836 100644
+--- a/fs/fuse/fuse_i.h
++++ b/fs/fuse/fuse_i.h
+@@ -9,6 +9,10 @@
+ #ifndef _FS_FUSE_I_H
+ #define _FS_FUSE_I_H
+ 
++#ifndef pr_fmt
++# define pr_fmt(fmt) "fuse: " fmt
++#endif
++
+ #include <linux/fuse.h>
+ #include <linux/fs.h>
+ #include <linux/mount.h>
+diff --git a/fs/fuse/inode.c b/fs/fuse/inode.c
+index ec5d9953dfb6..36981ea7eac0 100644
+--- a/fs/fuse/inode.c
++++ b/fs/fuse/inode.c
+@@ -1397,8 +1397,8 @@ static int __init fuse_init(void)
+ {
+ 	int res;
+ 
+-	printk(KERN_INFO "fuse init (API version %i.%i)\n",
+-	       FUSE_KERNEL_VERSION, FUSE_KERNEL_MINOR_VERSION);
++	pr_info("init (API version %i.%i)\n",
++		FUSE_KERNEL_VERSION, FUSE_KERNEL_MINOR_VERSION);
+ 
+ 	INIT_LIST_HEAD(&fuse_conn_list);
+ 	res = fuse_fs_init();
+@@ -1434,7 +1434,7 @@ static int __init fuse_init(void)
+ 
+ static void __exit fuse_exit(void)
+ {
+-	printk(KERN_DEBUG "fuse exit\n");
++	pr_debug("exit\n");
+ 
+ 	fuse_ctl_cleanup();
+ 	fuse_sysfs_cleanup();

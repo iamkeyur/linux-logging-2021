@@ -1,0 +1,25 @@
+['2b8eae795580ca13ce6f035cac599f6a85c81bbf', '995.txt', 'Typo']
+commit 2b8eae795580ca13ce6f035cac599f6a85c81bbf
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Fri May 11 14:28:18 2018 +0100
+
+    ASoC: hisilicon: fix spelling mistake: "uknown" -> "unknown"
+    
+    Trivial fix to spelling mistake in dev_err message text
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/sound/soc/hisilicon/hi6210-i2s.c b/sound/soc/hisilicon/hi6210-i2s.c
+index 07a57209e055..53344a3b7a60 100644
+--- a/sound/soc/hisilicon/hi6210-i2s.c
++++ b/sound/soc/hisilicon/hi6210-i2s.c
+@@ -498,7 +498,7 @@ static int hi6210_i2s_trigger(struct snd_pcm_substream *substream, int cmd,
+ 			hi6210_i2s_txctrl(cpu_dai, 0);
+ 		break;
+ 	default:
+-		dev_err(cpu_dai->dev, "uknown cmd\n");
++		dev_err(cpu_dai->dev, "unknown cmd\n");
+ 		return -EINVAL;
+ 	}
+ 	return 0;

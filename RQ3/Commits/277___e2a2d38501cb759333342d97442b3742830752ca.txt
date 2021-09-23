@@ -1,0 +1,32 @@
+['e2a2d38501cb759333342d97442b3742830752ca', '697.txt', 'LogLevel']
+commit e2a2d38501cb759333342d97442b3742830752ca
+Author: Daniel Lezcano <daniel.lezcano@linaro.org>
+Date:   Thu Sep 8 14:25:40 2016 +0200
+
+    clocksource/drivers/moxart: Replace panic by pr_err
+    
+    The clksrc-of code is supposed to catch the return code and fail gracefully.
+    
+    Don't panic on error, but print the error and exit with a relevant error
+    code.
+    
+    Signed-off-by: Daniel Lezcano <daniel.lezcano@linaro.org>
+    Acked-by: Joel Stanley <joel@jms.id.au>
+
+diff --git a/drivers/clocksource/moxart_timer.c b/drivers/clocksource/moxart_timer.c
+index cba25b75c29b..2a8f4705c734 100644
+--- a/drivers/clocksource/moxart_timer.c
++++ b/drivers/clocksource/moxart_timer.c
+@@ -184,8 +184,10 @@ static int __init moxart_timer_init(struct device_node *node)
+ 	} else if (of_device_is_compatible(node, "aspeed,ast2400-timer")) {
+ 		timer->t1_enable_val = ASPEED_TIMER1_ENABLE;
+ 		timer->t1_disable_val = ASPEED_TIMER1_DISABLE;
+-	} else
+-		panic("%s: unknown platform\n", node->full_name);
++	} else {
++		pr_err("%s: unknown platform\n", node->full_name);
++		return -EINVAL;
++	}
+ 
+ 	timer->count_per_tick = DIV_ROUND_CLOSEST(pclk, HZ);
+ 

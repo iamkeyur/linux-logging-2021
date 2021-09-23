@@ -1,0 +1,35 @@
+['c071cc428376f1ee9d3df7c6543c6055bd481ff9', '842.txt', 'FixFormatSpecifier']
+commit c071cc428376f1ee9d3df7c6543c6055bd481ff9
+Author: Rob Herring <robh@kernel.org>
+Date:   Mon Aug 27 19:53:48 2018 -0500
+
+    devfreq: Convert to using %pOFn instead of device_node.name
+    
+    In preparation to remove the node name pointer from struct device_node,
+    convert printf users to use the %pOFn format specifier.
+    
+    Acked-by: Chanwoo Choi <cw00.choi@samsung.com>
+    Acked-by: MyungJoo Ham <myungjoo.ham@samsung.com>
+    Cc: Kyungmin Park <kyungmin.park@samsung.com>
+    Cc: Kukjin Kim <kgene@kernel.org>
+    Cc: Krzysztof Kozlowski <krzk@kernel.org>
+    Cc: linux-pm@vger.kernel.org
+    Cc: linux-arm-kernel@lists.infradead.org
+    Cc: linux-samsung-soc@vger.kernel.org
+    Signed-off-by: Rob Herring <robh@kernel.org>
+
+diff --git a/drivers/devfreq/event/exynos-ppmu.c b/drivers/devfreq/event/exynos-ppmu.c
+index a9c64f0d3284..c61de0bdf053 100644
+--- a/drivers/devfreq/event/exynos-ppmu.c
++++ b/drivers/devfreq/event/exynos-ppmu.c
+@@ -535,8 +535,8 @@ static int of_get_devfreq_events(struct device_node *np,
+ 
+ 		if (i == ARRAY_SIZE(ppmu_events)) {
+ 			dev_warn(dev,
+-				"don't know how to configure events : %s\n",
+-				node->name);
++				"don't know how to configure events : %pOFn\n",
++				node);
+ 			continue;
+ 		}
+ 

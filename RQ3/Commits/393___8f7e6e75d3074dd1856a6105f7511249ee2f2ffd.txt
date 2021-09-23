@@ -1,0 +1,25 @@
+['8f7e6e75d3074dd1856a6105f7511249ee2f2ffd', '572.txt', 'LogLevel']
+commit 8f7e6e75d3074dd1856a6105f7511249ee2f2ffd
+Author: David Howells <dhowells@redhat.com>
+Date:   Thu Apr 7 17:23:09 2016 +0100
+
+    rxrpc: Disable a debugging statement that has been left enabled.
+    
+    Disable a debugging statement that has been left enabled
+    
+    Signed-off-by: David Howells <dhowells@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/net/rxrpc/ar-ack.c b/net/rxrpc/ar-ack.c
+index 16d967075eaf..01a017a05f14 100644
+--- a/net/rxrpc/ar-ack.c
++++ b/net/rxrpc/ar-ack.c
+@@ -426,7 +426,7 @@ static void rxrpc_rotate_tx_window(struct rxrpc_call *call, u32 hard)
+ 	int tail = call->acks_tail, old_tail;
+ 	int win = CIRC_CNT(call->acks_head, tail, call->acks_winsz);
+ 
+-	kenter("{%u,%u},%u", call->acks_hard, win, hard);
++	_enter("{%u,%u},%u", call->acks_hard, win, hard);
+ 
+ 	ASSERTCMP(hard - call->acks_hard, <=, win);
+ 

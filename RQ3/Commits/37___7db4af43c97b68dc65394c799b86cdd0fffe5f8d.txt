@@ -1,0 +1,43 @@
+['7db4af43c97b68dc65394c799b86cdd0fffe5f8d', '960.txt', 'ModernizeLog']
+commit 7db4af43c97b68dc65394c799b86cdd0fffe5f8d
+Author: Bjorn Helgaas <bhelgaas@google.com>
+Date:   Tue May 7 17:37:53 2019 -0500
+
+    PCI: Use dev_printk() when possible
+    
+    Use dev_printk() when possible.  This makes messages more consistent with
+    other device-related messages and, in some cases, adds useful information.
+    
+    Signed-off-by: Bjorn Helgaas <bhelgaas@google.com>
+
+diff --git a/drivers/pci/pci-sysfs.c b/drivers/pci/pci-sysfs.c
+index 25794c27c7a4..6d27475e39b2 100644
+--- a/drivers/pci/pci-sysfs.c
++++ b/drivers/pci/pci-sysfs.c
+@@ -1111,8 +1111,7 @@ void pci_create_legacy_files(struct pci_bus *b)
+ 	kfree(b->legacy_io);
+ 	b->legacy_io = NULL;
+ kzalloc_err:
+-	printk(KERN_WARNING "pci: warning: could not create legacy I/O port and ISA memory resources to sysfs\n");
+-	return;
++	dev_warn(&b->dev, "could not create legacy I/O port and ISA memory resources in sysfs\n");
+ }
+ 
+ void pci_remove_legacy_files(struct pci_bus *b)
+diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
+index a59ad09ce911..0f0f73ff9ee2 100644
+--- a/drivers/pci/quirks.c
++++ b/drivers/pci/quirks.c
+@@ -177,9 +177,9 @@ static int __init pci_apply_final_quirks(void)
+ 			if (!tmp || cls == tmp)
+ 				continue;
+ 
+-			printk(KERN_DEBUG "PCI: CLS mismatch (%u != %u), using %u bytes\n",
+-			       cls << 2, tmp << 2,
+-			       pci_dfl_cache_line_size << 2);
++			pci_printk(KERN_DEBUG, dev, "CLS mismatch (%u != %u), using %u bytes\n",
++				   cls << 2, tmp << 2,
++				   pci_dfl_cache_line_size << 2);
+ 			pci_cache_line_size = pci_dfl_cache_line_size;
+ 		}
+ 	}

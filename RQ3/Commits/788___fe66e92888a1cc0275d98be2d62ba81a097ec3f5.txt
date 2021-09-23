@@ -1,0 +1,28 @@
+['fe66e92888a1cc0275d98be2d62ba81a097ec3f5', '206.txt', 'Mislead/Ambiguous']
+commit fe66e92888a1cc0275d98be2d62ba81a097ec3f5
+Author: Lionel Landwerlin <lionel.g.landwerlin@intel.com>
+Date:   Wed Dec 13 17:11:54 2017 +0000
+
+    drm/i915: make CS frequency read support missing more obvious
+    
+    As suggested by Chris, we should make this more obvious for people
+    working with newer generations.
+    
+    Suggested-by: Chris Wilson <chris@chris-wilson.co.uk>
+    Signed-off-by: Lionel Landwerlin <lionel.g.landwerlin@intel.com>
+    Reviewed-by: Chris Wilson <chris@chris-wilson.co.uk>
+    Link: https://patchwork.freedesktop.org/patch/msgid/20171213171154.6201-1-lionel.g.landwerlin@intel.com
+
+diff --git a/drivers/gpu/drm/i915/intel_device_info.c b/drivers/gpu/drm/i915/intel_device_info.c
+index 405d70124a46..f478be3ae0ba 100644
+--- a/drivers/gpu/drm/i915/intel_device_info.c
++++ b/drivers/gpu/drm/i915/intel_device_info.c
+@@ -416,7 +416,7 @@ static u32 read_timestamp_frequency(struct drm_i915_private *dev_priv)
+ 		return freq;
+ 	}
+ 
+-	DRM_ERROR("Unknown gen, unable to compute command stream timestamp frequency\n");
++	MISSING_CASE("Unknown gen, unable to read command streamer timestamp frequency\n");
+ 	return 0;
+ }
+ 

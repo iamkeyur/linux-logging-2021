@@ -1,0 +1,47 @@
+['f9831bfec7414d8f54f064b6b21de0685f107a47', '774.txt', 'LogLevel']
+commit f9831bfec7414d8f54f064b6b21de0685f107a47
+Author: Michael Thalmeier <michael.thalmeier@hale.at>
+Date:   Wed May 31 11:40:03 2017 +0200
+
+    i2c: mxs: change error printing to debug for mxs_i2c_pio_wait_xfer_end
+    
+    Instead of printing errors after mxs_i2c_pio_wait_xfer_end returns with
+    an error code just print a debug message.
+    
+    NAKs and timeouts can occur in this situation normally, so do not treat
+    them as errors.
+    
+    Signed-off-by: Michael Thalmeier <michael.thalmeier@hale.at>
+    Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
+
+diff --git a/drivers/i2c/busses/i2c-mxs.c b/drivers/i2c/busses/i2c-mxs.c
+index 5738556b6aac..d4e8f1954f23 100644
+--- a/drivers/i2c/busses/i2c-mxs.c
++++ b/drivers/i2c/busses/i2c-mxs.c
+@@ -419,7 +419,7 @@ static int mxs_i2c_pio_setup_xfer(struct i2c_adapter *adap,
+ 
+ 		ret = mxs_i2c_pio_wait_xfer_end(i2c);
+ 		if (ret) {
+-			dev_err(i2c->dev,
++			dev_dbg(i2c->dev,
+ 				"PIO: Failed to send SELECT command!\n");
+ 			goto cleanup;
+ 		}
+@@ -431,7 +431,7 @@ static int mxs_i2c_pio_setup_xfer(struct i2c_adapter *adap,
+ 
+ 		ret = mxs_i2c_pio_wait_xfer_end(i2c);
+ 		if (ret) {
+-			dev_err(i2c->dev,
++			dev_dbg(i2c->dev,
+ 				"PIO: Failed to send READ command!\n");
+ 			goto cleanup;
+ 		}
+@@ -528,7 +528,7 @@ static int mxs_i2c_pio_setup_xfer(struct i2c_adapter *adap,
+ 			/* Wait for the end of the transfer. */
+ 			ret = mxs_i2c_pio_wait_xfer_end(i2c);
+ 			if (ret) {
+-				dev_err(i2c->dev,
++				dev_dbg(i2c->dev,
+ 					"PIO: Failed to finish WRITE cmd!\n");
+ 				break;
+ 			}

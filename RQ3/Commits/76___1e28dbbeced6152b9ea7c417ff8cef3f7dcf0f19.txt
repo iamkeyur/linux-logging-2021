@@ -1,0 +1,27 @@
+['1e28dbbeced6152b9ea7c417ff8cef3f7dcf0f19', '919.txt', 'FixFormatSpecifier']
+commit 1e28dbbeced6152b9ea7c417ff8cef3f7dcf0f19
+Author: Bjorn Andersson <bjorn.andersson@linaro.org>
+Date:   Thu Aug 16 17:49:19 2018 -0700
+
+    remoteproc/davinci: Use %zx for formating size_t
+    
+    da8xx_rproc_mem size is of type size_t, so use %zx to format the debug
+    print of it to avoid a compile warning.
+    
+    Acked-by: Suman Anna <s-anna@ti.com>
+    Reviewed-by: Bartosz Golaszewski <bgolaszewski@baylibre.com>
+    Signed-off-by: Bjorn Andersson <bjorn.andersson@linaro.org>
+
+diff --git a/drivers/remoteproc/da8xx_remoteproc.c b/drivers/remoteproc/da8xx_remoteproc.c
+index e230bef71be1..d200334577f6 100644
+--- a/drivers/remoteproc/da8xx_remoteproc.c
++++ b/drivers/remoteproc/da8xx_remoteproc.c
+@@ -226,7 +226,7 @@ static int da8xx_rproc_get_internal_memories(struct platform_device *pdev,
+ 				res->start & DA8XX_RPROC_LOCAL_ADDRESS_MASK;
+ 		drproc->mem[i].size = resource_size(res);
+ 
+-		dev_dbg(dev, "memory %8s: bus addr %pa size 0x%x va %p da 0x%x\n",
++		dev_dbg(dev, "memory %8s: bus addr %pa size 0x%zx va %p da 0x%x\n",
+ 			mem_names[i], &drproc->mem[i].bus_addr,
+ 			drproc->mem[i].size, drproc->mem[i].cpu_addr,
+ 			drproc->mem[i].dev_addr);

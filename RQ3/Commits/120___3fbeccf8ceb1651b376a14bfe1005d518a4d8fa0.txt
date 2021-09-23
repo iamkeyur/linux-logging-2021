@@ -1,0 +1,73 @@
+['3fbeccf8ceb1651b376a14bfe1005d518a4d8fa0', '870.txt', 'Clarify/Reword']
+commit 3fbeccf8ceb1651b376a14bfe1005d518a4d8fa0
+Author: Thomas Hellstrom <thellstrom@vmware.com>
+Date:   Wed Jun 20 11:38:48 2018 +0200
+
+    drm/vmwgfx: Improve on host message error messages
+    
+    Make sure the error messages are a bit more descriptive, so that
+    a log reader may understand what's gone wrong.
+    
+    Signed-off-by: Thomas Hellstrom <thellstrom@vmware.com>
+    Reviewed-by: Brian Paul <brianp@vmware.com>
+    Reviewed-by: Sinclair Yeh <syeh@vmware.com>
+
+diff --git a/drivers/gpu/drm/vmwgfx/vmwgfx_msg.c b/drivers/gpu/drm/vmwgfx/vmwgfx_msg.c
+index 21d746bdc922..a72268e97042 100644
+--- a/drivers/gpu/drm/vmwgfx/vmwgfx_msg.c
++++ b/drivers/gpu/drm/vmwgfx/vmwgfx_msg.c
+@@ -234,7 +234,7 @@ static int vmw_recv_msg(struct rpc_channel *channel, void **msg,
+ 
+ 		if ((HIGH_WORD(ecx) & MESSAGE_STATUS_SUCCESS) == 0 ||
+ 		    (HIGH_WORD(ecx) & MESSAGE_STATUS_HB) == 0) {
+-			DRM_ERROR("Failed to get reply size\n");
++			DRM_ERROR("Failed to get reply size for host message.\n");
+ 			return -EINVAL;
+ 		}
+ 
+@@ -245,7 +245,7 @@ static int vmw_recv_msg(struct rpc_channel *channel, void **msg,
+ 		reply_len = ebx;
+ 		reply     = kzalloc(reply_len + 1, GFP_KERNEL);
+ 		if (!reply) {
+-			DRM_ERROR("Cannot allocate memory for reply\n");
++			DRM_ERROR("Cannot allocate memory for host message reply.\n");
+ 			return -ENOMEM;
+ 		}
+ 
+@@ -338,7 +338,8 @@ int vmw_host_get_guestinfo(const char *guest_info_param,
+ 
+ 	msg = kasprintf(GFP_KERNEL, "info-get %s", guest_info_param);
+ 	if (!msg) {
+-		DRM_ERROR("Cannot allocate memory to get %s", guest_info_param);
++		DRM_ERROR("Cannot allocate memory to get guest info \"%s\".",
++			  guest_info_param);
+ 		return -ENOMEM;
+ 	}
+ 
+@@ -374,7 +375,7 @@ int vmw_host_get_guestinfo(const char *guest_info_param,
+ out_open:
+ 	*length = 0;
+ 	kfree(msg);
+-	DRM_ERROR("Failed to get %s", guest_info_param);
++	DRM_ERROR("Failed to get guest info \"%s\".", guest_info_param);
+ 
+ 	return -EINVAL;
+ }
+@@ -403,7 +404,7 @@ int vmw_host_log(const char *log)
+ 
+ 	msg = kasprintf(GFP_KERNEL, "log %s", log);
+ 	if (!msg) {
+-		DRM_ERROR("Cannot allocate memory for log message\n");
++		DRM_ERROR("Cannot allocate memory for host log message.\n");
+ 		return -ENOMEM;
+ 	}
+ 
+@@ -422,7 +423,7 @@ int vmw_host_log(const char *log)
+ 	vmw_close_channel(&channel);
+ out_open:
+ 	kfree(msg);
+-	DRM_ERROR("Failed to send log\n");
++	DRM_ERROR("Failed to send host log message.\n");
+ 
+ 	return -EINVAL;
+ }

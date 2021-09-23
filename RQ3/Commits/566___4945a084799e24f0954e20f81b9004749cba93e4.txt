@@ -1,0 +1,23 @@
+['4945a084799e24f0954e20f81b9004749cba93e4', '376.txt', 'Typo']
+commit 4945a084799e24f0954e20f81b9004749cba93e4
+Author: Jeff Layton <jlayton@kernel.org>
+Date:   Wed Nov 16 09:45:22 2016 -0500
+
+    ceph: fix minor typo in unsafe_request_wait
+    
+    Signed-off-by: Jeff Layton <jlayton@redhat.com>
+    Reviewed-by: Yan, Zheng <zyan@redhat.com>
+
+diff --git a/fs/ceph/caps.c b/fs/ceph/caps.c
+index edb407f38b40..843aa873eb1c 100644
+--- a/fs/ceph/caps.c
++++ b/fs/ceph/caps.c
+@@ -1996,7 +1996,7 @@ static int unsafe_request_wait(struct inode *inode)
+ 	}
+ 	spin_unlock(&ci->i_unsafe_lock);
+ 
+-	dout("unsafe_requeset_wait %p wait on tid %llu %llu\n",
++	dout("unsafe_request_wait %p wait on tid %llu %llu\n",
+ 	     inode, req1 ? req1->r_tid : 0ULL, req2 ? req2->r_tid : 0ULL);
+ 	if (req1) {
+ 		ret = !wait_for_completion_timeout(&req1->r_safe_completion,

@@ -1,0 +1,25 @@
+['845f876d0819e2b941b1dbe92e0d219df8010035', '283.txt', 'LogLevel']
+commit 845f876d0819e2b941b1dbe92e0d219df8010035
+Author: Dean Luick <dean.luick@intel.com>
+Date:   Wed Feb 3 14:31:57 2016 -0800
+
+    staging/rdma/hfi1: Only warn when board description is not found
+    
+    Change-Id: Icc4ad27c4c67e51df8c8a203c4f16973793678ec
+    Reviewed-by: Dennis Dalessandro <dennis.dalessandro@intel.com>
+    Signed-off-by: Dean Luick <dean.luick@intel.com>
+    Signed-off-by: Doug Ledford <dledford@redhat.com>
+
+diff --git a/drivers/staging/rdma/hfi1/chip.c b/drivers/staging/rdma/hfi1/chip.c
+index 108cd48c9006..81b48d600cf8 100644
+--- a/drivers/staging/rdma/hfi1/chip.c
++++ b/drivers/staging/rdma/hfi1/chip.c
+@@ -13941,7 +13941,7 @@ static int obtain_boardname(struct hfi1_devdata *dd)
+ 	ret = read_hfi1_efi_var(dd, "description", &size,
+ 				(void **)&dd->boardname);
+ 	if (ret) {
+-		dd_dev_err(dd, "Board description not found\n");
++		dd_dev_info(dd, "Board description not found\n");
+ 		/* use generic description */
+ 		dd->boardname = kstrdup(generic, GFP_KERNEL);
+ 		if (!dd->boardname)

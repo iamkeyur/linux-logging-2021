@@ -1,0 +1,25 @@
+['c655f7ea4d881a607001de44bd6d7f5a2842b305', '244.txt', 'FixFormatSpecifier']
+commit c655f7ea4d881a607001de44bd6d7f5a2842b305
+Author: Rob Herring <robh@kernel.org>
+Date:   Mon Aug 27 19:51:50 2018 -0500
+
+    bus: mvebu-mbus: Convert to using %pOFn instead of device_node.name
+    
+    In preparation to remove the node name pointer from struct device_node,
+    convert printf users to use the %pOFn format specifier.
+    
+    Signed-off-by: Rob Herring <robh@kernel.org>
+
+diff --git a/drivers/bus/mvebu-mbus.c b/drivers/bus/mvebu-mbus.c
+index 70db4d5638a6..5b2a11a88951 100644
+--- a/drivers/bus/mvebu-mbus.c
++++ b/drivers/bus/mvebu-mbus.c
+@@ -1229,7 +1229,7 @@ mbus_parse_ranges(struct device_node *node,
+ 	tuple_len = (*cell_count) * sizeof(__be32);
+ 
+ 	if (ranges_len % tuple_len) {
+-		pr_warn("malformed ranges entry '%s'\n", node->name);
++		pr_warn("malformed ranges entry '%pOFn'\n", node);
+ 		return -EINVAL;
+ 	}
+ 	return 0;

@@ -1,0 +1,28 @@
+['6062ba61567f8e08f1767ae6d1c3788247da81dc', '963.txt', 'FixFormatSpecifier']
+commit 6062ba61567f8e08f1767ae6d1c3788247da81dc
+Author: Mauro Carvalho Chehab <mchehab@kernel.org>
+Date:   Fri Mar 23 07:27:21 2018 -0400
+
+    media: saa7134-alsa: don't use casts to print a buffer address
+    
+    Change the logic there to avoid casting, solving this warning:
+            drivers/media/pci/saa7134/saa7134-alsa.c:276 saa7134_alsa_dma_init() warn: argument 3 to %08lx specifier is cast from pointer
+    
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+
+diff --git a/drivers/media/pci/saa7134/saa7134-alsa.c b/drivers/media/pci/saa7134/saa7134-alsa.c
+index c59b69f1af9d..72311445d13d 100644
+--- a/drivers/media/pci/saa7134/saa7134-alsa.c
++++ b/drivers/media/pci/saa7134/saa7134-alsa.c
+@@ -273,9 +273,8 @@ static int saa7134_alsa_dma_init(struct saa7134_dev *dev, int nr_pages)
+ 		return -ENOMEM;
+ 	}
+ 
+-	pr_debug("vmalloc is at addr 0x%08lx, size=%d\n",
+-				(unsigned long)dma->vaddr,
+-				nr_pages << PAGE_SHIFT);
++	pr_debug("vmalloc is at addr %p, size=%d\n",
++		 dma->vaddr, nr_pages << PAGE_SHIFT);
+ 
+ 	memset(dma->vaddr, 0, nr_pages << PAGE_SHIFT);
+ 	dma->nr_pages = nr_pages;

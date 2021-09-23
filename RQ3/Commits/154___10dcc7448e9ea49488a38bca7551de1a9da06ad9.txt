@@ -1,0 +1,25 @@
+['10dcc7448e9ea49488a38bca7551de1a9da06ad9', '832.txt', 'Typo']
+commit 10dcc7448e9ea49488a38bca7551de1a9da06ad9
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Mon Jun 24 13:16:49 2019 +0100
+
+    RDMA/hns: fix spelling mistake "attatch" -> "attach"
+    
+    There is a spelling mistake in an dev_err message. Fix it.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Jason Gunthorpe <jgg@mellanox.com>
+
+diff --git a/drivers/infiniband/hw/hns/hns_roce_qp.c b/drivers/infiniband/hw/hns/hns_roce_qp.c
+index ee7e1fef31e7..4f693cded74e 100644
+--- a/drivers/infiniband/hw/hns/hns_roce_qp.c
++++ b/drivers/infiniband/hw/hns/hns_roce_qp.c
+@@ -853,7 +853,7 @@ static int hns_roce_create_qp_common(struct hns_roce_dev *hr_dev,
+ 	ret = hns_roce_mtr_attach(hr_dev, &hr_qp->mtr, buf_list,
+ 				  hr_qp->regions, hr_qp->region_cnt);
+ 	if (ret) {
+-		dev_err(dev, "mtr attatch error for create qp\n");
++		dev_err(dev, "mtr attach error for create qp\n");
+ 		goto err_mtr;
+ 	}
+ 

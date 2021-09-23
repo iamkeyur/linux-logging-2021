@@ -1,0 +1,26 @@
+['eb7e61b62db36e6987d2b502aea0ff27f00b00fc', '192.txt', 'Typo']
+commit eb7e61b62db36e6987d2b502aea0ff27f00b00fc
+Author: Julia Lawall <Julia.Lawall@lip6.fr>
+Date:   Tue May 17 11:38:42 2016 -0300
+
+    [media] mn88472: fix typo
+    
+    firmare -> firmware
+    
+    Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
+    Signed-off-by: Antti Palosaari <crope@iki.fi>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@osg.samsung.com>
+
+diff --git a/drivers/staging/media/mn88472/mn88472.c b/drivers/staging/media/mn88472/mn88472.c
+index 7ea749cf19f9..5cfa22a30db8 100644
+--- a/drivers/staging/media/mn88472/mn88472.c
++++ b/drivers/staging/media/mn88472/mn88472.c
+@@ -312,7 +312,7 @@ static int mn88472_init(struct dvb_frontend *fe)
+ 	/* request the firmware, this will block and timeout */
+ 	ret = request_firmware(&fw, fw_file, &client->dev);
+ 	if (ret) {
+-		dev_err(&client->dev, "firmare file '%s' not found\n",
++		dev_err(&client->dev, "firmware file '%s' not found\n",
+ 				fw_file);
+ 		goto err;
+ 	}

@@ -1,0 +1,26 @@
+['44c0c23725a16c8803b8809b87651405e8741e4d', '588.txt', 'LogLevel']
+commit 44c0c23725a16c8803b8809b87651405e8741e4d
+Author: Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>
+Date:   Mon Apr 29 20:42:13 2019 -0700
+
+    drivers: thermal: processor_thermal: Downgrade error message
+    
+    Downgrade "Unsupported event" message from dev_err to dev_dbg. Otherwise it
+    floods with this message one some platforms.
+    
+    Signed-off-by: Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>
+    Signed-off-by: Zhang Rui <rui.zhang@intel.com>
+
+diff --git a/drivers/thermal/intel/int340x_thermal/processor_thermal_device.c b/drivers/thermal/intel/int340x_thermal/processor_thermal_device.c
+index 2a7cbaa1712d..2e6071a82da2 100644
+--- a/drivers/thermal/intel/int340x_thermal/processor_thermal_device.c
++++ b/drivers/thermal/intel/int340x_thermal/processor_thermal_device.c
+@@ -265,7 +265,7 @@ static void proc_thermal_notify(acpi_handle handle, u32 event, void *data)
+ 				THERMAL_DEVICE_POWER_CAPABILITY_CHANGED);
+ 		break;
+ 	default:
+-		dev_err(proc_priv->dev, "Unsupported event [0x%x]\n", event);
++		dev_dbg(proc_priv->dev, "Unsupported event [0x%x]\n", event);
+ 		break;
+ 	}
+ }

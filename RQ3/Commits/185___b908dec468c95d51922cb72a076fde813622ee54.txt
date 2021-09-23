@@ -1,0 +1,29 @@
+['b908dec468c95d51922cb72a076fde813622ee54', '797.txt', 'CopyPasteMistakes']
+commit b908dec468c95d51922cb72a076fde813622ee54
+Author: Viresh Kumar <viresh.kumar@linaro.org>
+Date:   Tue Mar 10 14:41:12 2015 +0530
+
+    greybus: gpb: Fix print mistakes
+    
+    Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+    Reviewed-by: Alex Elder <elder@linaro.org>
+    Signed-off-by: Greg Kroah-Hartman <greg@kroah.com>
+
+diff --git a/drivers/staging/greybus/gpb.c b/drivers/staging/greybus/gpb.c
+index 5f080d40ced4..61771058a0c3 100644
+--- a/drivers/staging/greybus/gpb.c
++++ b/drivers/staging/greybus/gpb.c
+@@ -42,11 +42,11 @@ static int __init gpbridge_init(void)
+ 		goto error_usb;
+ 	}
+ 	if (gb_i2c_protocol_init()) {
+-		pr_err("error initializing usb protocol\n");
++		pr_err("error initializing i2c protocol\n");
+ 		goto error_i2c;
+ 	}
+ 	if (gb_spi_protocol_init()) {
+-		pr_err("error initializing usb protocol\n");
++		pr_err("error initializing spi protocol\n");
+ 		goto error_spi;
+ 	}
+ 	return 0;

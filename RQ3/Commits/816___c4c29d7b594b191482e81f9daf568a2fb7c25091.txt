@@ -1,0 +1,29 @@
+['c4c29d7b594b191482e81f9daf568a2fb7c25091', '238.txt', 'LogLevel']
+commit c4c29d7b594b191482e81f9daf568a2fb7c25091
+Author: Chris Wilson <chris@chris-wilson.co.uk>
+Date:   Wed Nov 9 10:45:07 2016 +0000
+
+    drm/i915: Demote i915_gem_open() debugging from DRIVER to USER
+    
+    We use DRM_DEBUG() when reporting on user actions, to try and keep
+    intentional errors out of the CI dmesg. Demote the debug from
+    i915_gem_open() similarly so that it is only apparent with drm.debug & 1
+    like its brethren.
+    
+    Signed-off-by: Chris Wilson <chris@chris-wilson.co.uk>
+    Link: http://patchwork.freedesktop.org/patch/msgid/20161109104507.21228-1-chris@chris-wilson.co.uk
+    Reviewed-by: Tvrtko Ursulin <tvrtko.ursulin@intel.com>
+
+diff --git a/drivers/gpu/drm/i915/i915_gem.c b/drivers/gpu/drm/i915/i915_gem.c
+index 17c538f55adb..1fa3813976e5 100644
+--- a/drivers/gpu/drm/i915/i915_gem.c
++++ b/drivers/gpu/drm/i915/i915_gem.c
+@@ -4639,7 +4639,7 @@ int i915_gem_open(struct drm_device *dev, struct drm_file *file)
+ 	struct drm_i915_file_private *file_priv;
+ 	int ret;
+ 
+-	DRM_DEBUG_DRIVER("\n");
++	DRM_DEBUG("\n");
+ 
+ 	file_priv = kzalloc(sizeof(*file_priv), GFP_KERNEL);
+ 	if (!file_priv)

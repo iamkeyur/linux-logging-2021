@@ -1,0 +1,488 @@
+['8dfe162ac74f56b382d6e3d37365672897422f51', '119.txt', 'ModernizeLog']
+commit 8dfe162ac74f56b382d6e3d37365672897422f51
+Author: Joe Perches <joe@perches.com>
+Date:   Tue Feb 28 04:55:54 2017 -0800
+
+    gpu: drm: drivers: Convert printk(KERN_<LEVEL> to pr_<level>
+    
+    Use a more common logging style.
+    
+    Miscellanea:
+    
+    o Coalesce formats and realign arguments
+    o Neaten a few macros now using pr_<level>
+    
+    Signed-off-by: Joe Perches <joe@perches.com>
+    Acked-by: Rob Clark <robdclark@gmail.com>
+    Acked-by: Sinclair Yeh <syeh@vmware.com>
+    Acked-by: Patrik Jakobsson <patrik.r.jakobsson@gmail.com>
+    Acked-by: Tomi Valkeinen <tomi.valkeinen@ti.com>
+    Signed-off-by: Daniel Vetter <daniel.vetter@ffwll.ch>
+    Link: http://patchwork.freedesktop.org/patch/msgid/76355db47b31668bb64d996865ceee53bd66b11f.1488285953.git.joe@perches.com
+
+diff --git a/drivers/gpu/drm/gma500/cdv_intel_lvds.c b/drivers/gpu/drm/gma500/cdv_intel_lvds.c
+index 5efdb7fbb7ee..e64960db3224 100644
+--- a/drivers/gpu/drm/gma500/cdv_intel_lvds.c
++++ b/drivers/gpu/drm/gma500/cdv_intel_lvds.c
+@@ -284,8 +284,7 @@ static bool cdv_intel_lvds_mode_fixup(struct drm_encoder *encoder,
+ 			    head) {
+ 		if (tmp_encoder != encoder
+ 		    && tmp_encoder->crtc == encoder->crtc) {
+-			printk(KERN_ERR "Can't enable LVDS and another "
+-			       "encoder on the same pipe\n");
++			pr_err("Can't enable LVDS and another encoder on the same pipe\n");
+ 			return false;
+ 		}
+ 	}
+@@ -756,13 +755,13 @@ void cdv_intel_lvds_init(struct drm_device *dev,
+ 
+ failed_find:
+ 	mutex_unlock(&dev->mode_config.mutex);
+-	printk(KERN_ERR "Failed find\n");
++	pr_err("Failed find\n");
+ 	psb_intel_i2c_destroy(gma_encoder->ddc_bus);
+ failed_ddc:
+-	printk(KERN_ERR "Failed DDC\n");
++	pr_err("Failed DDC\n");
+ 	psb_intel_i2c_destroy(gma_encoder->i2c_bus);
+ failed_blc_i2c:
+-	printk(KERN_ERR "Failed BLC\n");
++	pr_err("Failed BLC\n");
+ 	drm_encoder_cleanup(encoder);
+ 	drm_connector_cleanup(connector);
+ 	kfree(lvds_priv);
+diff --git a/drivers/gpu/drm/gma500/oaktrail_lvds.c b/drivers/gpu/drm/gma500/oaktrail_lvds.c
+index f7038f12ac76..e6943fef0611 100644
+--- a/drivers/gpu/drm/gma500/oaktrail_lvds.c
++++ b/drivers/gpu/drm/gma500/oaktrail_lvds.c
+@@ -255,15 +255,15 @@ static void oaktrail_lvds_get_configuration_mode(struct drm_device *dev,
+ 				((ti->vblank_hi << 8) | ti->vblank_lo);
+ 		mode->clock = ti->pixel_clock * 10;
+ #if 0
+-		printk(KERN_INFO "hdisplay is %d\n", mode->hdisplay);
+-		printk(KERN_INFO "vdisplay is %d\n", mode->vdisplay);
+-		printk(KERN_INFO "HSS is %d\n", mode->hsync_start);
+-		printk(KERN_INFO "HSE is %d\n", mode->hsync_end);
+-		printk(KERN_INFO "htotal is %d\n", mode->htotal);
+-		printk(KERN_INFO "VSS is %d\n", mode->vsync_start);
+-		printk(KERN_INFO "VSE is %d\n", mode->vsync_end);
+-		printk(KERN_INFO "vtotal is %d\n", mode->vtotal);
+-		printk(KERN_INFO "clock is %d\n", mode->clock);
++		pr_info("hdisplay is %d\n", mode->hdisplay);
++		pr_info("vdisplay is %d\n", mode->vdisplay);
++		pr_info("HSS is %d\n", mode->hsync_start);
++		pr_info("HSE is %d\n", mode->hsync_end);
++		pr_info("htotal is %d\n", mode->htotal);
++		pr_info("VSS is %d\n", mode->vsync_start);
++		pr_info("VSE is %d\n", mode->vsync_end);
++		pr_info("vtotal is %d\n", mode->vtotal);
++		pr_info("clock is %d\n", mode->clock);
+ #endif
+ 		mode_dev->panel_fixed_mode = mode;
+ 	}
+diff --git a/drivers/gpu/drm/gma500/psb_drv.h b/drivers/gpu/drm/gma500/psb_drv.h
+index 05d7aaf47eea..f7bf04138dbf 100644
+--- a/drivers/gpu/drm/gma500/psb_drv.h
++++ b/drivers/gpu/drm/gma500/psb_drv.h
+@@ -905,9 +905,8 @@ static inline void REGISTER_WRITE8(struct drm_device *dev,
+ #define PSB_RSGX32(_offs)						\
+ ({									\
+ 	if (inl(dev_priv->apm_base + PSB_APM_STS) & 0x3) {		\
+-		printk(KERN_ERR						\
+-			"access sgx when it's off!! (READ) %s, %d\n",	\
+-	       __FILE__, __LINE__);					\
++		pr_err("access sgx when it's off!! (READ) %s, %d\n",	\
++		       __FILE__, __LINE__);				\
+ 		melay(1000);						\
+ 	}								\
+ 	ioread32(dev_priv->sgx_reg + (_offs));				\
+diff --git a/drivers/gpu/drm/gma500/psb_intel_lvds.c b/drivers/gpu/drm/gma500/psb_intel_lvds.c
+index 483fdce74e39..0066fe7e622e 100644
+--- a/drivers/gpu/drm/gma500/psb_intel_lvds.c
++++ b/drivers/gpu/drm/gma500/psb_intel_lvds.c
+@@ -388,11 +388,11 @@ bool psb_intel_lvds_mode_fixup(struct drm_encoder *encoder,
+ 
+ 	/* PSB requires the LVDS is on pipe B, MRST has only one pipe anyway */
+ 	if (!IS_MRST(dev) && gma_crtc->pipe == 0) {
+-		printk(KERN_ERR "Can't support LVDS on pipe A\n");
++		pr_err("Can't support LVDS on pipe A\n");
+ 		return false;
+ 	}
+ 	if (IS_MRST(dev) && gma_crtc->pipe != 0) {
+-		printk(KERN_ERR "Must use PIPE A\n");
++		pr_err("Must use PIPE A\n");
+ 		return false;
+ 	}
+ 	/* Should never happen!! */
+@@ -400,8 +400,7 @@ bool psb_intel_lvds_mode_fixup(struct drm_encoder *encoder,
+ 			    head) {
+ 		if (tmp_encoder != encoder
+ 		    && tmp_encoder->crtc == encoder->crtc) {
+-			printk(KERN_ERR "Can't enable LVDS and another "
+-			       "encoder on the same pipe\n");
++			pr_err("Can't enable LVDS and another encoder on the same pipe\n");
+ 			return false;
+ 		}
+ 	}
+diff --git a/drivers/gpu/drm/i915/i915_sw_fence.c b/drivers/gpu/drm/i915/i915_sw_fence.c
+index 40f4e5efaf83..a277f8eb7beb 100644
+--- a/drivers/gpu/drm/i915/i915_sw_fence.c
++++ b/drivers/gpu/drm/i915/i915_sw_fence.c
+@@ -395,10 +395,10 @@ static void timer_i915_sw_fence_wake(unsigned long data)
+ {
+ 	struct i915_sw_dma_fence_cb *cb = (struct i915_sw_dma_fence_cb *)data;
+ 
+-	printk(KERN_WARNING "asynchronous wait on fence %s:%s:%x timed out\n",
+-	       cb->dma->ops->get_driver_name(cb->dma),
+-	       cb->dma->ops->get_timeline_name(cb->dma),
+-	       cb->dma->seqno);
++	pr_warn("asynchronous wait on fence %s:%s:%x timed out\n",
++		cb->dma->ops->get_driver_name(cb->dma),
++		cb->dma->ops->get_timeline_name(cb->dma),
++		cb->dma->seqno);
+ 	dma_fence_put(cb->dma);
+ 	cb->dma = NULL;
+ 
+diff --git a/drivers/gpu/drm/mgag200/mgag200_mode.c b/drivers/gpu/drm/mgag200/mgag200_mode.c
+index 3938120e5051..f2e9b2bc18a5 100644
+--- a/drivers/gpu/drm/mgag200/mgag200_mode.c
++++ b/drivers/gpu/drm/mgag200/mgag200_mode.c
+@@ -195,7 +195,7 @@ static int mga_g200se_set_plls(struct mga_device *mdev, long clock)
+ 	}
+ 
+ 	if (delta > permitteddelta) {
+-		printk(KERN_WARNING "PLL delta too large\n");
++		pr_warn("PLL delta too large\n");
+ 		return 1;
+ 	}
+ 
+diff --git a/drivers/gpu/drm/msm/msm_drv.c b/drivers/gpu/drm/msm/msm_drv.c
+index cb47f4a14215..6842d427cc2b 100644
+--- a/drivers/gpu/drm/msm/msm_drv.c
++++ b/drivers/gpu/drm/msm/msm_drv.c
+@@ -152,7 +152,7 @@ u32 msm_readl(const void __iomem *addr)
+ {
+ 	u32 val = readl(addr);
+ 	if (reglog)
+-		printk(KERN_ERR "IO:R %p %08x\n", addr, val);
++		pr_err("IO:R %p %08x\n", addr, val);
+ 	return val;
+ }
+ 
+diff --git a/drivers/gpu/drm/nouveau/nouveau_acpi.c b/drivers/gpu/drm/nouveau/nouveau_acpi.c
+index 193573d191e5..39468c218027 100644
+--- a/drivers/gpu/drm/nouveau/nouveau_acpi.c
++++ b/drivers/gpu/drm/nouveau/nouveau_acpi.c
+@@ -326,7 +326,7 @@ static bool nouveau_dsm_detect(void)
+ 		nouveau_dsm_priv.dhandle = dhandle;
+ 		acpi_get_name(nouveau_dsm_priv.dhandle, ACPI_FULL_PATHNAME,
+ 			&buffer);
+-		printk(KERN_INFO "VGA switcheroo: detected Optimus DSM method %s handle\n",
++		pr_info("VGA switcheroo: detected Optimus DSM method %s handle\n",
+ 			acpi_method_name);
+ 		if (has_power_resources)
+ 			pr_info("nouveau: detected PR support, will not use DSM\n");
+@@ -338,7 +338,7 @@ static bool nouveau_dsm_detect(void)
+ 		nouveau_dsm_priv.dhandle = dhandle;
+ 		acpi_get_name(nouveau_dsm_priv.dhandle, ACPI_FULL_PATHNAME,
+ 			&buffer);
+-		printk(KERN_INFO "VGA switcheroo: detected DSM switching method %s handle\n",
++		pr_info("VGA switcheroo: detected DSM switching method %s handle\n",
+ 			acpi_method_name);
+ 		nouveau_dsm_priv.dsm_detected = true;
+ 		ret = true;
+@@ -406,7 +406,8 @@ static int nouveau_rom_call(acpi_handle rom_handle, uint8_t *bios,
+ 
+ 	status = acpi_evaluate_object(rom_handle, NULL, &rom_arg, &buffer);
+ 	if (ACPI_FAILURE(status)) {
+-		printk(KERN_INFO "failed to evaluate ROM got %s\n", acpi_format_exception(status));
++		pr_info("failed to evaluate ROM got %s\n",
++			acpi_format_exception(status));
+ 		return -ENODEV;
+ 	}
+ 	obj = (union acpi_object *)buffer.pointer;
+diff --git a/drivers/gpu/drm/nouveau/nouveau_vga.c b/drivers/gpu/drm/nouveau/nouveau_vga.c
+index eef22c6b9665..ccb597eac538 100644
+--- a/drivers/gpu/drm/nouveau/nouveau_vga.c
++++ b/drivers/gpu/drm/nouveau/nouveau_vga.c
+@@ -41,13 +41,13 @@ nouveau_switcheroo_set_state(struct pci_dev *pdev,
+ 		return;
+ 
+ 	if (state == VGA_SWITCHEROO_ON) {
+-		printk(KERN_ERR "VGA switcheroo: switched nouveau on\n");
++		pr_err("VGA switcheroo: switched nouveau on\n");
+ 		dev->switch_power_state = DRM_SWITCH_POWER_CHANGING;
+ 		nouveau_pmops_resume(&pdev->dev);
+ 		drm_kms_helper_poll_enable(dev);
+ 		dev->switch_power_state = DRM_SWITCH_POWER_ON;
+ 	} else {
+-		printk(KERN_ERR "VGA switcheroo: switched nouveau off\n");
++		pr_err("VGA switcheroo: switched nouveau off\n");
+ 		dev->switch_power_state = DRM_SWITCH_POWER_CHANGING;
+ 		drm_kms_helper_poll_disable(dev);
+ 		nouveau_switcheroo_optimus_dsm();
+diff --git a/drivers/gpu/drm/nouveau/nv50_display.c b/drivers/gpu/drm/nouveau/nv50_display.c
+index 2517adbe7089..16915c29ec52 100644
+--- a/drivers/gpu/drm/nouveau/nv50_display.c
++++ b/drivers/gpu/drm/nouveau/nv50_display.c
+@@ -705,7 +705,7 @@ evo_wait(void *evoc, int nr)
+ 				break;
+ 		) < 0) {
+ 			mutex_unlock(&dmac->lock);
+-			printk(KERN_ERR "nouveau: evo channel stalled\n");
++			pr_err("nouveau: evo channel stalled\n");
+ 			return NULL;
+ 		}
+ 
+@@ -723,18 +723,18 @@ evo_kick(u32 *push, void *evoc)
+ 	mutex_unlock(&dmac->lock);
+ }
+ 
+-#define evo_mthd(p,m,s) do {                                                   \
+-	const u32 _m = (m), _s = (s);                                          \
+-	if (drm_debug & DRM_UT_KMS)                                            \
+-		printk(KERN_ERR "%04x %d %s\n", _m, _s, __func__);             \
+-	*((p)++) = ((_s << 18) | _m);                                          \
++#define evo_mthd(p, m, s) do {						\
++	const u32 _m = (m), _s = (s);					\
++	if (drm_debug & DRM_UT_KMS)					\
++		pr_err("%04x %d %s\n", _m, _s, __func__);		\
++	*((p)++) = ((_s << 18) | _m);					\
+ } while(0)
+ 
+-#define evo_data(p,d) do {                                                     \
+-	const u32 _d = (d);                                                    \
+-	if (drm_debug & DRM_UT_KMS)                                            \
+-		printk(KERN_ERR "\t%08x\n", _d);                               \
+-	*((p)++) = _d;                                                         \
++#define evo_data(p, d) do {						\
++	const u32 _d = (d);						\
++	if (drm_debug & DRM_UT_KMS)					\
++		pr_err("\t%08x\n", _d);					\
++	*((p)++) = _d;							\
+ } while(0)
+ 
+ /******************************************************************************
+diff --git a/drivers/gpu/drm/nouveau/nvkm/core/mm.c b/drivers/gpu/drm/nouveau/nvkm/core/mm.c
+index fd19d652a7ab..5c7891234eea 100644
+--- a/drivers/gpu/drm/nouveau/nvkm/core/mm.c
++++ b/drivers/gpu/drm/nouveau/nvkm/core/mm.c
+@@ -31,15 +31,15 @@ nvkm_mm_dump(struct nvkm_mm *mm, const char *header)
+ {
+ 	struct nvkm_mm_node *node;
+ 
+-	printk(KERN_ERR "nvkm: %s\n", header);
+-	printk(KERN_ERR "nvkm: node list:\n");
++	pr_err("nvkm: %s\n", header);
++	pr_err("nvkm: node list:\n");
+ 	list_for_each_entry(node, &mm->nodes, nl_entry) {
+-		printk(KERN_ERR "nvkm: \t%08x %08x %d\n",
++		pr_err("nvkm: \t%08x %08x %d\n",
+ 		       node->offset, node->length, node->type);
+ 	}
+-	printk(KERN_ERR "nvkm: free list:\n");
++	pr_err("nvkm: free list:\n");
+ 	list_for_each_entry(node, &mm->free, fl_entry) {
+-		printk(KERN_ERR "nvkm: \t%08x %08x %d\n",
++		pr_err("nvkm: \t%08x %08x %d\n",
+ 		       node->offset, node->length, node->type);
+ 	}
+ }
+diff --git a/drivers/gpu/drm/omapdrm/dss/dsi.c b/drivers/gpu/drm/omapdrm/dss/dsi.c
+index f74615d005a8..5e51a5649efb 100644
+--- a/drivers/gpu/drm/omapdrm/dss/dsi.c
++++ b/drivers/gpu/drm/omapdrm/dss/dsi.c
+@@ -582,15 +582,14 @@ static void dsi_perf_show(struct platform_device *dsidev, const char *name)
+ 
+ 	total_bytes = dsi->update_bytes;
+ 
+-	printk(KERN_INFO "DSI(%s): %u us + %u us = %u us (%uHz), "
+-			"%u bytes, %u kbytes/sec\n",
+-			name,
+-			setup_us,
+-			trans_us,
+-			total_us,
+-			1000*1000 / total_us,
+-			total_bytes,
+-			total_bytes * 1000 / total_us);
++	pr_info("DSI(%s): %u us + %u us = %u us (%uHz), %u bytes, %u kbytes/sec\n",
++		name,
++		setup_us,
++		trans_us,
++		total_us,
++		1000 * 1000 / total_us,
++		total_bytes,
++		total_bytes * 1000 / total_us);
+ }
+ #else
+ static inline void dsi_perf_mark_setup(struct platform_device *dsidev)
+diff --git a/drivers/gpu/drm/omapdrm/dss/dss.c b/drivers/gpu/drm/omapdrm/dss/dss.c
+index 14887d5b02e5..4e72d2fefb4d 100644
+--- a/drivers/gpu/drm/omapdrm/dss/dss.c
++++ b/drivers/gpu/drm/omapdrm/dss/dss.c
+@@ -1254,8 +1254,7 @@ static int dss_bind(struct device *dev)
+ 	dss.lcd_clk_source[1] = DSS_CLK_SRC_FCK;
+ 
+ 	rev = dss_read_reg(DSS_REVISION);
+-	printk(KERN_INFO "OMAP DSS rev %d.%d\n",
+-			FLD_GET(rev, 7, 4), FLD_GET(rev, 3, 0));
++	pr_info("OMAP DSS rev %d.%d\n", FLD_GET(rev, 7, 4), FLD_GET(rev, 3, 0));
+ 
+ 	dss_runtime_put();
+ 
+diff --git a/drivers/gpu/drm/omapdrm/dss/dss.h b/drivers/gpu/drm/omapdrm/dss/dss.h
+index 56493b290731..78f6fc75948b 100644
+--- a/drivers/gpu/drm/omapdrm/dss/dss.h
++++ b/drivers/gpu/drm/omapdrm/dss/dss.h
+@@ -42,29 +42,26 @@
+ 
+ #ifdef DSS_SUBSYS_NAME
+ #define DSSERR(format, ...) \
+-	printk(KERN_ERR "omapdss " DSS_SUBSYS_NAME " error: " format, \
+-	## __VA_ARGS__)
++	pr_err("omapdss " DSS_SUBSYS_NAME " error: " format, ##__VA_ARGS__)
+ #else
+ #define DSSERR(format, ...) \
+-	printk(KERN_ERR "omapdss error: " format, ## __VA_ARGS__)
++	pr_err("omapdss error: " format, ##__VA_ARGS__)
+ #endif
+ 
+ #ifdef DSS_SUBSYS_NAME
+ #define DSSINFO(format, ...) \
+-	printk(KERN_INFO "omapdss " DSS_SUBSYS_NAME ": " format, \
+-	## __VA_ARGS__)
++	pr_info("omapdss " DSS_SUBSYS_NAME ": " format, ##__VA_ARGS__)
+ #else
+ #define DSSINFO(format, ...) \
+-	printk(KERN_INFO "omapdss: " format, ## __VA_ARGS__)
++	pr_info("omapdss: " format, ## __VA_ARGS__)
+ #endif
+ 
+ #ifdef DSS_SUBSYS_NAME
+ #define DSSWARN(format, ...) \
+-	printk(KERN_WARNING "omapdss " DSS_SUBSYS_NAME ": " format, \
+-	## __VA_ARGS__)
++	pr_warn("omapdss " DSS_SUBSYS_NAME ": " format, ##__VA_ARGS__)
+ #else
+ #define DSSWARN(format, ...) \
+-	printk(KERN_WARNING "omapdss: " format, ## __VA_ARGS__)
++	pr_warn("omapdss: " format, ##__VA_ARGS__)
+ #endif
+ 
+ /* OMAP TRM gives bitfields as start:end, where start is the higher bit
+diff --git a/drivers/gpu/drm/omapdrm/omap_gem.c b/drivers/gpu/drm/omapdrm/omap_gem.c
+index 4a90c690f09e..8d80aef94898 100644
+--- a/drivers/gpu/drm/omapdrm/omap_gem.c
++++ b/drivers/gpu/drm/omapdrm/omap_gem.c
+@@ -1107,9 +1107,8 @@ static inline bool is_waiting(struct omap_gem_sync_waiter *waiter)
+ 
+ /* macro for sync debug.. */
+ #define SYNCDBG 0
+-#define SYNC(fmt, ...) do { if (SYNCDBG) \
+-		printk(KERN_ERR "%s:%d: "fmt"\n", \
+-				__func__, __LINE__, ##__VA_ARGS__); \
++#define SYNC(fmt, ...) do { if (SYNCDBG)				\
++		pr_err("%s:%d: " fmt "\n", __func__, __LINE__, ##__VA_ARGS__); \
+ 	} while (0)
+ 
+ 
+diff --git a/drivers/gpu/drm/r128/r128_cce.c b/drivers/gpu/drm/r128/r128_cce.c
+index 14fd83b5f497..c9890afe69d6 100644
+--- a/drivers/gpu/drm/r128/r128_cce.c
++++ b/drivers/gpu/drm/r128/r128_cce.c
+@@ -149,20 +149,19 @@ static int r128_cce_load_microcode(drm_r128_private_t *dev_priv)
+ 
+ 	pdev = platform_device_register_simple("r128_cce", 0, NULL, 0);
+ 	if (IS_ERR(pdev)) {
+-		printk(KERN_ERR "r128_cce: Failed to register firmware\n");
++		pr_err("r128_cce: Failed to register firmware\n");
+ 		return PTR_ERR(pdev);
+ 	}
+ 	rc = request_firmware(&fw, FIRMWARE_NAME, &pdev->dev);
+ 	platform_device_unregister(pdev);
+ 	if (rc) {
+-		printk(KERN_ERR "r128_cce: Failed to load firmware \"%s\"\n",
++		pr_err("r128_cce: Failed to load firmware \"%s\"\n",
+ 		       FIRMWARE_NAME);
+ 		return rc;
+ 	}
+ 
+ 	if (fw->size != 256 * 8) {
+-		printk(KERN_ERR
+-		       "r128_cce: Bogus length %zu in firmware \"%s\"\n",
++		pr_err("r128_cce: Bogus length %zu in firmware \"%s\"\n",
+ 		       fw->size, FIRMWARE_NAME);
+ 		rc = -EINVAL;
+ 		goto out_release;
+diff --git a/drivers/gpu/drm/ttm/ttm_bo.c b/drivers/gpu/drm/ttm/ttm_bo.c
+index 4562e53c8244..bd8678a6f3f2 100644
+--- a/drivers/gpu/drm/ttm/ttm_bo.c
++++ b/drivers/gpu/drm/ttm/ttm_bo.c
+@@ -1008,7 +1008,7 @@ int ttm_bo_mem_space(struct ttm_buffer_object *bo,
+ 	}
+ 
+ 	if (!type_found) {
+-		printk(KERN_ERR TTM_PFX "No compatible memory type found.\n");
++		pr_err(TTM_PFX "No compatible memory type found\n");
+ 		return -EINVAL;
+ 	}
+ 
+diff --git a/drivers/gpu/drm/vmwgfx/vmwgfx_fence.c b/drivers/gpu/drm/vmwgfx/vmwgfx_fence.c
+index 6541dd8b82dc..b399f03a988d 100644
+--- a/drivers/gpu/drm/vmwgfx/vmwgfx_fence.c
++++ b/drivers/gpu/drm/vmwgfx/vmwgfx_fence.c
+@@ -728,8 +728,7 @@ int vmw_fence_obj_wait_ioctl(struct drm_device *dev, void *data,
+ 
+ 	base = ttm_base_object_lookup(tfile, arg->handle);
+ 	if (unlikely(base == NULL)) {
+-		printk(KERN_ERR "Wait invalid fence object handle "
+-		       "0x%08lx.\n",
++		pr_err("Wait invalid fence object handle 0x%08lx\n",
+ 		       (unsigned long)arg->handle);
+ 		return -EINVAL;
+ 	}
+@@ -773,8 +772,7 @@ int vmw_fence_obj_signaled_ioctl(struct drm_device *dev, void *data,
+ 
+ 	base = ttm_base_object_lookup(tfile, arg->handle);
+ 	if (unlikely(base == NULL)) {
+-		printk(KERN_ERR "Fence signaled invalid fence object handle "
+-		       "0x%08lx.\n",
++		pr_err("Fence signaled invalid fence object handle 0x%08lx\n",
+ 		       (unsigned long)arg->handle);
+ 		return -EINVAL;
+ 	}
+diff --git a/drivers/gpu/drm/vmwgfx/vmwgfx_gmrid_manager.c b/drivers/gpu/drm/vmwgfx/vmwgfx_gmrid_manager.c
+index fec7348cea2c..c1900f4390a4 100644
+--- a/drivers/gpu/drm/vmwgfx/vmwgfx_gmrid_manager.c
++++ b/drivers/gpu/drm/vmwgfx/vmwgfx_gmrid_manager.c
+@@ -159,8 +159,7 @@ static int vmw_gmrid_man_takedown(struct ttm_mem_type_manager *man)
+ static void vmw_gmrid_man_debug(struct ttm_mem_type_manager *man,
+ 				const char *prefix)
+ {
+-	printk(KERN_INFO "%s: No debug info available for the GMR "
+-	       "id manager.\n", prefix);
++	pr_info("%s: No debug info available for the GMR id manager\n", prefix);
+ }
+ 
+ const struct ttm_mem_type_manager_func vmw_gmrid_manager_func = {
+diff --git a/drivers/gpu/drm/vmwgfx/vmwgfx_resource.c b/drivers/gpu/drm/vmwgfx/vmwgfx_resource.c
+index 65b3f0369636..27033d944b08 100644
+--- a/drivers/gpu/drm/vmwgfx/vmwgfx_resource.c
++++ b/drivers/gpu/drm/vmwgfx/vmwgfx_resource.c
+@@ -736,14 +736,14 @@ int vmw_user_dmabuf_lookup(struct ttm_object_file *tfile,
+ 
+ 	base = ttm_base_object_lookup(tfile, handle);
+ 	if (unlikely(base == NULL)) {
+-		printk(KERN_ERR "Invalid buffer object handle 0x%08lx.\n",
++		pr_err("Invalid buffer object handle 0x%08lx\n",
+ 		       (unsigned long)handle);
+ 		return -ESRCH;
+ 	}
+ 
+ 	if (unlikely(ttm_base_object_type(base) != ttm_buffer_type)) {
+ 		ttm_base_object_unref(&base);
+-		printk(KERN_ERR "Invalid buffer object handle 0x%08lx.\n",
++		pr_err("Invalid buffer object handle 0x%08lx\n",
+ 		       (unsigned long)handle);
+ 		return -EINVAL;
+ 	}

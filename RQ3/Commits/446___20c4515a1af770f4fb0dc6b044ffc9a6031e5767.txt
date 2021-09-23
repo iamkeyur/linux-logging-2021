@@ -1,0 +1,25 @@
+['20c4515a1af770f4fb0dc6b044ffc9a6031e5767', '511.txt', 'Typo']
+commit 20c4515a1af770f4fb0dc6b044ffc9a6031e5767
+Author: Ewan D. Milne <emilne@redhat.com>
+Date:   Tue Jul 10 10:27:24 2018 -0400
+
+    qed: fix spelling mistake "successffuly" -> "successfully"
+    
+    Trivial fix to spelling mistake in qed_probe message.
+    
+    Signed-off-by: Ewan D. Milne <emilne@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/qlogic/qed/qed_main.c b/drivers/net/ethernet/qlogic/qed/qed_main.c
+index 0cbc74d6ca8b..758a9a5127fa 100644
+--- a/drivers/net/ethernet/qlogic/qed/qed_main.c
++++ b/drivers/net/ethernet/qlogic/qed/qed_main.c
+@@ -371,7 +371,7 @@ static struct qed_dev *qed_probe(struct pci_dev *pdev,
+ 		goto err2;
+ 	}
+ 
+-	DP_INFO(cdev, "qed_probe completed successffuly\n");
++	DP_INFO(cdev, "qed_probe completed successfully\n");
+ 
+ 	return cdev;
+ 

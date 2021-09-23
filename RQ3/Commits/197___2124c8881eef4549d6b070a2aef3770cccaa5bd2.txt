@@ -1,0 +1,28 @@
+['2124c8881eef4549d6b070a2aef3770cccaa5bd2', '785.txt', 'LogLevel']
+commit 2124c8881eef4549d6b070a2aef3770cccaa5bd2
+Author: Kai-Heng Feng <kai.heng.feng@canonical.com>
+Date:   Tue Nov 7 03:58:29 2017 -0500
+
+    usb: core: lower log level when device is not able to deal with string
+    
+    USB devices should work just fine when they don't support language id.
+    
+    Lower the log level so user won't panic in the future.
+    
+    BugLink: https://bugs.launchpad.net/bugs/1729618
+    Signed-off-by: Kai-Heng Feng <kai.heng.feng@canonical.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/usb/core/message.c b/drivers/usb/core/message.c
+index 77001bcfc504..5a8ab77bc367 100644
+--- a/drivers/usb/core/message.c
++++ b/drivers/usb/core/message.c
+@@ -776,7 +776,7 @@ static int usb_get_langid(struct usb_device *dev, unsigned char *tbuf)
+ 	 * deal with strings at all. Set string_langid to -1 in order to
+ 	 * prevent any string to be retrieved from the device */
+ 	if (err < 0) {
+-		dev_err(&dev->dev, "string descriptor 0 read error: %d\n",
++		dev_info(&dev->dev, "string descriptor 0 read error: %d\n",
+ 					err);
+ 		dev->string_langid = -1;
+ 		return -EPIPE;

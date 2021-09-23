@@ -1,0 +1,26 @@
+['5848828387c748d13890df1e3a1038fe91c0373d', '25.txt', 'Formatting']
+commit 5848828387c748d13890df1e3a1038fe91c0373d
+Author: Guido Kiener <guido@kiener-muenchen.de>
+Date:   Wed Sep 12 10:51:11 2018 +0200
+
+    usb: usbtmc: Fix split quoted string in debug message
+    
+    Signed-off-by: Guido Kiener <guido.kiener@rohde-schwarz.com>
+    Reviewed-by: Steve Bayless <steve_bayless@keysight.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/usb/class/usbtmc.c b/drivers/usb/class/usbtmc.c
+index ad3932ca4d8d..b9e505cbe6b4 100644
+--- a/drivers/usb/class/usbtmc.c
++++ b/drivers/usb/class/usbtmc.c
+@@ -2499,8 +2499,8 @@ static int usbtmc_probe(struct usb_interface *intf,
+ 
+ 	retcode = usb_register_dev(intf, &usbtmc_class);
+ 	if (retcode) {
+-		dev_err(&intf->dev, "Not able to get a minor"
+-			" (base %u, slice default): %d\n", USBTMC_MINOR_BASE,
++		dev_err(&intf->dev, "Not able to get a minor (base %u, slice default): %d\n",
++			USBTMC_MINOR_BASE,
+ 			retcode);
+ 		goto error_register;
+ 	}

@@ -1,0 +1,113 @@
+['305a031e1ae006eb3cbac5c4c7fd441596f0fe45', '821.txt', 'RedundantInformation', 'ModernizeLog']
+commit 305a031e1ae006eb3cbac5c4c7fd441596f0fe45
+Author: Johan Hovold <johan@kernel.org>
+Date:   Tue Oct 13 19:10:20 2015 +0200
+
+    greybus: es1/es2: clean up error messages
+    
+    Replace the remaining pr_err with dev_err, and drop redundant function
+    prefixes.
+    
+    Signed-off-by: Johan Hovold <johan@hovoldconsulting.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@google.com>
+
+diff --git a/drivers/staging/greybus/es1.c b/drivers/staging/greybus/es1.c
+index 2c56aaf55b42..4d70e89aedd9 100644
+--- a/drivers/staging/greybus/es1.c
++++ b/drivers/staging/greybus/es1.c
+@@ -193,7 +193,8 @@ static int message_send(struct greybus_host_device *hd, u16 cport_id,
+ 	 * the target CPort id before filling it in.
+ 	 */
+ 	if (!cport_id_valid(hd, cport_id)) {
+-		pr_err("invalid destination cport 0x%02x\n", cport_id);
++		dev_err(&udev->dev, "invalid destination cport 0x%02x\n",
++				cport_id);
+ 		return -EINVAL;
+ 	}
+ 
+@@ -219,7 +220,7 @@ static int message_send(struct greybus_host_device *hd, u16 cport_id,
+ 	trace_gb_host_device_send(hd, cport_id, buffer_size);
+ 	retval = usb_submit_urb(urb, gfp_mask);
+ 	if (retval) {
+-		pr_err("error %d submitting URB\n", retval);
++		dev_err(&udev->dev, "failed to submit out-urb: %d\n", retval);
+ 
+ 		spin_lock_irqsave(&es1->cport_out_urb_lock, flags);
+ 		message->hcpriv = NULL;
+@@ -363,7 +364,7 @@ static void cport_in_callback(struct urb *urb)
+ 	}
+ 
+ 	if (urb->actual_length < sizeof(*header)) {
+-		dev_err(dev, "%s: short message received\n", __func__);
++		dev_err(dev, "short message received\n");
+ 		goto exit;
+ 	}
+ 
+@@ -376,15 +377,13 @@ static void cport_in_callback(struct urb *urb)
+ 		greybus_data_rcvd(hd, cport_id, urb->transfer_buffer,
+ 							urb->actual_length);
+ 	} else {
+-		dev_err(dev, "%s: invalid cport id 0x%02x received\n",
+-				__func__, cport_id);
++		dev_err(dev, "invalid cport id 0x%02x received\n", cport_id);
+ 	}
+ exit:
+ 	/* put our urb back in the request pool */
+ 	retval = usb_submit_urb(urb, GFP_ATOMIC);
+ 	if (retval)
+-		dev_err(dev, "%s: error %d in submitting urb.\n",
+-			__func__, retval);
++		dev_err(dev, "failed to resubmit in-urb: %d\n", retval);
+ }
+ 
+ static void cport_out_callback(struct urb *urb)
+diff --git a/drivers/staging/greybus/es2.c b/drivers/staging/greybus/es2.c
+index f0770389df71..5faf80a1d5dd 100644
+--- a/drivers/staging/greybus/es2.c
++++ b/drivers/staging/greybus/es2.c
+@@ -298,7 +298,8 @@ static int message_send(struct greybus_host_device *hd, u16 cport_id,
+ 	 * the target CPort id before filling it in.
+ 	 */
+ 	if (!cport_id_valid(hd, cport_id)) {
+-		pr_err("invalid destination cport 0x%02x\n", cport_id);
++		dev_err(&udev->dev, "invalid destination cport 0x%02x\n",
++				cport_id);
+ 		return -EINVAL;
+ 	}
+ 
+@@ -326,7 +327,7 @@ static int message_send(struct greybus_host_device *hd, u16 cport_id,
+ 	trace_gb_host_device_send(hd, cport_id, buffer_size);
+ 	retval = usb_submit_urb(urb, gfp_mask);
+ 	if (retval) {
+-		pr_err("error %d submitting URB\n", retval);
++		dev_err(&udev->dev, "failed to submit out-urb: %d\n", retval);
+ 
+ 		spin_lock_irqsave(&es1->cport_out_urb_lock, flags);
+ 		message->hcpriv = NULL;
+@@ -509,7 +510,7 @@ static void cport_in_callback(struct urb *urb)
+ 	}
+ 
+ 	if (urb->actual_length < sizeof(*header)) {
+-		dev_err(dev, "%s: short message received\n", __func__);
++		dev_err(dev, "short message received\n");
+ 		goto exit;
+ 	}
+ 
+@@ -522,15 +523,13 @@ static void cport_in_callback(struct urb *urb)
+ 		greybus_data_rcvd(hd, cport_id, urb->transfer_buffer,
+ 							urb->actual_length);
+ 	} else {
+-		dev_err(dev, "%s: invalid cport id 0x%02x received\n",
+-				__func__, cport_id);
++		dev_err(dev, "invalid cport id 0x%02x received\n", cport_id);
+ 	}
+ exit:
+ 	/* put our urb back in the request pool */
+ 	retval = usb_submit_urb(urb, GFP_ATOMIC);
+ 	if (retval)
+-		dev_err(dev, "%s: error %d in submitting urb.\n",
+-			__func__, retval);
++		dev_err(dev, "failed to resubmit in-urb: %d\n", retval);
+ }
+ 
+ static void cport_out_callback(struct urb *urb)

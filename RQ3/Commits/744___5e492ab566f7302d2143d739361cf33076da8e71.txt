@@ -1,0 +1,62 @@
+['5e492ab566f7302d2143d739361cf33076da8e71', '160.txt', 'ModernizeLog']
+commit 5e492ab566f7302d2143d739361cf33076da8e71
+Author: Mohsin Shan <mohsinshan1k@gmail.com>
+Date:   Wed Mar 15 20:51:42 2017 -0700
+
+    Staging: goldfish: use __func__ instead of embedded function names
+    
+    Embedded function names are less appropriate to use when
+    refactoring, can cause function renaming.  Prefer the use
+    of "%s", __func__ to embedded function names
+    
+    Signed-off-by: Mohsin Shan <mohsinshan1k@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/goldfish/goldfish_nand.c b/drivers/staging/goldfish/goldfish_nand.c
+index 76d60eed1490..8f92ff4ba4b8 100644
+--- a/drivers/staging/goldfish/goldfish_nand.c
++++ b/drivers/staging/goldfish/goldfish_nand.c
+@@ -114,8 +114,8 @@ static int goldfish_nand_erase(struct mtd_info *mtd, struct erase_info *instr)
+ 	len = len / mtd->writesize * (mtd->writesize + mtd->oobsize);
+ 
+ 	if (goldfish_nand_cmd(mtd, NAND_CMD_ERASE, ofs, len, NULL) != len) {
+-		pr_err("goldfish_nand_erase: erase failed, start %llx, len %x, dev_size %llx, erase_size %x\n",
+-		       ofs, len, mtd->size, mtd->erasesize);
++		pr_err("%s: erase failed, start %llx, len %x, dev_size %llx, erase_size %x\n",
++		       __func__, ofs, len, mtd->size, mtd->erasesize);
+ 		return -EIO;
+ 	}
+ 
+@@ -125,8 +125,8 @@ static int goldfish_nand_erase(struct mtd_info *mtd, struct erase_info *instr)
+ 	return 0;
+ 
+ invalid_arg:
+-	pr_err("goldfish_nand_erase: invalid erase, start %llx, len %x, dev_size %llx, erase_size %x\n",
+-	       ofs, len, mtd->size, mtd->erasesize);
++	pr_err("%s: invalid erase, start %llx, len %x, dev_size %llx, erase_size %x\n",
++	       __func__, ofs, len, mtd->size, mtd->erasesize);
+ 	return -EINVAL;
+ }
+ 
+@@ -254,8 +254,8 @@ static int goldfish_nand_block_isbad(struct mtd_info *mtd, loff_t ofs)
+ 	return goldfish_nand_cmd(mtd, NAND_CMD_BLOCK_BAD_GET, ofs, 0, NULL);
+ 
+ invalid_arg:
+-	pr_err("goldfish_nand_block_isbad: invalid arg, ofs %llx, dev_size %llx, write_size %x\n",
+-	       ofs, mtd->size, mtd->writesize);
++	pr_err("%s: invalid arg, ofs %llx, dev_size %llx, write_size %x\n",
++	       __func__, ofs, mtd->size, mtd->writesize);
+ 	return -EINVAL;
+ }
+ 
+@@ -277,8 +277,8 @@ static int goldfish_nand_block_markbad(struct mtd_info *mtd, loff_t ofs)
+ 	return 0;
+ 
+ invalid_arg:
+-	pr_err("goldfish_nand_block_markbad: invalid arg, ofs %llx, dev_size %llx, write_size %x\n",
+-	       ofs, mtd->size, mtd->writesize);
++	pr_err("%s: invalid arg, ofs %llx, dev_size %llx, write_size %x\n",
++	       __func__, ofs, mtd->size, mtd->writesize);
+ 	return -EINVAL;
+ }
+ 

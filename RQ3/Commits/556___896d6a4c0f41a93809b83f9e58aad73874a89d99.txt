@@ -1,0 +1,36 @@
+['896d6a4c0f41a93809b83f9e58aad73874a89d99', '388.txt', 'ModernizeLog']
+commit 896d6a4c0f41a93809b83f9e58aad73874a89d99
+Author: Viresh Kumar <viresh.kumar@linaro.org>
+Date:   Tue Feb 9 10:30:40 2016 +0530
+
+    cpufreq: dt: Convert few pr_debug/err() calls to dev_dbg/err()
+    
+    We have the device structure available now, lets use it for better print
+    messages.
+    
+    Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+    Reviewed-by: Stephen Boyd <sboyd@codeaurora.org>
+    Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+
+diff --git a/drivers/cpufreq/cpufreq-dt.c b/drivers/cpufreq/cpufreq-dt.c
+index 0ca74d070058..ace0168274d4 100644
+--- a/drivers/cpufreq/cpufreq-dt.c
++++ b/drivers/cpufreq/cpufreq-dt.c
+@@ -246,7 +246,7 @@ static int cpufreq_init(struct cpufreq_policy *policy)
+ 	 */
+ 	ret = dev_pm_opp_get_opp_count(cpu_dev);
+ 	if (ret <= 0) {
+-		pr_debug("OPP table is not ready, deferring probe\n");
++		dev_dbg(cpu_dev, "OPP table is not ready, deferring probe\n");
+ 		ret = -EPROBE_DEFER;
+ 		goto out_free_opp;
+ 	}
+@@ -325,7 +325,7 @@ static int cpufreq_init(struct cpufreq_policy *policy)
+ 
+ 	ret = dev_pm_opp_init_cpufreq_table(cpu_dev, &freq_table);
+ 	if (ret) {
+-		pr_err("failed to init cpufreq table: %d\n", ret);
++		dev_err(cpu_dev, "failed to init cpufreq table: %d\n", ret);
+ 		goto out_free_priv;
+ 	}
+ 

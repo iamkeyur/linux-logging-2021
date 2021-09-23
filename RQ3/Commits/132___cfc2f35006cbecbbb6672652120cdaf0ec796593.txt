@@ -1,0 +1,48 @@
+['cfc2f35006cbecbbb6672652120cdaf0ec796593', '856.txt', 'Clarify/Reword']
+commit cfc2f35006cbecbbb6672652120cdaf0ec796593
+Author: Oded Gabbay <oded.gabbay@gmail.com>
+Date:   Sat May 4 16:43:20 2019 +0300
+
+    habanalabs: improve a couple of error messages
+    
+    This patch improves the error message that is shown when a new user tries
+    to open a new FD while there is already an existing user that is working
+    on the device.
+    
+    It also improves the error message in case of missing firmware file.
+    
+    Signed-off-by: Oded Gabbay <oded.gabbay@gmail.com>
+
+diff --git a/drivers/misc/habanalabs/firmware_if.c b/drivers/misc/habanalabs/firmware_if.c
+index eda5d7fcb79f..19d1271a8f5c 100644
+--- a/drivers/misc/habanalabs/firmware_if.c
++++ b/drivers/misc/habanalabs/firmware_if.c
+@@ -29,13 +29,13 @@ int hl_fw_push_fw_to_device(struct hl_device *hdev, const char *fw_name,
+ 
+ 	rc = request_firmware(&fw, fw_name, hdev->dev);
+ 	if (rc) {
+-		dev_err(hdev->dev, "Failed to request %s\n", fw_name);
++		dev_err(hdev->dev, "Firmware file %s is not found!\n", fw_name);
+ 		goto out;
+ 	}
+ 
+ 	fw_size = fw->size;
+ 	if ((fw_size % 4) != 0) {
+-		dev_err(hdev->dev, "illegal %s firmware size %zu\n",
++		dev_err(hdev->dev, "Illegal %s firmware size %zu\n",
+ 			fw_name, fw_size);
+ 		rc = -EINVAL;
+ 		goto out;
+diff --git a/drivers/misc/habanalabs/habanalabs_drv.c b/drivers/misc/habanalabs/habanalabs_drv.c
+index 5f4d155be767..d8b47bb4729c 100644
+--- a/drivers/misc/habanalabs/habanalabs_drv.c
++++ b/drivers/misc/habanalabs/habanalabs_drv.c
+@@ -107,7 +107,7 @@ int hl_device_open(struct inode *inode, struct file *filp)
+ 
+ 	if (atomic_read(&hdev->fd_open_cnt)) {
+ 		dev_info_ratelimited(hdev->dev,
+-			"Device %s is already attached to application\n",
++			"Can't open %s because another user is working on it\n",
+ 			dev_name(hdev->dev));
+ 		mutex_unlock(&hdev->fd_open_cnt_lock);
+ 		return -EBUSY;

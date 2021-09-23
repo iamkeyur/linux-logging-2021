@@ -1,0 +1,33 @@
+['d12d0cb1d7dc00605112bf1d5dcc157f2908a068', '1508.txt', 'Mislead/Ambiguous']
+commit d12d0cb1d7dc00605112bf1d5dcc157f2908a068
+Author: Shawn Lin <shawn.lin@rock-chips.com>
+Date:   Fri Sep 2 12:14:38 2016 +0800
+
+    mmc: dw_mmc: fix misleading error print if failing to do DMA transfer
+    
+    The original log didn't figure out that we could still
+    finish this transfer by PIO mode even if failing to use
+    DMA. And it should be kept for debug level instead of
+    error one.
+    
+    Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+    Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+    Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 38099bafcd4c..c59a7b5c69a1 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1057,8 +1057,10 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+ 	spin_unlock_irqrestore(&host->irq_lock, irqflags);
+ 
+ 	if (host->dma_ops->start(host, sg_len)) {
+-		/* We can't do DMA */
+-		dev_err(host->dev, "%s: failed to start DMA.\n", __func__);
++		/* We can't do DMA, try PIO for this one */
++		dev_dbg(host->dev,
++			"%s: fall back to PIO mode for current transfer\n",
++			__func__);
+ 		return -ENODEV;
+ 	}
+ 

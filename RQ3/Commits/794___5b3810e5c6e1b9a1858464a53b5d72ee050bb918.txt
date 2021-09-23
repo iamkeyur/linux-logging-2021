@@ -1,0 +1,62 @@
+['5b3810e5c6e1b9a1858464a53b5d72ee050bb918', '213.txt', 'ModernizeLog']
+commit 5b3810e5c6e1b9a1858464a53b5d72ee050bb918
+Author: Vlastimil Babka <vbabka@suse.cz>
+Date:   Tue Mar 15 14:56:33 2016 -0700
+
+    mm, sl[au]b: print gfp_flags as strings in slab_out_of_memory()
+    
+    We can now print gfp_flags more human-readable.  Make use of this in
+    slab_out_of_memory() for SLUB and SLAB.  Also convert the SLAB variant
+    it to pr_warn() along the way.
+    
+    Signed-off-by: Vlastimil Babka <vbabka@suse.cz>
+    Acked-by: David Rientjes <rientjes@google.com>
+    Cc: Christoph Lameter <cl@linux.com>
+    Cc: Pekka Enberg <penberg@kernel.org>
+    Cc: Joonsoo Kim <iamjoonsoo.kim@lge.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+diff --git a/mm/slab.c b/mm/slab.c
+index 863c005a3d9c..852fc5c79829 100644
+--- a/mm/slab.c
++++ b/mm/slab.c
+@@ -1350,10 +1350,9 @@ slab_out_of_memory(struct kmem_cache *cachep, gfp_t gfpflags, int nodeid)
+ 	if ((gfpflags & __GFP_NOWARN) || !__ratelimit(&slab_oom_rs))
+ 		return;
+ 
+-	printk(KERN_WARNING
+-		"SLAB: Unable to allocate memory on node %d (gfp=0x%x)\n",
+-		nodeid, gfpflags);
+-	printk(KERN_WARNING "  cache: %s, object size: %d, order: %d\n",
++	pr_warn("SLAB: Unable to allocate memory on node %d, gfp=%#x(%pGg)\n",
++		nodeid, gfpflags, &gfpflags);
++	pr_warn("  cache: %s, object size: %d, order: %d\n",
+ 		cachep->name, cachep->size, cachep->gfporder);
+ 
+ 	for_each_kmem_cache_node(cachep, node, n) {
+@@ -1377,8 +1376,7 @@ slab_out_of_memory(struct kmem_cache *cachep, gfp_t gfpflags, int nodeid)
+ 
+ 		num_slabs += active_slabs;
+ 		num_objs = num_slabs * cachep->num;
+-		printk(KERN_WARNING
+-			"  node %d: slabs: %ld/%ld, objs: %ld/%ld, free: %ld\n",
++		pr_warn("  node %d: slabs: %ld/%ld, objs: %ld/%ld, free: %ld\n",
+ 			node, active_slabs, num_slabs, active_objs, num_objs,
+ 			free_objects);
+ 	}
+diff --git a/mm/slub.c b/mm/slub.c
+index 2d4d817f3d7a..6c91324f9370 100644
+--- a/mm/slub.c
++++ b/mm/slub.c
+@@ -2236,8 +2236,8 @@ slab_out_of_memory(struct kmem_cache *s, gfp_t gfpflags, int nid)
+ 	if ((gfpflags & __GFP_NOWARN) || !__ratelimit(&slub_oom_rs))
+ 		return;
+ 
+-	pr_warn("SLUB: Unable to allocate memory on node %d (gfp=0x%x)\n",
+-		nid, gfpflags);
++	pr_warn("SLUB: Unable to allocate memory on node %d, gfp=%#x(%pGg)\n",
++		nid, gfpflags, &gfpflags);
+ 	pr_warn("  cache: %s, object size: %d, buffer size: %d, default order: %d, min order: %d\n",
+ 		s->name, s->object_size, s->size, oo_order(s->oo),
+ 		oo_order(s->min));

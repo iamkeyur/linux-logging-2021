@@ -1,0 +1,25 @@
+['ff86110e26c53634fc6c413732f68a6489ea40b2', '501.txt', 'Typo']
+commit ff86110e26c53634fc6c413732f68a6489ea40b2
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Wed Dec 28 16:52:41 2016 +0000
+
+    usb: renesas_usbhs: mod_host: fix typo: "connecte" -> "connected"
+    
+    trivial fix to typo in dev_dbg message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+
+diff --git a/drivers/usb/renesas_usbhs/mod_host.c b/drivers/usb/renesas_usbhs/mod_host.c
+index 165e81bfd93a..dfb346e9bd0c 100644
+--- a/drivers/usb/renesas_usbhs/mod_host.c
++++ b/drivers/usb/renesas_usbhs/mod_host.c
+@@ -577,7 +577,7 @@ static struct usbhsh_device *usbhsh_device_attach(struct usbhsh_hpriv *hpriv,
+ 		upphub	= usbhsh_device_number(hpriv, parent);
+ 		hubport	= usbhsh_device_hubport(udev);
+ 
+-		dev_dbg(dev, "%s connecte to Hub [%d:%d](%p)\n", __func__,
++		dev_dbg(dev, "%s connected to Hub [%d:%d](%p)\n", __func__,
+ 			upphub, hubport, parent);
+ 	}
+ 

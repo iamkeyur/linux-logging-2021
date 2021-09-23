@@ -1,0 +1,29 @@
+['872b4af48f878e361739bae7d3f300c0a35ecfd0', '660.txt', 'FixFormatSpecifier']
+commit 872b4af48f878e361739bae7d3f300c0a35ecfd0
+Author: Vinod Koul <vkoul@kernel.org>
+Date:   Wed Sep 14 15:22:49 2016 +0530
+
+    dmaengine: sa11x0: use correct print specifiers for u32
+    
+    This driver when compiled on 64 bits gave warnings:
+    
+    drivers/dma/sa11x0-dma.c:494:2: warning: format ‘%zx’ expects argument of type ‘size_t’, but argument 4 has type ‘u32’ [-Wformat=]
+    
+    We should use %x to print 'u32' values.
+    
+    Acked-by: Russell King <rmk+kernel@armlinux.org.uk>
+    Signed-off-by: Vinod Koul <vinod.koul@intel.com>
+
+diff --git a/drivers/dma/sa11x0-dma.c b/drivers/dma/sa11x0-dma.c
+index 137fad5859f6..4ebc00f90f36 100644
+--- a/drivers/dma/sa11x0-dma.c
++++ b/drivers/dma/sa11x0-dma.c
+@@ -491,7 +491,7 @@ static enum dma_status sa11x0_dma_tx_status(struct dma_chan *chan,
+ 	}
+ 	spin_unlock_irqrestore(&c->vc.lock, flags);
+ 
+-	dev_vdbg(d->slave.dev, "tx_status: bytes 0x%zx\n", state->residue);
++	dev_vdbg(d->slave.dev, "tx_status: bytes 0x%x\n", state->residue);
+ 
+ 	return ret;
+ }

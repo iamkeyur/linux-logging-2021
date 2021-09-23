@@ -1,0 +1,26 @@
+['c121f72a66c5f92fbe2fc53baa274eef39875cec', '989.txt', 'Typo']
+commit c121f72a66c5f92fbe2fc53baa274eef39875cec
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Mon Oct 24 23:46:18 2016 +0100
+
+    net: bgmac: fix spelling mistake: "connecton" -> "connection"
+    
+    trivial fix to spelling mistake in dev_err message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Acked-by: Jon Mason <jon.mason@broadcom.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/broadcom/bgmac.c b/drivers/net/ethernet/broadcom/bgmac.c
+index 856379cbb402..31ca204b38d2 100644
+--- a/drivers/net/ethernet/broadcom/bgmac.c
++++ b/drivers/net/ethernet/broadcom/bgmac.c
+@@ -1449,7 +1449,7 @@ static int bgmac_phy_connect(struct bgmac *bgmac)
+ 	phy_dev = phy_connect(bgmac->net_dev, bus_id, &bgmac_adjust_link,
+ 			      PHY_INTERFACE_MODE_MII);
+ 	if (IS_ERR(phy_dev)) {
+-		dev_err(bgmac->dev, "PHY connecton failed\n");
++		dev_err(bgmac->dev, "PHY connection failed\n");
+ 		return PTR_ERR(phy_dev);
+ 	}
+ 

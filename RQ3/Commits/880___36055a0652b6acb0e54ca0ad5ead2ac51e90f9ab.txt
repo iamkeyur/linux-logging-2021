@@ -1,0 +1,29 @@
+['36055a0652b6acb0e54ca0ad5ead2ac51e90f9ab', '1521.txt', 'FixEarlyLogging']
+commit 36055a0652b6acb0e54ca0ad5ead2ac51e90f9ab
+Author: Dennis Dalessandro <dennis.dalessandro@intel.com>
+Date:   Wed Jan 6 10:03:39 2016 -0800
+
+    IB/rdmavt: Do not use rvt prints which rely on driver too early
+    
+    Trying to print debug and error messages with the rdmavt helpers will not
+    work out so well if the drivers have not provided the get_card and get
+    pci functions. Use the normal pr_error instead until we can check this.
+    
+    Reviewed-by: Ira Weiny <ira.weiny@intel.com>
+    Reviewed-by: Mike Marciniszyn <mike.marciniszyn@intel.com>
+    Signed-off-by: Dennis Dalessandro <dennis.dalessandro@intel.com>
+    Signed-off-by: Doug Ledford <dledford@redhat.com>
+
+diff --git a/drivers/infiniband/sw/rdmavt/vt.c b/drivers/infiniband/sw/rdmavt/vt.c
+index 516c810fad65..e92af9c6521e 100644
+--- a/drivers/infiniband/sw/rdmavt/vt.c
++++ b/drivers/infiniband/sw/rdmavt/vt.c
+@@ -266,7 +266,7 @@ int rvt_register_device(struct rvt_dev_info *rdi)
+ 	/* Mem Region */
+ 	ret = rvt_driver_mr_init(rdi);
+ 	if (ret) {
+-		rvt_pr_err(rdi, "Error in driver MR init.\n");
++		pr_err("Error in driver MR init.\n");
+ 		goto bail_no_mr;
+ 	}
+ 

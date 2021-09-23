@@ -1,0 +1,44 @@
+['4450dc0ae2c18a0ac6dce560215c7a1fa12122b5', '798.txt', 'ModernizeLog', 'Formatting']
+commit 4450dc0ae2c18a0ac6dce560215c7a1fa12122b5
+Author: Geert Uytterhoeven <geert+renesas@glider.be>
+Date:   Thu Apr 5 17:26:58 2018 +0200
+
+    clockevents: Fix kernel messages split across multiple lines
+    
+    Convert the clockevents driver from old-style printk() to pr_info() and
+    pr_cont(), to fix split kernel messages like below:
+    
+        Clockevents: could not switch to one-shot mode:
+         dummy_timer is not functional.
+    
+    Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+    Cc: Frederic Weisbecker <fweisbec@gmail.com>
+    Link: https://lkml.kernel.org/r/1522942018-14471-1-git-send-email-geert%2Brenesas@glider.be
+
+diff --git a/kernel/time/tick-oneshot.c b/kernel/time/tick-oneshot.c
+index c1f518e7aa80..6fe615d57ebb 100644
+--- a/kernel/time/tick-oneshot.c
++++ b/kernel/time/tick-oneshot.c
+@@ -82,16 +82,15 @@ int tick_switch_to_oneshot(void (*handler)(struct clock_event_device *))
+ 	if (!dev || !(dev->features & CLOCK_EVT_FEAT_ONESHOT) ||
+ 		    !tick_device_is_functional(dev)) {
+ 
+-		printk(KERN_INFO "Clockevents: "
+-		       "could not switch to one-shot mode:");
++		pr_info("Clockevents: could not switch to one-shot mode:");
+ 		if (!dev) {
+-			printk(" no tick device\n");
++			pr_cont(" no tick device\n");
+ 		} else {
+ 			if (!tick_device_is_functional(dev))
+-				printk(" %s is not functional.\n", dev->name);
++				pr_cont(" %s is not functional.\n", dev->name);
+ 			else
+-				printk(" %s does not support one-shot mode.\n",
+-				       dev->name);
++				pr_cont(" %s does not support one-shot mode.\n",
++					dev->name);
+ 		}
+ 		return -EINVAL;
+ 	}

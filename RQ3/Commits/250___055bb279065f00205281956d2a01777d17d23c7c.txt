@@ -1,0 +1,25 @@
+['055bb279065f00205281956d2a01777d17d23c7c', '727.txt', 'Typo']
+commit 055bb279065f00205281956d2a01777d17d23c7c
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Mon Jul 3 10:23:47 2017 +0100
+
+    IB/qib: fix spelling mistake: "failng" -> "failing"
+    
+    Trivial fix to spelling mistake in qib_dev_err error message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Doug Ledford <dledford@redhat.com>
+
+diff --git a/drivers/infiniband/hw/qib/qib_init.c b/drivers/infiniband/hw/qib/qib_init.c
+index 6c16ba1107ba..cce4ab468b29 100644
+--- a/drivers/infiniband/hw/qib/qib_init.c
++++ b/drivers/infiniband/hw/qib/qib_init.c
+@@ -399,7 +399,7 @@ static int loadtime_init(struct qib_devdata *dd)
+ 	if (((dd->revision >> QLOGIC_IB_R_SOFTWARE_SHIFT) &
+ 	     QLOGIC_IB_R_SOFTWARE_MASK) != QIB_CHIP_SWVERSION) {
+ 		qib_dev_err(dd,
+-			"Driver only handles version %d, chip swversion is %d (%llx), failng\n",
++			"Driver only handles version %d, chip swversion is %d (%llx), failing\n",
+ 			QIB_CHIP_SWVERSION,
+ 			(int)(dd->revision >>
+ 				QLOGIC_IB_R_SOFTWARE_SHIFT) &

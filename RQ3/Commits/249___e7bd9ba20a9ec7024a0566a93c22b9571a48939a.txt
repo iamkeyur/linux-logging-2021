@@ -1,0 +1,51 @@
+['e7bd9ba20a9ec7024a0566a93c22b9571a48939a', '728.txt', 'AddInfo']
+commit e7bd9ba20a9ec7024a0566a93c22b9571a48939a
+Author: Namhyung Kim <namhyung@kernel.org>
+Date:   Sun Jun 18 23:22:59 2017 +0900
+
+    perf ftrace: Show error message when fails to set ftrace files
+    
+    It'd be better for debugging to show an error message when it fails to
+    setup ftrace for some reason.
+    
+    Signed-off-by: Namhyung Kim <namhyung@kernel.org>
+    Cc: Frederic Weisbecker <fweisbec@gmail.com>
+    Cc: Jiri Olsa <jolsa@kernel.org>
+    Cc: Masami Hiramatsu <mhiramat@kernel.org>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Steven Rostedt <rostedt@goodmis.org>
+    Cc: kernel-team@lge.com
+    Link: http://lkml.kernel.org/r/20170618142302.25390-1-namhyung@kernel.org
+    Signed-off-by: Arnaldo Carvalho de Melo <acme@redhat.com>
+
+diff --git a/tools/perf/builtin-ftrace.c b/tools/perf/builtin-ftrace.c
+index 9e0b35cd0eea..966a94fa8200 100644
+--- a/tools/perf/builtin-ftrace.c
++++ b/tools/perf/builtin-ftrace.c
+@@ -61,6 +61,7 @@ static int __write_tracing_file(const char *name, const char *val, bool append)
+ 	int fd, ret = -1;
+ 	ssize_t size = strlen(val);
+ 	int flags = O_WRONLY;
++	char errbuf[512];
+ 
+ 	file = get_tracing_file(name);
+ 	if (!file) {
+@@ -75,14 +76,16 @@ static int __write_tracing_file(const char *name, const char *val, bool append)
+ 
+ 	fd = open(file, flags);
+ 	if (fd < 0) {
+-		pr_debug("cannot open tracing file: %s\n", name);
++		pr_debug("cannot open tracing file: %s: %s\n",
++			 name, str_error_r(errno, errbuf, sizeof(errbuf)));
+ 		goto out;
+ 	}
+ 
+ 	if (write(fd, val, size) == size)
+ 		ret = 0;
+ 	else
+-		pr_debug("write '%s' to tracing/%s failed\n", val, name);
++		pr_debug("write '%s' to tracing/%s failed: %s\n",
++			 val, name, str_error_r(errno, errbuf, sizeof(errbuf)));
+ 
+ 	close(fd);
+ out:

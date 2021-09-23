@@ -1,0 +1,58 @@
+['2b3fee3622d0973970faf2f5790fbe74cde77e45', '642.txt', 'RedundantInformation']
+commit 2b3fee3622d0973970faf2f5790fbe74cde77e45
+Author: Enrico Weigelt, metux IT consult <info@metux.net>
+Date:   Mon Jun 17 18:49:15 2019 +0200
+
+    gpio: amdpt: Drop unneeded deref of &pdev->dev
+    
+    We already have the struct device* pointer in a local variable,
+    so we can write this a bit shorter.
+    
+    Signed-off-by: Enrico Weigelt, metux IT consult <info@metux.net>
+    Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+
+diff --git a/drivers/gpio/gpio-amdpt.c b/drivers/gpio/gpio-amdpt.c
+index 1ffd7c2d1285..2ec9d1fb7626 100644
+--- a/drivers/gpio/gpio-amdpt.c
++++ b/drivers/gpio/gpio-amdpt.c
+@@ -91,7 +91,7 @@ static int pt_gpio_probe(struct platform_device *pdev)
+ 
+ 	pt_gpio->reg_base = devm_platform_ioremap_resource(pdev, 0);
+ 	if (IS_ERR(pt_gpio->reg_base)) {
+-		dev_err(&pdev->dev, "Failed to map MMIO resource for PT GPIO.\n");
++		dev_err(dev, "Failed to map MMIO resource for PT GPIO.\n");
+ 		return PTR_ERR(pt_gpio->reg_base);
+ 	}
+ 
+@@ -101,7 +101,7 @@ static int pt_gpio_probe(struct platform_device *pdev)
+ 			 pt_gpio->reg_base + PT_DIRECTION_REG, NULL,
+ 			 BGPIOF_READ_OUTPUT_REG_SET);
+ 	if (ret) {
+-		dev_err(&pdev->dev, "bgpio_init failed\n");
++		dev_err(dev, "bgpio_init failed\n");
+ 		return ret;
+ 	}
+ 
+@@ -110,11 +110,11 @@ static int pt_gpio_probe(struct platform_device *pdev)
+ 	pt_gpio->gc.free             = pt_gpio_free;
+ 	pt_gpio->gc.ngpio            = PT_TOTAL_GPIO;
+ #if defined(CONFIG_OF_GPIO)
+-	pt_gpio->gc.of_node          = pdev->dev.of_node;
++	pt_gpio->gc.of_node          = dev->of_node;
+ #endif
+ 	ret = gpiochip_add_data(&pt_gpio->gc, pt_gpio);
+ 	if (ret) {
+-		dev_err(&pdev->dev, "Failed to register GPIO lib\n");
++		dev_err(dev, "Failed to register GPIO lib\n");
+ 		return ret;
+ 	}
+ 
+@@ -124,7 +124,7 @@ static int pt_gpio_probe(struct platform_device *pdev)
+ 	writel(0, pt_gpio->reg_base + PT_SYNC_REG);
+ 	writel(0, pt_gpio->reg_base + PT_CLOCKRATE_REG);
+ 
+-	dev_dbg(&pdev->dev, "PT GPIO driver loaded\n");
++	dev_dbg(dev, "PT GPIO driver loaded\n");
+ 	return ret;
+ }
+ 

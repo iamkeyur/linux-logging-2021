@@ -1,0 +1,28 @@
+['a5da9568c58023dff5e79a5eb52b164e69890707', '383.txt', 'LogLevel']
+commit a5da9568c58023dff5e79a5eb52b164e69890707
+Author: Mathias Nyman <mathias.nyman@linux.intel.com>
+Date:   Tue Nov 24 13:09:57 2015 +0200
+
+    xhci: use debug level when printing out interval rounding messages
+    
+    Don't use dev_warn() for intened behaviour, use dev_dbg()
+    
+    Rounding down the interval to the nearest power of 2 is required
+    by xhci specs.
+    
+    Signed-off-by: Mathias Nyman <mathias.nyman@linux.intel.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/usb/host/xhci-mem.c b/drivers/usb/host/xhci-mem.c
+index c48cbe731356..536d00f21eed 100644
+--- a/drivers/usb/host/xhci-mem.c
++++ b/drivers/usb/host/xhci-mem.c
+@@ -1245,7 +1245,7 @@ static unsigned int xhci_microframes_to_exponent(struct usb_device *udev,
+ 	interval = fls(desc_interval) - 1;
+ 	interval = clamp_val(interval, min_exponent, max_exponent);
+ 	if ((1 << interval) != desc_interval)
+-		dev_warn(&udev->dev,
++		dev_dbg(&udev->dev,
+ 			 "ep %#x - rounding interval to %d microframes, ep desc says %d microframes\n",
+ 			 ep->desc.bEndpointAddress,
+ 			 1 << interval,

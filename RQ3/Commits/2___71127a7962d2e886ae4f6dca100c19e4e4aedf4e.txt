@@ -1,0 +1,42 @@
+['71127a7962d2e886ae4f6dca100c19e4e4aedf4e', '999.txt', 'ModernizeLog']
+commit 71127a7962d2e886ae4f6dca100c19e4e4aedf4e
+Author: Ladislav Michl <ladis@linux-mips.org>
+Date:   Mon Nov 21 08:59:25 2016 -0600
+
+    usb: musb: omap2430: use dev_err
+    
+    Replace pr_err with dev_err to print also device name.
+    
+    Signed-off-by: Ladislav Michl <ladis@linux-mips.org>
+    Acked-by: Tony Lindgren <tony@atomide.com>
+    Signed-off-by: Bin Liu <b-liu@ti.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/usb/musb/omap2430.c b/drivers/usb/musb/omap2430.c
+index cc1225485509..451b37252604 100644
+--- a/drivers/usb/musb/omap2430.c
++++ b/drivers/usb/musb/omap2430.c
+@@ -277,12 +277,12 @@ static int omap2430_musb_init(struct musb *musb)
+ 		if (status == -ENXIO)
+ 			return status;
+ 
+-		pr_err("HS USB OTG: no transceiver configured\n");
++		dev_err(dev, "HS USB OTG: no transceiver configured\n");
+ 		return -EPROBE_DEFER;
+ 	}
+ 
+ 	if (IS_ERR(musb->phy)) {
+-		pr_err("HS USB OTG: no PHY configured\n");
++		dev_err(dev, "HS USB OTG: no PHY configured\n");
+ 		return PTR_ERR(musb->phy);
+ 	}
+ 	musb->isr = omap2430_musb_interrupt;
+@@ -301,7 +301,7 @@ static int omap2430_musb_init(struct musb *musb)
+ 
+ 	musb_writel(musb->mregs, OTG_INTERFSEL, l);
+ 
+-	pr_debug("HS USB OTG: revision 0x%x, sysconfig 0x%02x, "
++	dev_dbg(dev, "HS USB OTG: revision 0x%x, sysconfig 0x%02x, "
+ 			"sysstatus 0x%x, intrfsel 0x%x, simenable  0x%x\n",
+ 			musb_readl(musb->mregs, OTG_REVISION),
+ 			musb_readl(musb->mregs, OTG_SYSCONFIG),

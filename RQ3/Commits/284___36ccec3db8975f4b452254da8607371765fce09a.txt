@@ -1,0 +1,28 @@
+['36ccec3db8975f4b452254da8607371765fce09a', '690.txt', 'Typo']
+commit 36ccec3db8975f4b452254da8607371765fce09a
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Tue Apr 16 14:33:18 2019 +0100
+
+    watchdog: intel_scu_watchdog: fix spelling mistake: "set_hearbeat" -> "set_heartbeat"
+    
+    There is a spelling mistake in a pr_debug message. Fix it.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Reviewed-by: Mukesh Ojha <mojha@codeaurora.org>
+    Reviewed-by: Guenter Roeck <linux@roeck-us.net>
+    Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+    Signed-off-by: Wim Van Sebroeck <wim@linux-watchdog.org>
+
+diff --git a/drivers/watchdog/intel_scu_watchdog.c b/drivers/watchdog/intel_scu_watchdog.c
+index 0caab6241eb7..718f7db35bec 100644
+--- a/drivers/watchdog/intel_scu_watchdog.c
++++ b/drivers/watchdog/intel_scu_watchdog.c
+@@ -224,7 +224,7 @@ static int intel_scu_set_heartbeat(u32 t)
+ 		 watchdog_device.timer_tbl_ptr->freq_hz);
+ 	pr_debug("set_heartbeat: timer_set is %x (hex)\n",
+ 		 watchdog_device.timer_set);
+-	pr_debug("set_hearbeat: timer_margin is %x (hex)\n", timer_margin);
++	pr_debug("set_heartbeat: timer_margin is %x (hex)\n", timer_margin);
+ 	pr_debug("set_heartbeat: threshold is %x (hex)\n",
+ 		 watchdog_device.threshold);
+ 	pr_debug("set_heartbeat: soft_threshold is %x (hex)\n",

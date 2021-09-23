@@ -1,0 +1,65 @@
+['35a84ba7f94001c11fac0679b20c8d268fbc0b96', '771.txt', 'FixFormatSpecifier']
+commit 35a84ba7f94001c11fac0679b20c8d268fbc0b96
+Author: Johan Hovold <johan@kernel.org>
+Date:   Wed Nov 11 10:07:07 2015 +0100
+
+    greybus: use decimal notation for interface and cport ids
+    
+    Fix up the few places where hexadecimal rather than decimal notation was
+    used for interface and cport ids.
+    
+    Note that this includes the endo sysfs-attribute for the AP interface
+    id.
+    
+    Signed-off-by: Johan Hovold <johan@hovoldconsulting.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@google.com>
+
+diff --git a/drivers/staging/greybus/endo.c b/drivers/staging/greybus/endo.c
+index df4afb232c5e..775dbcea539b 100644
+--- a/drivers/staging/greybus/endo.c
++++ b/drivers/staging/greybus/endo.c
+@@ -89,7 +89,7 @@ static ssize_t ap_intf_id_show(struct device *dev,
+ {
+ 	struct gb_endo *endo = to_gb_endo(dev);
+ 
+-	return sprintf(buf, "0x%02x\n", endo->ap_intf_id);
++	return sprintf(buf, "%u\n", endo->ap_intf_id);
+ }
+ static DEVICE_ATTR_RO(ap_intf_id);
+ 
+diff --git a/drivers/staging/greybus/interface.c b/drivers/staging/greybus/interface.c
+index b864f6879ffb..4c96adc56139 100644
+--- a/drivers/staging/greybus/interface.c
++++ b/drivers/staging/greybus/interface.c
+@@ -157,8 +157,7 @@ struct gb_interface *gb_interface_create(struct gb_host_device *hd,
+ 
+ 	retval = device_add(&intf->dev);
+ 	if (retval) {
+-		pr_err("failed to add interface device for id 0x%02hhx\n",
+-		       interface_id);
++		pr_err("failed to add interface %u\n", interface_id);
+ 		goto free_intf;
+ 	}
+ 
+diff --git a/drivers/staging/greybus/svc.c b/drivers/staging/greybus/svc.c
+index c2633e25d43b..acf08e774791 100644
+--- a/drivers/staging/greybus/svc.c
++++ b/drivers/staging/greybus/svc.c
+@@ -268,7 +268,7 @@ void gb_svc_connection_destroy(struct gb_svc *svc, u8 intf1_id, u16 cport1_id,
+ 	ret = gb_operation_sync(connection, GB_SVC_TYPE_CONN_DESTROY,
+ 				&request, sizeof(request), NULL, 0);
+ 	if (ret)
+-		pr_err("failed to destroy connection (%hhx:%hx %hhx:%hx) %d\n",
++		pr_err("failed to destroy connection (%hhu:%hu %hhu:%hu) %d\n",
+ 		       intf1_id, cport1_id, intf2_id, cport2_id, ret);
+ }
+ EXPORT_SYMBOL_GPL(gb_svc_connection_destroy);
+@@ -300,7 +300,7 @@ static void gb_svc_route_destroy(struct gb_svc *svc, u8 intf1_id, u8 intf2_id)
+ 	ret = gb_operation_sync(svc->connection, GB_SVC_TYPE_ROUTE_DESTROY,
+ 				&request, sizeof(request), NULL, 0);
+ 	if (ret)
+-		pr_err("failed to destroy route (%hhx %hhx) %d\n",
++		pr_err("failed to destroy route (%hhu %hhu) %d\n",
+ 			intf1_id, intf2_id, ret);
+ }
+ 

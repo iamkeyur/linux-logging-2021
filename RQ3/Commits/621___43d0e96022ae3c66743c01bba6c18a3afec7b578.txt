@@ -1,0 +1,26 @@
+['43d0e96022ae3c66743c01bba6c18a3afec7b578', '316.txt', 'Typo']
+commit 43d0e96022ae3c66743c01bba6c18a3afec7b578
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Tue Nov 27 14:37:17 2018 +0000
+
+    openvswitch: fix spelling mistake "execeeds" -> "exceeds"
+    
+    There is a spelling mistake in a net_warn_ratelimited message, fix this.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Reviewed-by: Simon Horman <simon.horman@netronome.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/net/openvswitch/conntrack.c b/net/openvswitch/conntrack.c
+index a4660c48ff01..cd94f925495a 100644
+--- a/net/openvswitch/conntrack.c
++++ b/net/openvswitch/conntrack.c
+@@ -1166,7 +1166,7 @@ static int ovs_ct_commit(struct net *net, struct sw_flow_key *key,
+ 				&ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple);
+ 			if (err) {
+ 				net_warn_ratelimited("openvswitch: zone: %u "
+-					"execeeds conntrack limit\n",
++					"exceeds conntrack limit\n",
+ 					info->zone.id);
+ 				return err;
+ 			}

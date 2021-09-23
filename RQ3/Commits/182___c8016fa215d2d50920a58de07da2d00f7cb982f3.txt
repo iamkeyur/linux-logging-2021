@@ -1,0 +1,29 @@
+['c8016fa215d2d50920a58de07da2d00f7cb982f3', '800.txt', 'AddInfo']
+commit c8016fa215d2d50920a58de07da2d00f7cb982f3
+Author: Hans de Goede <hdegoede@redhat.com>
+Date:   Sun Apr 22 19:57:59 2018 +0200
+
+    i2c: core: ACPI: Improve OpRegion read errors
+    
+    When we get an error doing an ACPI SerialBus I2C OpRegion read log some
+    useful details, like the client address and which register is being
+    read.
+    
+    Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+    Reviewed-by: Mika Westerberg <mika.westerberg@linux.intel.com>
+    Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
+
+diff --git a/drivers/i2c/i2c-core-acpi.c b/drivers/i2c/i2c-core-acpi.c
+index a9126b3cda61..3dc43a009f5d 100644
+--- a/drivers/i2c/i2c-core-acpi.c
++++ b/drivers/i2c/i2c-core-acpi.c
+@@ -446,7 +446,8 @@ static int acpi_gsb_i2c_read_bytes(struct i2c_client *client,
+ 
+ 	ret = i2c_transfer(client->adapter, msgs, ARRAY_SIZE(msgs));
+ 	if (ret < 0)
+-		dev_err(&client->adapter->dev, "i2c read failed\n");
++		dev_err(&client->adapter->dev, "i2c read %d bytes from client@%#x starting at reg %#x failed, error: %d\n",
++			data_len, client->addr, cmd, ret);
+ 	else
+ 		memcpy(data, buffer, data_len);
+ 

@@ -1,0 +1,31 @@
+['390dd67c471a43a8a0f36c7d5177de49e7749c59', '57.txt', 'AddInfo']
+commit 390dd67c471a43a8a0f36c7d5177de49e7749c59
+Author: Seiichi Ikarashi <s.ikarashi@jp.fujitsu.com>
+Date:   Thu Sep 10 18:01:56 2015 +0900
+
+    clocksource: Add CPU info to clocksource watchdog reporting
+    
+    The clocksource watchdog reporting was improved by 0b046b217ad4c6.
+    I want to add the info of CPU where the watchdog detects a
+    deviation because it is necessary to identify the trouble spot
+    if the clocksource is TSC.
+    
+    Signed-off-by: Seiichi Ikarashi <s.ikarashi@jp.fujitsu.com>
+    [jstultz: Tweaked commit message]
+    Signed-off-by: John Stultz <john.stultz@linaro.org>
+
+diff --git a/kernel/time/clocksource.c b/kernel/time/clocksource.c
+index 1347882d131e..664de539299b 100644
+--- a/kernel/time/clocksource.c
++++ b/kernel/time/clocksource.c
+@@ -218,8 +218,8 @@ static void clocksource_watchdog(unsigned long data)
+ 
+ 		/* Check the deviation from the watchdog clocksource. */
+ 		if (abs(cs_nsec - wd_nsec) > WATCHDOG_THRESHOLD) {
+-			pr_warn("timekeeping watchdog: Marking clocksource '%s' as unstable because the skew is too large:\n",
+-				cs->name);
++			pr_warn("timekeeping watchdog on CPU%d: Marking clocksource '%s' as unstable because the skew is too large:\n",
++				smp_processor_id(), cs->name);
+ 			pr_warn("                      '%s' wd_now: %llx wd_last: %llx mask: %llx\n",
+ 				watchdog->name, wdnow, wdlast, watchdog->mask);
+ 			pr_warn("                      '%s' cs_now: %llx cs_last: %llx mask: %llx\n",

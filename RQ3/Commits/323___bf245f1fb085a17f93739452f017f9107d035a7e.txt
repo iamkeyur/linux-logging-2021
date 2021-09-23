@@ -1,0 +1,31 @@
+['bf245f1fb085a17f93739452f017f9107d035a7e', '650.txt', 'Clarify/Reword']
+commit bf245f1fb085a17f93739452f017f9107d035a7e
+Author: Jakub Kicinski <jakub.kicinski@netronome.com>
+Date:   Wed Jan 17 18:51:00 2018 -0800
+
+    nfp: improve app not found message
+    
+    When driver app matching loaded FW is not found users are faced with:
+    
+       nfp: failed to find app with ID 0x%02x
+    
+    This message does not properly explain that matching driver code is
+    either not built into the driver or the driver is too old.
+    
+    Signed-off-by: Jakub Kicinski <jakub.kicinski@netronome.com>
+    Reviewed-by: Dirk van der Merwe <dirk.vandermerwe@netronome.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/netronome/nfp/nfp_app.c b/drivers/net/ethernet/netronome/nfp/nfp_app.c
+index 8ce65d4276b1..6aedef0ad433 100644
+--- a/drivers/net/ethernet/netronome/nfp/nfp_app.c
++++ b/drivers/net/ethernet/netronome/nfp/nfp_app.c
+@@ -124,7 +124,7 @@ struct nfp_app *nfp_app_alloc(struct nfp_pf *pf, enum nfp_app_id id)
+ 	struct nfp_app *app;
+ 
+ 	if (id >= ARRAY_SIZE(apps) || !apps[id]) {
+-		nfp_err(pf->cpp, "failed to find app with ID 0x%02hhx\n", id);
++		nfp_err(pf->cpp, "unknown FW app ID 0x%02hhx, driver too old or support for FW not built in\n", id);
+ 		return ERR_PTR(-EINVAL);
+ 	}
+ 

@@ -1,0 +1,26 @@
+['9aa37874d1930da139a08f4db1eff5d305f2ddc8', '946.txt', 'Typo']
+commit 9aa37874d1930da139a08f4db1eff5d305f2ddc8
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Sat May 25 21:32:44 2019 +0100
+
+    ASoC: cx2072x: fix spelling mistake "configued" -> "configured"
+    
+    There is a spelling mistake in a dev_err error message. Fit it.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Reviewed-by: Takashi Iwai <tiwai@suse.de>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/sound/soc/codecs/cx2072x.c b/sound/soc/codecs/cx2072x.c
+index ed762546eaee..8b0830854bb3 100644
+--- a/sound/soc/codecs/cx2072x.c
++++ b/sound/soc/codecs/cx2072x.c
+@@ -933,7 +933,7 @@ static int cx2072x_hw_params(struct snd_pcm_substream *substream,
+ 		return frame_size;
+ 
+ 	if (cx2072x->mclk_rate == 0) {
+-		dev_err(dev, "Master clock rate is not configued\n");
++		dev_err(dev, "Master clock rate is not configured\n");
+ 		return -EINVAL;
+ 	}
+ 

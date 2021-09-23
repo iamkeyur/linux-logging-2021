@@ -1,0 +1,25 @@
+['ac8d3818aab7e08332a79e4252118297cb28e995', '948.txt', 'Typo']
+commit ac8d3818aab7e08332a79e4252118297cb28e995
+Author: Balbir Singh <bsingharora@gmail.com>
+Date:   Sat Nov 5 15:24:22 2016 +1100
+
+    powerpc/mm: Fix typo in radix encodings print
+    
+    Rename "sift" to "shift".
+    
+    Signed-off-by: Balbir Singh <bsingharora@gmail.com>
+    Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+
+diff --git a/arch/powerpc/mm/pgtable-radix.c b/arch/powerpc/mm/pgtable-radix.c
+index ed7bddc456b7..525c36ebbc8d 100644
+--- a/arch/powerpc/mm/pgtable-radix.c
++++ b/arch/powerpc/mm/pgtable-radix.c
+@@ -248,7 +248,7 @@ static int __init radix_dt_scan_page_sizes(unsigned long node,
+ 		/* top 3 bit is AP encoding */
+ 		shift = be32_to_cpu(prop[0]) & ~(0xe << 28);
+ 		ap = be32_to_cpu(prop[0]) >> 29;
+-		pr_info("Page size sift = %d AP=0x%x\n", shift, ap);
++		pr_info("Page size shift = %d AP=0x%x\n", shift, ap);
+ 
+ 		idx = get_idx_from_shift(shift);
+ 		if (idx < 0)

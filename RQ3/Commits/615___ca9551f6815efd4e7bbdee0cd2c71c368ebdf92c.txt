@@ -1,0 +1,33 @@
+['ca9551f6815efd4e7bbdee0cd2c71c368ebdf92c', '323.txt', 'AddInfo']
+commit ca9551f6815efd4e7bbdee0cd2c71c368ebdf92c
+Author: Bryan O'Donoghue <bryan.odonoghue@linaro.org>
+Date:   Tue Aug 2 13:18:29 2016 +0100
+
+    greybus: timesync: Printout strobe count on sync failure
+    
+    If we failed to synchronize the FrameTime it would be useful to know how
+    many of the expected strobes arrived, for example a value of 0/5 would
+    indicate the SVC was completely dead but a value of 4/5 would indicate one
+    GPIO pulse got lost i.e. the AP was too slow reacting to an interrupt and
+    completely missed one of the strobe events. In either case the actual
+    number of strobes is a useful thing to print out.
+    
+    Signed-off-by: Bryan O'Donoghue <bryan.odonoghue@linaro.org>
+    Reviewed-by: Alex Elder <elder@linaro.org>
+    Reviewed-by: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@google.com>
+
+diff --git a/drivers/staging/greybus/timesync.c b/drivers/staging/greybus/timesync.c
+index 561bbea9ae17..2e68af7dea6d 100644
+--- a/drivers/staging/greybus/timesync.c
++++ b/drivers/staging/greybus/timesync.c
+@@ -772,7 +772,8 @@ static void gb_timesync_worker(struct work_struct *work)
+ 
+ 	case GB_TIMESYNC_STATE_WAIT_SVC:
+ 		dev_err(&timesync_svc->svc->dev,
+-			"timeout SVC strobe completion\n");
++			"timeout SVC strobe completion %d/%d\n",
++			timesync_svc->strobe, GB_TIMESYNC_MAX_STROBES);
+ 		gb_timesync_teardown(timesync_svc);
+ 		break;
+ 

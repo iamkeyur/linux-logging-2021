@@ -1,0 +1,37 @@
+['c468f9e2e56f67410b1659d2eacf147a4558f137', '704.txt', 'Clarify/Reword']
+commit c468f9e2e56f67410b1659d2eacf147a4558f137
+Author: Christian König <christian.koenig@amd.com>
+Date:   Tue Dec 11 11:06:59 2018 +0100
+
+    drm/amdgpu: improve GMC v9 page fault message
+    
+    Note if this is a retry fault or not and cleanup the message a bit.
+    
+    Signed-off-by: Christian König <christian.koenig@amd.com>
+    Acked-by: Alex Deucher <alexander.deucher@amd.com>
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+diff --git a/drivers/gpu/drm/amd/amdgpu/gmc_v9_0.c b/drivers/gpu/drm/amd/amdgpu/gmc_v9_0.c
+index 521ac8954652..9c082f9aea1a 100644
+--- a/drivers/gpu/drm/amd/amdgpu/gmc_v9_0.c
++++ b/drivers/gpu/drm/amd/amdgpu/gmc_v9_0.c
+@@ -305,6 +305,7 @@ static int gmc_v9_0_process_interrupt(struct amdgpu_device *adev,
+ 				struct amdgpu_iv_entry *entry)
+ {
+ 	struct amdgpu_vmhub *hub = &adev->vmhub[entry->vmid_src];
++	bool retry_fault = !!(entry->src_data[1] & 0x80);
+ 	uint32_t status = 0;
+ 	u64 addr;
+ 
+@@ -326,8 +327,10 @@ static int gmc_v9_0_process_interrupt(struct amdgpu_device *adev,
+ 		amdgpu_vm_get_task_info(adev, entry->pasid, &task_info);
+ 
+ 		dev_err(adev->dev,
+-			"[%s] VMC page fault (src_id:%u ring:%u vmid:%u pasid:%u, for process %s pid %d thread %s pid %d)\n",
++			"[%s] %s page fault (src_id:%u ring:%u vmid:%u "
++			"pasid:%u, for process %s pid %d thread %s pid %d)\n",
+ 			entry->vmid_src ? "mmhub" : "gfxhub",
++			retry_fault ? "retry" : "no-retry",
+ 			entry->src_id, entry->ring_id, entry->vmid,
+ 			entry->pasid, task_info.process_name, task_info.tgid,
+ 			task_info.task_name, task_info.pid);

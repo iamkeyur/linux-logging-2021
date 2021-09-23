@@ -1,0 +1,245 @@
+['ab2a605fa621ecf4ec26603a237822f7772cfa28', '194.txt', 'ModernizeLog']
+commit ab2a605fa621ecf4ec26603a237822f7772cfa28
+Author: Andrew Lunn <andrew@lunn.ch>
+Date:   Sat Sep 29 23:04:10 2018 +0200
+
+    net: phy: Add phydev_warn()
+    
+    Not all new style LINK_MODE bits can be converted into old style
+    SUPPORTED bits. We need to warn when such a conversion is attempted.
+    Add a helper for this.
+    
+    Convert all pr_warn() calls to phydev_warn() where possible.
+    
+    Signed-off-by: Andrew Lunn <andrew@lunn.ch>
+    Reviewed-by: Maxime Chevallier <maxime.chevallier@bootlin.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/phy/at803x.c b/drivers/net/phy/at803x.c
+index 411cf1072bae..e74a047a846e 100644
+--- a/drivers/net/phy/at803x.c
++++ b/drivers/net/phy/at803x.c
+@@ -357,7 +357,7 @@ static int at803x_aneg_done(struct phy_device *phydev)
+ 
+ 	/* check if the SGMII link is OK. */
+ 	if (!(phy_read(phydev, AT803X_PSSR) & AT803X_PSSR_MR_AN_COMPLETE)) {
+-		pr_warn("803x_aneg_done: SGMII link is not ok\n");
++		phydev_warn(phydev, "803x_aneg_done: SGMII link is not ok\n");
+ 		aneg_done = 0;
+ 	}
+ 	/* switch back to copper page */
+diff --git a/drivers/net/phy/dp83640.c b/drivers/net/phy/dp83640.c
+index 29aa8d772b0c..74cf356d8171 100644
+--- a/drivers/net/phy/dp83640.c
++++ b/drivers/net/phy/dp83640.c
+@@ -553,16 +553,17 @@ static void enable_status_frames(struct phy_device *phydev, bool on)
+ 	mutex_unlock(&clock->extreg_lock);
+ 
+ 	if (!phydev->attached_dev) {
+-		pr_warn("expected to find an attached netdevice\n");
++		phydev_warn(phydev,
++			    "expected to find an attached netdevice\n");
+ 		return;
+ 	}
+ 
+ 	if (on) {
+ 		if (dev_mc_add(phydev->attached_dev, status_frame_dst))
+-			pr_warn("failed to add mc address\n");
++			phydev_warn(phydev, "failed to add mc address\n");
+ 	} else {
+ 		if (dev_mc_del(phydev->attached_dev, status_frame_dst))
+-			pr_warn("failed to delete mc address\n");
++			phydev_warn(phydev, "failed to delete mc address\n");
+ 	}
+ }
+ 
+diff --git a/drivers/net/phy/marvell.c b/drivers/net/phy/marvell.c
+index 24fc4a73c300..8872a430d74a 100644
+--- a/drivers/net/phy/marvell.c
++++ b/drivers/net/phy/marvell.c
+@@ -638,7 +638,7 @@ static void marvell_config_led(struct phy_device *phydev)
+ 	err = phy_write_paged(phydev, MII_MARVELL_LED_PAGE, MII_PHY_LED_CTRL,
+ 			      def_config);
+ 	if (err < 0)
+-		pr_warn("Fail to config marvell phy LED.\n");
++		phydev_warn(phydev, "Fail to config marvell phy LED.\n");
+ }
+ 
+ static int marvell_config_init(struct phy_device *phydev)
+diff --git a/drivers/net/phy/marvell10g.c b/drivers/net/phy/marvell10g.c
+index f77a2d9e7f9d..f214834819dd 100644
+--- a/drivers/net/phy/marvell10g.c
++++ b/drivers/net/phy/marvell10g.c
+@@ -337,9 +337,9 @@ static int mv3310_config_init(struct phy_device *phydev)
+ 	}
+ 
+ 	if (!ethtool_convert_link_mode_to_legacy_u32(&mask, supported))
+-		dev_warn(&phydev->mdio.dev,
+-			 "PHY supports (%*pb) more modes than phylib supports, some modes not supported.\n",
+-			 __ETHTOOL_LINK_MODE_MASK_NBITS, supported);
++		phydev_warn(phydev,
++			    "PHY supports (%*pb) more modes than phylib supports, some modes not supported.\n",
++			    __ETHTOOL_LINK_MODE_MASK_NBITS, supported);
+ 
+ 	phydev->supported &= mask;
+ 	phydev->advertising &= phydev->supported;
+diff --git a/drivers/net/phy/microchip.c b/drivers/net/phy/microchip.c
+index 2d67937866a3..04b12e34da58 100644
+--- a/drivers/net/phy/microchip.c
++++ b/drivers/net/phy/microchip.c
+@@ -88,7 +88,7 @@ static int lan88xx_TR_reg_set(struct phy_device *phydev, u16 regaddr,
+ 	/* Save current page */
+ 	save_page = phy_save_page(phydev);
+ 	if (save_page < 0) {
+-		pr_warn("Failed to get current page\n");
++		phydev_warn(phydev, "Failed to get current page\n");
+ 		goto err;
+ 	}
+ 
+@@ -98,14 +98,14 @@ static int lan88xx_TR_reg_set(struct phy_device *phydev, u16 regaddr,
+ 	ret = __phy_write(phydev, LAN88XX_EXT_PAGE_TR_LOW_DATA,
+ 			  (data & 0xFFFF));
+ 	if (ret < 0) {
+-		pr_warn("Failed to write TR low data\n");
++		phydev_warn(phydev, "Failed to write TR low data\n");
+ 		goto err;
+ 	}
+ 
+ 	ret = __phy_write(phydev, LAN88XX_EXT_PAGE_TR_HIGH_DATA,
+ 			  (data & 0x00FF0000) >> 16);
+ 	if (ret < 0) {
+-		pr_warn("Failed to write TR high data\n");
++		phydev_warn(phydev, "Failed to write TR high data\n");
+ 		goto err;
+ 	}
+ 
+@@ -115,14 +115,15 @@ static int lan88xx_TR_reg_set(struct phy_device *phydev, u16 regaddr,
+ 
+ 	ret = __phy_write(phydev, LAN88XX_EXT_PAGE_TR_CR, buf);
+ 	if (ret < 0) {
+-		pr_warn("Failed to write data in reg\n");
++		phydev_warn(phydev, "Failed to write data in reg\n");
+ 		goto err;
+ 	}
+ 
+ 	usleep_range(1000, 2000);/* Wait for Data to be written */
+ 	val = __phy_read(phydev, LAN88XX_EXT_PAGE_TR_CR);
+ 	if (!(val & 0x8000))
+-		pr_warn("TR Register[0x%X] configuration failed\n", regaddr);
++		phydev_warn(phydev, "TR Register[0x%X] configuration failed\n",
++			    regaddr);
+ err:
+ 	return phy_restore_page(phydev, save_page, ret);
+ }
+@@ -137,7 +138,7 @@ static void lan88xx_config_TR_regs(struct phy_device *phydev)
+ 	 */
+ 	err = lan88xx_TR_reg_set(phydev, 0x0F82, 0x12B00A);
+ 	if (err < 0)
+-		pr_warn("Failed to Set Register[0x0F82]\n");
++		phydev_warn(phydev, "Failed to Set Register[0x0F82]\n");
+ 
+ 	/* Get access to Channel b'10, Node b'1101, Register 0x06.
+ 	 * Write 24-bit value 0xD2C46F to register. Setting SSTrKf1000Slv,
+@@ -145,7 +146,7 @@ static void lan88xx_config_TR_regs(struct phy_device *phydev)
+ 	 */
+ 	err = lan88xx_TR_reg_set(phydev, 0x168C, 0xD2C46F);
+ 	if (err < 0)
+-		pr_warn("Failed to Set Register[0x168C]\n");
++		phydev_warn(phydev, "Failed to Set Register[0x168C]\n");
+ 
+ 	/* Get access to Channel b'10, Node b'1111, Register 0x11.
+ 	 * Write 24-bit value 0x620 to register. Setting rem_upd_done_thresh
+@@ -153,7 +154,7 @@ static void lan88xx_config_TR_regs(struct phy_device *phydev)
+ 	 */
+ 	err = lan88xx_TR_reg_set(phydev, 0x17A2, 0x620);
+ 	if (err < 0)
+-		pr_warn("Failed to Set Register[0x17A2]\n");
++		phydev_warn(phydev, "Failed to Set Register[0x17A2]\n");
+ 
+ 	/* Get access to Channel b'10, Node b'1101, Register 0x10.
+ 	 * Write 24-bit value 0xEEFFDD to register. Setting
+@@ -162,7 +163,7 @@ static void lan88xx_config_TR_regs(struct phy_device *phydev)
+ 	 */
+ 	err = lan88xx_TR_reg_set(phydev, 0x16A0, 0xEEFFDD);
+ 	if (err < 0)
+-		pr_warn("Failed to Set Register[0x16A0]\n");
++		phydev_warn(phydev, "Failed to Set Register[0x16A0]\n");
+ 
+ 	/* Get access to Channel b'10, Node b'1101, Register 0x13.
+ 	 * Write 24-bit value 0x071448 to register. Setting
+@@ -170,7 +171,7 @@ static void lan88xx_config_TR_regs(struct phy_device *phydev)
+ 	 */
+ 	err = lan88xx_TR_reg_set(phydev, 0x16A6, 0x071448);
+ 	if (err < 0)
+-		pr_warn("Failed to Set Register[0x16A6]\n");
++		phydev_warn(phydev, "Failed to Set Register[0x16A6]\n");
+ 
+ 	/* Get access to Channel b'10, Node b'1101, Register 0x12.
+ 	 * Write 24-bit value 0x13132F to register. Setting
+@@ -178,7 +179,7 @@ static void lan88xx_config_TR_regs(struct phy_device *phydev)
+ 	 */
+ 	err = lan88xx_TR_reg_set(phydev, 0x16A4, 0x13132F);
+ 	if (err < 0)
+-		pr_warn("Failed to Set Register[0x16A4]\n");
++		phydev_warn(phydev, "Failed to Set Register[0x16A4]\n");
+ 
+ 	/* Get access to Channel b'10, Node b'1101, Register 0x14.
+ 	 * Write 24-bit value 0x0 to register. Setting eee_3level_delay,
+@@ -186,7 +187,7 @@ static void lan88xx_config_TR_regs(struct phy_device *phydev)
+ 	 */
+ 	err = lan88xx_TR_reg_set(phydev, 0x16A8, 0x0);
+ 	if (err < 0)
+-		pr_warn("Failed to Set Register[0x16A8]\n");
++		phydev_warn(phydev, "Failed to Set Register[0x16A8]\n");
+ 
+ 	/* Get access to Channel b'01, Node b'1111, Register 0x34.
+ 	 * Write 24-bit value 0x91B06C to register. Setting
+@@ -195,7 +196,7 @@ static void lan88xx_config_TR_regs(struct phy_device *phydev)
+ 	 */
+ 	err = lan88xx_TR_reg_set(phydev, 0x0FE8, 0x91B06C);
+ 	if (err < 0)
+-		pr_warn("Failed to Set Register[0x0FE8]\n");
++		phydev_warn(phydev, "Failed to Set Register[0x0FE8]\n");
+ 
+ 	/* Get access to Channel b'01, Node b'1111, Register 0x3E.
+ 	 * Write 24-bit value 0xC0A028 to register. Setting
+@@ -204,7 +205,7 @@ static void lan88xx_config_TR_regs(struct phy_device *phydev)
+ 	 */
+ 	err = lan88xx_TR_reg_set(phydev, 0x0FFC, 0xC0A028);
+ 	if (err < 0)
+-		pr_warn("Failed to Set Register[0x0FFC]\n");
++		phydev_warn(phydev, "Failed to Set Register[0x0FFC]\n");
+ 
+ 	/* Get access to Channel b'01, Node b'1111, Register 0x35.
+ 	 * Write 24-bit value 0x041600 to register. Setting
+@@ -213,14 +214,14 @@ static void lan88xx_config_TR_regs(struct phy_device *phydev)
+ 	 */
+ 	err = lan88xx_TR_reg_set(phydev, 0x0FEA, 0x041600);
+ 	if (err < 0)
+-		pr_warn("Failed to Set Register[0x0FEA]\n");
++		phydev_warn(phydev, "Failed to Set Register[0x0FEA]\n");
+ 
+ 	/* Get access to Channel b'10, Node b'1101, Register 0x03.
+ 	 * Write 24-bit value 0x000004 to register. Setting TrFreeze bits.
+ 	 */
+ 	err = lan88xx_TR_reg_set(phydev, 0x1686, 0x000004);
+ 	if (err < 0)
+-		pr_warn("Failed to Set Register[0x1686]\n");
++		phydev_warn(phydev, "Failed to Set Register[0x1686]\n");
+ }
+ 
+ static int lan88xx_probe(struct phy_device *phydev)
+diff --git a/include/linux/phy.h b/include/linux/phy.h
+index d24cc46748e2..0ab9f89773fd 100644
+--- a/include/linux/phy.h
++++ b/include/linux/phy.h
+@@ -968,6 +968,9 @@ static inline void phy_device_reset(struct phy_device *phydev, int value)
+ #define phydev_err(_phydev, format, args...)	\
+ 	dev_err(&_phydev->mdio.dev, format, ##args)
+ 
++#define phydev_warn(_phydev, format, args...)	\
++	dev_warn(&_phydev->mdio.dev, format, ##args)
++
+ #define phydev_dbg(_phydev, format, args...)	\
+ 	dev_dbg(&_phydev->mdio.dev, format, ##args)
+ 

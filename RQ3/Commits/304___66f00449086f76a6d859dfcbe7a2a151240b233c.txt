@@ -1,0 +1,67 @@
+['66f00449086f76a6d859dfcbe7a2a151240b233c', '670.txt', 'Typo']
+commit 66f00449086f76a6d859dfcbe7a2a151240b233c
+Author: Masahiro Yamada <yamada.masahiro@socionext.com>
+Date:   Mon Feb 27 14:29:42 2017 -0800
+
+    scripts/spelling.txt: add "disassocation" pattern and fix typo instances
+    
+    Fix typos and add the following to the scripts/spelling.txt:
+    
+      disassocation||disassociation
+    
+    Link: http://lkml.kernel.org/r/1481573103-11329-27-git-send-email-yamada.masahiro@socionext.com
+    Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+diff --git a/drivers/net/wireless/intel/ipw2x00/ipw2100.c b/drivers/net/wireless/intel/ipw2x00/ipw2100.c
+index 96f18222950a..f922859acf40 100644
+--- a/drivers/net/wireless/intel/ipw2x00/ipw2100.c
++++ b/drivers/net/wireless/intel/ipw2x00/ipw2100.c
+@@ -5652,7 +5652,7 @@ static void shim__set_security(struct net_device *dev,
+ 
+ /* As a temporary work around to enable WPA until we figure out why
+  * wpa_supplicant toggles the security capability of the driver, which
+- * forces a disassocation with force_update...
++ * forces a disassociation with force_update...
+  *
+  *	if (force_update || !(priv->status & STATUS_ASSOCIATED))*/
+ 	if (!(priv->status & (STATUS_ASSOCIATED | STATUS_ASSOCIATING)))
+diff --git a/drivers/net/wireless/intel/ipw2x00/ipw2200.c b/drivers/net/wireless/intel/ipw2x00/ipw2200.c
+index c09215de6d53..5ef3c5cc47c5 100644
+--- a/drivers/net/wireless/intel/ipw2x00/ipw2200.c
++++ b/drivers/net/wireless/intel/ipw2x00/ipw2200.c
+@@ -3974,7 +3974,7 @@ static void ipw_send_disassociate(struct ipw_priv *priv, int quiet)
+ 		return;
+ 	}
+ 
+-	IPW_DEBUG_ASSOC("Disassocation attempt from %pM "
++	IPW_DEBUG_ASSOC("Disassociation attempt from %pM "
+ 			"on channel %d.\n",
+ 			priv->assoc_request.bssid,
+ 			priv->assoc_request.channel);
+diff --git a/include/net/cfg80211.h b/include/net/cfg80211.h
+index c92dc03c8528..ead1aa6d003e 100644
+--- a/include/net/cfg80211.h
++++ b/include/net/cfg80211.h
+@@ -1948,7 +1948,7 @@ struct cfg80211_deauth_request {
+  * struct cfg80211_disassoc_request - Disassociation request data
+  *
+  * This structure provides information needed to complete IEEE 802.11
+- * disassocation.
++ * disassociation.
+  *
+  * @bss: the BSS to disassociate from
+  * @ie: Extra IEs to add to Disassociation frame or %NULL
+diff --git a/scripts/spelling.txt b/scripts/spelling.txt
+index 898658b56392..6b627d850864 100644
+--- a/scripts/spelling.txt
++++ b/scripts/spelling.txt
+@@ -364,6 +364,7 @@ differrence||difference
+ difinition||definition
+ diplay||display
+ direectly||directly
++disassocation||disassociation
+ disapear||disappear
+ disapeared||disappeared
+ disappared||disappeared

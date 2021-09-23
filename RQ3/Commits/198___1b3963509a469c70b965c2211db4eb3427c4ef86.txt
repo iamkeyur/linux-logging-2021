@@ -1,0 +1,77 @@
+['1b3963509a469c70b965c2211db4eb3427c4ef86', '784.txt', 'AddInfo']
+commit 1b3963509a469c70b965c2211db4eb3427c4ef86
+Author: Hans Verkuil <hverkuil@xs4all.nl>
+Date:   Thu Feb 8 11:55:48 2018 -0500
+
+    media: cec: improve debugging
+    
+    cec_transmit_msg_fh() first checked the message for errors, and only
+    after the message was found to be valid did it log the message contents.
+    
+    However, that makes it hard to associate an error in the kernel log with
+    the message since the message contents was never logged in that case.
+    
+    So swap the order: first log the message (once some very basic checks
+    are done), and only after that check for errors.
+    
+    Signed-off-by: Hans Verkuil <hans.verkuil@cisco.com>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+
+diff --git a/drivers/media/cec/cec-adap.c b/drivers/media/cec/cec-adap.c
+index 768f7d70b55c..cf6dc3f3a17e 100644
+--- a/drivers/media/cec/cec-adap.c
++++ b/drivers/media/cec/cec-adap.c
+@@ -699,16 +699,31 @@ int cec_transmit_msg_fh(struct cec_adapter *adap, struct cec_msg *msg,
+ 	else
+ 		msg->flags = 0;
+ 
++	if (msg->len > 1 && msg->msg[1] == CEC_MSG_CDC_MESSAGE) {
++		msg->msg[2] = adap->phys_addr >> 8;
++		msg->msg[3] = adap->phys_addr & 0xff;
++	}
++
+ 	/* Sanity checks */
+ 	if (msg->len == 0 || msg->len > CEC_MAX_MSG_SIZE) {
+ 		dprintk(1, "%s: invalid length %d\n", __func__, msg->len);
+ 		return -EINVAL;
+ 	}
++
++	memset(msg->msg + msg->len, 0, sizeof(msg->msg) - msg->len);
++
++	if (msg->timeout)
++		dprintk(2, "%s: %*ph (wait for 0x%02x%s)\n",
++			__func__, msg->len, msg->msg, msg->reply,
++			!block ? ", nb" : "");
++	else
++		dprintk(2, "%s: %*ph%s\n",
++			__func__, msg->len, msg->msg, !block ? " (nb)" : "");
++
+ 	if (msg->timeout && msg->len == 1) {
+-		dprintk(1, "%s: can't reply for poll msg\n", __func__);
++		dprintk(1, "%s: can't reply to poll msg\n", __func__);
+ 		return -EINVAL;
+ 	}
+-	memset(msg->msg + msg->len, 0, sizeof(msg->msg) - msg->len);
+ 	if (msg->len == 1) {
+ 		if (cec_msg_destination(msg) == 0xf) {
+ 			dprintk(1, "%s: invalid poll message\n", __func__);
+@@ -768,19 +783,6 @@ int cec_transmit_msg_fh(struct cec_adapter *adap, struct cec_msg *msg,
+ 	if (!msg->sequence)
+ 		msg->sequence = ++adap->sequence;
+ 
+-	if (msg->len > 1 && msg->msg[1] == CEC_MSG_CDC_MESSAGE) {
+-		msg->msg[2] = adap->phys_addr >> 8;
+-		msg->msg[3] = adap->phys_addr & 0xff;
+-	}
+-
+-	if (msg->timeout)
+-		dprintk(2, "%s: %*ph (wait for 0x%02x%s)\n",
+-			__func__, msg->len, msg->msg, msg->reply,
+-			!block ? ", nb" : "");
+-	else
+-		dprintk(2, "%s: %*ph%s\n",
+-			__func__, msg->len, msg->msg, !block ? " (nb)" : "");
+-
+ 	data->msg = *msg;
+ 	data->fh = fh;
+ 	data->adap = adap;

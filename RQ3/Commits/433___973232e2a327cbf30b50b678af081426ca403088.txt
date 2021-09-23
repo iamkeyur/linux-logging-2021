@@ -1,0 +1,28 @@
+['973232e2a327cbf30b50b678af081426ca403088', '526.txt', 'AddInfo']
+commit 973232e2a327cbf30b50b678af081426ca403088
+Author: Alexander Stein <alexander.stein@systec-electronic.com>
+Date:   Thu Aug 2 12:53:18 2018 +0200
+
+    pinctrl: baytrail: actually print the apparently misconfigured pin
+    
+    For further investigation the actual result in interrupt status register
+    is needed.
+    
+    Signed-off-by: Alexander Stein <alexander.stein@systec-electronic.com>
+    Acked-by: Mika Westerberg <mika.westerberg@linux.intel.com>
+    Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+
+diff --git a/drivers/pinctrl/intel/pinctrl-baytrail.c b/drivers/pinctrl/intel/pinctrl-baytrail.c
+index 003ad48a607f..f38d596efa05 100644
+--- a/drivers/pinctrl/intel/pinctrl-baytrail.c
++++ b/drivers/pinctrl/intel/pinctrl-baytrail.c
+@@ -1685,7 +1685,8 @@ static void byt_gpio_irq_init_hw(struct byt_gpio *vg)
+ 		value = readl(reg);
+ 		if (value)
+ 			dev_err(&vg->pdev->dev,
+-				"GPIO interrupt error, pins misconfigured\n");
++				"GPIO interrupt error, pins misconfigured. INT_STAT%u: 0x%08x\n",
++				base / 32, value);
+ 	}
+ }
+ 

@@ -1,0 +1,26 @@
+['c58656382e5f2919b05913584f2c54b4f841bc9f', '349.txt', 'AddInfo']
+commit c58656382e5f2919b05913584f2c54b4f841bc9f
+Author: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
+Date:   Tue Aug 18 11:25:48 2015 -0700
+
+    rcu: Add tasks to expedited stall-warning messages
+    
+    This commit adds task-print ability to the expedited RCU CPU stall
+    warning messages in preparation for adding stall warnings to
+    synchornize_rcu_expedited().
+    
+    Signed-off-by: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
+
+diff --git a/kernel/rcu/tree.c b/kernel/rcu/tree.c
+index 3d033fee0dcb..b4f71ffa299c 100644
+--- a/kernel/rcu/tree.c
++++ b/kernel/rcu/tree.c
+@@ -3734,7 +3734,7 @@ static void synchronize_sched_expedited_wait(struct rcu_state *rsp)
+ 				   sync_rcu_preempt_exp_done(rnp_root));
+ 			return;
+ 		}
+-		pr_err("INFO: %s detected expedited stalls on CPUs: {",
++		pr_err("INFO: %s detected expedited stalls on CPUs/tasks: {",
+ 		       rsp->name);
+ 		rcu_for_each_leaf_node(rsp, rnp) {
+ 			(void)rcu_print_task_exp_stall(rnp);

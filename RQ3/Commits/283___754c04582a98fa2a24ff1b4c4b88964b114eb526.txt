@@ -1,0 +1,27 @@
+['754c04582a98fa2a24ff1b4c4b88964b114eb526', '691.txt', 'Mislead/Ambiguous']
+commit 754c04582a98fa2a24ff1b4c4b88964b114eb526
+Author: Andrew Jeffery <andrew@aj.id.au>
+Date:   Tue Aug 8 15:37:36 2017 +0930
+
+    gpio: aspeed: Remove reference to clock name in debounce warning message
+    
+    HPLL is in fact not the clock we need. Remove the description of which clock we
+    failed to find a phandle to in order to avoid any further error.
+    
+    Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
+    Acked-by: Joel Stanley <joel@jms.id.au>
+    Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+
+diff --git a/drivers/gpio/gpio-aspeed.c b/drivers/gpio/gpio-aspeed.c
+index 4ca436e66bdb..bfc53995064a 100644
+--- a/drivers/gpio/gpio-aspeed.c
++++ b/drivers/gpio/gpio-aspeed.c
+@@ -834,7 +834,7 @@ static int __init aspeed_gpio_probe(struct platform_device *pdev)
+ 	gpio->clk = of_clk_get(pdev->dev.of_node, 0);
+ 	if (IS_ERR(gpio->clk)) {
+ 		dev_warn(&pdev->dev,
+-				"No HPLL clock phandle provided, debouncing disabled\n");
++				"Failed to get clock from devicetree, debouncing disabled\n");
+ 		gpio->clk = NULL;
+ 	}
+ 

@@ -1,0 +1,29 @@
+['43eec2f50c65bd469989a4dab8c1b5e14d87db84', '1518.txt', 'RedundantInformation']
+commit 43eec2f50c65bd469989a4dab8c1b5e14d87db84
+Author: Sylvain Lemieux <slemieux@tycoint.com>
+Date:   Fri Mar 4 13:44:05 2016 -0500
+
+    watchdog: pnx4008: update logging during power-on
+    
+    There is no need to add the driver name in the text to display
+    on the console during the power-on:
+    pnx4008-watchdog 4003c000.watchdog: PNX4008 Watchdog Timer: heartbeat 19 sec
+    
+    Signed-off-by: Sylvain Lemieux <slemieux@tycoint.com>
+    Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+    Signed-off-by: Wim Van Sebroeck <wim@iguana.be>
+
+diff --git a/drivers/watchdog/pnx4008_wdt.c b/drivers/watchdog/pnx4008_wdt.c
+index 313cd1c6fda0..88264a21017b 100644
+--- a/drivers/watchdog/pnx4008_wdt.c
++++ b/drivers/watchdog/pnx4008_wdt.c
+@@ -178,8 +178,7 @@ static int pnx4008_wdt_probe(struct platform_device *pdev)
+ 		goto disable_clk;
+ 	}
+ 
+-	dev_info(&pdev->dev, "PNX4008 Watchdog Timer: heartbeat %d sec\n",
+-		 pnx4008_wdd.timeout);
++	dev_info(&pdev->dev, "heartbeat %d sec\n", pnx4008_wdd.timeout);
+ 
+ 	return 0;
+ 

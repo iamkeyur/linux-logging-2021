@@ -1,0 +1,25 @@
+['7fb526212f16fcec4e92121ea86dc28fba493177', '917.txt', 'Typo']
+commit 7fb526212f16fcec4e92121ea86dc28fba493177
+Author: Randy Dunlap <rdunlap@infradead.org>
+Date:   Sat Nov 18 17:43:38 2017 -0800
+
+    block: genhd.c: fix message typo
+    
+    Fix typo in error message.
+    
+    Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
+    Signed-off-by: Jens Axboe <axboe@kernel.dk>
+
+diff --git a/block/genhd.c b/block/genhd.c
+index c143a2274238..96a66f671720 100644
+--- a/block/genhd.c
++++ b/block/genhd.c
+@@ -1392,7 +1392,7 @@ struct gendisk *__alloc_disk_node(int minors, int node_id)
+ 
+ 	if (minors > DISK_MAX_PARTS) {
+ 		printk(KERN_ERR
+-			"block: can't allocated more than %d partitions\n",
++			"block: can't allocate more than %d partitions\n",
+ 			DISK_MAX_PARTS);
+ 		minors = DISK_MAX_PARTS;
+ 	}

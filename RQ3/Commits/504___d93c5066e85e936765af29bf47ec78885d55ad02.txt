@@ -1,0 +1,25 @@
+['d93c5066e85e936765af29bf47ec78885d55ad02', '450.txt', 'Typo']
+commit d93c5066e85e936765af29bf47ec78885d55ad02
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Tue Jun 28 13:47:59 2016 +0100
+
+    ASoC: fsl_spdif: fix spelling mistake: "receivce" -> "receive"
+    
+    trivial fix to spelling mistake in dev_err message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/sound/soc/fsl/fsl_spdif.c b/sound/soc/fsl/fsl_spdif.c
+index 151849f79863..beec7934a265 100644
+--- a/sound/soc/fsl/fsl_spdif.c
++++ b/sound/soc/fsl/fsl_spdif.c
+@@ -172,7 +172,7 @@ static void spdif_irq_uqrx_full(struct fsl_spdif_priv *spdif_priv, char name)
+ 	if (*pos >= size * 2) {
+ 		*pos = 0;
+ 	} else if (unlikely((*pos % size) + 3 > size)) {
+-		dev_err(&pdev->dev, "User bit receivce buffer overflow\n");
++		dev_err(&pdev->dev, "User bit receive buffer overflow\n");
+ 		return;
+ 	}
+ 

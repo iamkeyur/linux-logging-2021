@@ -1,0 +1,25 @@
+['a0e65de71527477b100afe1e9ab2667d70f94d9e', '839.txt', 'WrongInformation']
+commit a0e65de71527477b100afe1e9ab2667d70f94d9e
+Author: Jakub Kicinski <jakub.kicinski@netronome.com>
+Date:   Mon Oct 17 18:02:22 2016 +0100
+
+    net: report right mtu value in error message
+    
+    Check is for max_mtu but message reports min_mtu.
+    
+    Signed-off-by: Jakub Kicinski <jakub.kicinski@netronome.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/net/core/dev.c b/net/core/dev.c
+index 6498cc2ba8f6..352e98129601 100644
+--- a/net/core/dev.c
++++ b/net/core/dev.c
+@@ -6372,7 +6372,7 @@ int dev_set_mtu(struct net_device *dev, int new_mtu)
+ 
+ 	if (dev->max_mtu > 0 && new_mtu > dev->max_mtu) {
+ 		net_err_ratelimited("%s: Invalid MTU %d requested, hw max %d\n",
+-				    dev->name, new_mtu, dev->min_mtu);
++				    dev->name, new_mtu, dev->max_mtu);
+ 		return -EINVAL;
+ 	}
+ 

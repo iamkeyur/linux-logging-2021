@@ -1,0 +1,27 @@
+['30795467e54f3fe0d00f2dba4e58e6475b8fd2e7', '818.txt', 'WrongInformation']
+commit 30795467e54f3fe0d00f2dba4e58e6475b8fd2e7
+Author: Adrian Hunter <adrian.hunter@intel.com>
+Date:   Fri May 26 11:17:19 2017 +0300
+
+    perf tools: Fix message because cpu list option is -C not -c
+    
+    Fix message because cpu list option is -C not -c
+    
+    Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+    Cc: Andi Kleen <ak@linux.intel.com>
+    Link: http://lkml.kernel.org/r/1495786658-18063-19-git-send-email-adrian.hunter@intel.com
+    Signed-off-by: Arnaldo Carvalho de Melo <acme@redhat.com>
+
+diff --git a/tools/perf/util/session.c b/tools/perf/util/session.c
+index 7dc1096264c5..d19c40a81040 100644
+--- a/tools/perf/util/session.c
++++ b/tools/perf/util/session.c
+@@ -2035,7 +2035,7 @@ int perf_session__cpu_bitmap(struct perf_session *session,
+ 
+ 		if (!(evsel->attr.sample_type & PERF_SAMPLE_CPU)) {
+ 			pr_err("File does not contain CPU events. "
+-			       "Remove -c option to proceed.\n");
++			       "Remove -C option to proceed.\n");
+ 			return -1;
+ 		}
+ 	}

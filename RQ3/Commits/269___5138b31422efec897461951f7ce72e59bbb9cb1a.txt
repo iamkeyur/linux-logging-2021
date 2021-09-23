@@ -1,0 +1,25 @@
+['5138b31422efec897461951f7ce72e59bbb9cb1a', '708.txt', 'LogLevel']
+commit 5138b31422efec897461951f7ce72e59bbb9cb1a
+Author: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Date:   Wed Nov 22 17:01:06 2017 +1100
+
+    powerpc: Reduce log level of "OPAL detected !" message
+    
+    This message isn't terribly useful.
+    
+    Signed-off-by: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+    Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+
+diff --git a/arch/powerpc/platforms/powernv/opal.c b/arch/powerpc/platforms/powernv/opal.c
+index 2c1aa9cef66d..69b5263fc9e3 100644
+--- a/arch/powerpc/platforms/powernv/opal.c
++++ b/arch/powerpc/platforms/powernv/opal.c
+@@ -127,7 +127,7 @@ int __init early_init_dt_scan_opal(unsigned long node,
+ 
+ 	if (of_flat_dt_is_compatible(node, "ibm,opal-v3")) {
+ 		powerpc_firmware_features |= FW_FEATURE_OPAL;
+-		pr_info("OPAL detected !\n");
++		pr_debug("OPAL detected !\n");
+ 	} else {
+ 		panic("OPAL != V3 detected, no longer supported.\n");
+ 	}

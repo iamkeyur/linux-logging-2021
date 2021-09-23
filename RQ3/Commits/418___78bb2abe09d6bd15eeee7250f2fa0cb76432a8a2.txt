@@ -1,0 +1,23 @@
+['78bb2abe09d6bd15eeee7250f2fa0cb76432a8a2', '543.txt', 'FixFormatSpecifier']
+commit 78bb2abe09d6bd15eeee7250f2fa0cb76432a8a2
+Author: Dmitry V. Krivenok <krivenok.dmitry@gmail.com>
+Date:   Mon Nov 30 23:45:48 2015 +0300
+
+    of: do not use 0x in front of %pa
+    
+    Signed-off-by: Dmitry V. Krivenok <krivenok.dmitry@gmail.com>
+    Signed-off-by: Rob Herring <robh@kernel.org>
+
+diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
+index d2430298a309..1bbe3a990ef1 100644
+--- a/drivers/of/fdt.c
++++ b/drivers/of/fdt.c
+@@ -1041,7 +1041,7 @@ void __init __weak early_init_dt_add_memory_arch(u64 base, u64 size)
+ int __init __weak early_init_dt_reserve_memory_arch(phys_addr_t base,
+ 					phys_addr_t size, bool nomap)
+ {
+-	pr_err("Reserved memory not supported, ignoring range 0x%pa - 0x%pa%s\n",
++	pr_err("Reserved memory not supported, ignoring range %pa - %pa%s\n",
+ 		  &base, &size, nomap ? " (nomap)" : "");
+ 	return -ENOSYS;
+ }

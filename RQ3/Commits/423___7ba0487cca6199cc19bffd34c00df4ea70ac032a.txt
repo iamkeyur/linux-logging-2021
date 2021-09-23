@@ -1,0 +1,36 @@
+['7ba0487cca6199cc19bffd34c00df4ea70ac032a', '538.txt', 'WrongInformation']
+commit 7ba0487cca6199cc19bffd34c00df4ea70ac032a
+Author: Ilya Dryomov <idryomov@gmail.com>
+Date:   Thu Feb 16 15:38:05 2017 +0100
+
+    crush: fix dprintk compilation
+    
+    The syntax error was not noticed because dprintk is a macro
+    and the code is discarded by default.
+    
+    Reflects ceph.git commit f29b840c64a933b2cb13e3da6f3d785effd73a57.
+    
+    Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+
+diff --git a/net/ceph/crush/mapper.c b/net/ceph/crush/mapper.c
+index 84d2de047865..b5cd8c21bfdf 100644
+--- a/net/ceph/crush/mapper.c
++++ b/net/ceph/crush/mapper.c
+@@ -105,7 +105,7 @@ static int bucket_perm_choose(const struct crush_bucket *bucket,
+ 
+ 	/* calculate permutation up to pr */
+ 	for (i = 0; i < work->perm_n; i++)
+-		dprintk(" perm_choose have %d: %d\n", i, bucket->perm[i]);
++		dprintk(" perm_choose have %d: %d\n", i, work->perm[i]);
+ 	while (work->perm_n <= pr) {
+ 		unsigned int p = work->perm_n;
+ 		/* no point in swapping the final entry */
+@@ -122,7 +122,7 @@ static int bucket_perm_choose(const struct crush_bucket *bucket,
+ 		work->perm_n++;
+ 	}
+ 	for (i = 0; i < bucket->size; i++)
+-		dprintk(" perm_choose  %d: %d\n", i, bucket->perm[i]);
++		dprintk(" perm_choose  %d: %d\n", i, work->perm[i]);
+ 
+ 	s = work->perm[pr];
+ out:

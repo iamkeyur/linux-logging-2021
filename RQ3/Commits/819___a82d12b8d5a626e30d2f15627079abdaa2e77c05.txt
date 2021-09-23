@@ -1,0 +1,26 @@
+['a82d12b8d5a626e30d2f15627079abdaa2e77c05', '240.txt', 'Typo']
+commit a82d12b8d5a626e30d2f15627079abdaa2e77c05
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Tue Apr 11 14:37:43 2017 +0100
+
+    clk: apn806: fix spelling mistake: "mising" -> "missing"
+    
+    trivial fix to spelling mistake in dev_warn message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Acked-by: Stephen Boyd <sboyd@codeaurora.org>
+    Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+diff --git a/drivers/clk/mvebu/ap806-system-controller.c b/drivers/clk/mvebu/ap806-system-controller.c
+index 103fe18a3c29..8155baccc98e 100644
+--- a/drivers/clk/mvebu/ap806-system-controller.c
++++ b/drivers/clk/mvebu/ap806-system-controller.c
+@@ -140,7 +140,7 @@ static int ap806_syscon_clk_probe(struct platform_device *pdev)
+ 					  4, &name)) {
+ 		ap806_clk_data.clk_num--;
+ 		dev_warn(&pdev->dev,
+-			 "eMMC clock mising: update the device tree!\n");
++			 "eMMC clock missing: update the device tree!\n");
+ 	} else {
+ 		ap806_clks[4] = clk_register_fixed_factor(NULL, name,
+ 							  fixedclk_name,

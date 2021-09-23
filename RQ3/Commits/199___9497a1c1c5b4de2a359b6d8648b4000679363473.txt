@@ -1,0 +1,43 @@
+['9497a1c1c5b4de2a359b6d8648b4000679363473', '783.txt', 'Clarify/Reword']
+commit 9497a1c1c5b4de2a359b6d8648b4000679363473
+Author: Gavin Shan <gwshan@linux.vnet.ibm.com>
+Date:   Tue Jun 21 12:35:56 2016 +1000
+
+    powerpc/powernv: Print correct PHB type names
+    
+    We're initializing "IODA1" and "IODA2" PHBs though they are IODA2
+    and NPU PHBs as below kernel log indicates.
+    
+       Initializing IODA1 OPAL PHB /pciex@3fffe40700000
+       Initializing IODA2 OPAL PHB /pciex@3fff000400000
+    
+    This fixes the PHB names. After it's applied, we get:
+    
+       Initializing IODA2 PHB (/pciex@3fffe40700000)
+       Initializing NPU PHB (/pciex@3fff000400000)
+    
+    Signed-off-by: Gavin Shan <gwshan@linux.vnet.ibm.com>
+    Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+
+diff --git a/arch/powerpc/platforms/powernv/pci-ioda.c b/arch/powerpc/platforms/powernv/pci-ioda.c
+index 4e0b2fc06694..2115ed70440e 100644
+--- a/arch/powerpc/platforms/powernv/pci-ioda.c
++++ b/arch/powerpc/platforms/powernv/pci-ioda.c
+@@ -55,6 +55,7 @@
+ #define POWERNV_IOMMU_DEFAULT_LEVELS	1
+ #define POWERNV_IOMMU_MAX_LEVELS	5
+ 
++static const char * const pnv_phb_names[] = { "IODA1", "IODA2", "NPU" };
+ static void pnv_pci_ioda2_table_free_pages(struct iommu_table *tbl);
+ 
+ void pe_level_printk(const struct pnv_ioda_pe *pe, const char *level,
+@@ -3628,7 +3629,8 @@ static void __init pnv_pci_init_ioda_phb(struct device_node *np,
+ 	void *aux;
+ 	long rc;
+ 
+-	pr_info("Initializing IODA%d OPAL PHB %s\n", ioda_type, np->full_name);
++	pr_info("Initializing %s PHB (%s)\n",
++		pnv_phb_names[ioda_type], of_node_full_name(np));
+ 
+ 	prop64 = of_get_property(np, "ibm,opal-phbid", NULL);
+ 	if (!prop64) {

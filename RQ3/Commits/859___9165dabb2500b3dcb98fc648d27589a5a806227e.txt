@@ -1,0 +1,274 @@
+['9165dabb2500b3dcb98fc648d27589a5a806227e', '72.txt', 'Typo']
+commit 9165dabb2500b3dcb98fc648d27589a5a806227e
+Author: Masanari Iida <standby24x7@gmail.com>
+Date:   Sat Sep 17 23:44:17 2016 +0900
+
+    treewide: Fix printk() message errors
+    
+    This patch fix spelling typos in printk and kconfig.
+    
+    Signed-off-by: Masanari Iida <standby24x7@gmail.com>
+    Acked-by: Randy Dunlap <rdunlap@infradead.org>
+    Signed-off-by: Jiri Kosina <jkosina@suse.cz>
+
+diff --git a/arch/arm64/kernel/hibernate.c b/arch/arm64/kernel/hibernate.c
+index d55a7b09959b..fe301cbcb442 100644
+--- a/arch/arm64/kernel/hibernate.c
++++ b/arch/arm64/kernel/hibernate.c
+@@ -136,7 +136,7 @@ int arch_hibernation_header_save(void *addr, unsigned int max_size)
+ 
+ 	/* Save the mpidr of the cpu we called cpu_suspend() on... */
+ 	if (sleep_cpu < 0) {
+-		pr_err("Failing to hibernate on an unkown CPU.\n");
++		pr_err("Failing to hibernate on an unknown CPU.\n");
+ 		return -ENODEV;
+ 	}
+ 	hdr->sleep_cpu_mpidr = cpu_logical_map(sleep_cpu);
+@@ -547,7 +547,7 @@ int swsusp_arch_resume(void)
+ int hibernate_resume_nonboot_cpu_disable(void)
+ {
+ 	if (sleep_cpu < 0) {
+-		pr_err("Failing to resume from hibernate on an unkown CPU.\n");
++		pr_err("Failing to resume from hibernate on an unknown CPU.\n");
+ 		return -ENODEV;
+ 	}
+ 
+diff --git a/arch/mips/kernel/asm-offsets.c b/arch/mips/kernel/asm-offsets.c
+index fae2f9447792..6080582a26d1 100644
+--- a/arch/mips/kernel/asm-offsets.c
++++ b/arch/mips/kernel/asm-offsets.c
+@@ -341,7 +341,7 @@ void output_pm_defines(void)
+ 
+ void output_kvm_defines(void)
+ {
+-	COMMENT(" KVM/MIPS Specfic offsets. ");
++	COMMENT(" KVM/MIPS Specific offsets. ");
+ 
+ 	OFFSET(VCPU_FPR0, kvm_vcpu_arch, fpu.fpr[0]);
+ 	OFFSET(VCPU_FPR1, kvm_vcpu_arch, fpu.fpr[1]);
+diff --git a/arch/sh/kernel/cpu/Makefile b/arch/sh/kernel/cpu/Makefile
+index accc7ca722e1..252e9fee687f 100644
+--- a/arch/sh/kernel/cpu/Makefile
++++ b/arch/sh/kernel/cpu/Makefile
+@@ -1,5 +1,5 @@
+ #
+-# Makefile for the Linux/SuperH CPU-specifc backends.
++# Makefile for the Linux/SuperH CPU-specific backends.
+ #
+ 
+ obj-$(CONFIG_CPU_SH2)		= sh2/
+diff --git a/arch/sh/kernel/cpu/irq/Makefile b/arch/sh/kernel/cpu/irq/Makefile
+index f0c7025a67d1..3f8e79402d7d 100644
+--- a/arch/sh/kernel/cpu/irq/Makefile
++++ b/arch/sh/kernel/cpu/irq/Makefile
+@@ -1,5 +1,5 @@
+ #
+-# Makefile for the Linux/SuperH CPU-specifc IRQ handlers.
++# Makefile for the Linux/SuperH CPU-specific IRQ handlers.
+ #
+ obj-$(CONFIG_SUPERH32)			+= imask.o
+ obj-$(CONFIG_CPU_SH5)			+= intc-sh5.o
+diff --git a/drivers/acpi/Kconfig b/drivers/acpi/Kconfig
+index 535e7828445a..a3c62f57672a 100644
+--- a/drivers/acpi/Kconfig
++++ b/drivers/acpi/Kconfig
+@@ -104,7 +104,7 @@ config ACPI_PROCFS_POWER
+ 	  Say N to delete power /proc/acpi/ directories that have moved to /sys/
+ 
+ config ACPI_REV_OVERRIDE_POSSIBLE
+-	bool "Allow supported ACPI revision to be overriden"
++	bool "Allow supported ACPI revision to be overridden"
+ 	depends on X86
+ 	default y
+ 	help
+diff --git a/drivers/isdn/hisax/q931.c b/drivers/isdn/hisax/q931.c
+index ba4beb25d872..298c8dba0321 100644
+--- a/drivers/isdn/hisax/q931.c
++++ b/drivers/isdn/hisax/q931.c
+@@ -855,7 +855,7 @@ struct DTag { /* Display tags */
+ 	{ 0x8c, "Reason" },
+ 	{ 0x8d, "Calling party name" },
+ 	{ 0x8e, "Called party name" },
+-	{ 0x8f, "Orignal called name" },
++	{ 0x8f, "Original called name" },
+ 	{ 0x90, "Redirecting name" },
+ 	{ 0x91, "Connected name" },
+ 	{ 0x92, "Originating restrictions" },
+diff --git a/drivers/media/usb/dvb-usb-v2/af9015.c b/drivers/media/usb/dvb-usb-v2/af9015.c
+index 941ceff9b268..29011dfabb11 100644
+--- a/drivers/media/usb/dvb-usb-v2/af9015.c
++++ b/drivers/media/usb/dvb-usb-v2/af9015.c
+@@ -1455,7 +1455,7 @@ static const struct usb_device_id af9015_id_table[] = {
+ 	{ DVB_USB_DEVICE(USB_VID_KWORLD_2, USB_PID_CONCEPTRONIC_CTVDIGRCU,
+ 		&af9015_props, "Conceptronic USB2.0 DVB-T CTVDIGRCU V3.0", NULL) },
+ 	{ DVB_USB_DEVICE(USB_VID_KWORLD_2, USB_PID_KWORLD_MC810,
+-		&af9015_props, "KWorld Digial MC-810", NULL) },
++		&af9015_props, "KWorld Digital MC-810", NULL) },
+ 	{ DVB_USB_DEVICE(USB_VID_KYE, USB_PID_GENIUS_TVGO_DVB_T03,
+ 		&af9015_props, "Genius TVGo DVB-T03", NULL) },
+ 	{ DVB_USB_DEVICE(USB_VID_KWORLD_2, USB_PID_KWORLD_399U_2,
+diff --git a/drivers/mfd/max77620.c b/drivers/mfd/max77620.c
+index 258757e216c4..b1700b5fa640 100644
+--- a/drivers/mfd/max77620.c
++++ b/drivers/mfd/max77620.c
+@@ -461,7 +461,7 @@ static int max77620_probe(struct i2c_client *client,
+ 	chip->rmap = devm_regmap_init_i2c(client, rmap_config);
+ 	if (IS_ERR(chip->rmap)) {
+ 		ret = PTR_ERR(chip->rmap);
+-		dev_err(chip->dev, "Failed to intialise regmap: %d\n", ret);
++		dev_err(chip->dev, "Failed to initialise regmap: %d\n", ret);
+ 		return ret;
+ 	}
+ 
+diff --git a/drivers/net/ethernet/broadcom/bnx2x/bnx2x_sriov.c b/drivers/net/ethernet/broadcom/bnx2x/bnx2x_sriov.c
+index 3f77d0863543..6fad22adbbb9 100644
+--- a/drivers/net/ethernet/broadcom/bnx2x/bnx2x_sriov.c
++++ b/drivers/net/ethernet/broadcom/bnx2x/bnx2x_sriov.c
+@@ -585,7 +585,7 @@ int bnx2x_vf_mcast(struct bnx2x *bp, struct bnx2x_virtf *vf,
+ 		mcast.mcast_list_len = mc_num;
+ 		rc = bnx2x_config_mcast(bp, &mcast, BNX2X_MCAST_CMD_SET);
+ 		if (rc)
+-			BNX2X_ERR("Faled to set multicasts\n");
++			BNX2X_ERR("Failed to set multicasts\n");
+ 	} else {
+ 		/* clear existing mcasts */
+ 		rc = bnx2x_config_mcast(bp, &mcast, BNX2X_MCAST_CMD_DEL);
+diff --git a/drivers/net/ethernet/qlogic/qed/qed_int.c b/drivers/net/ethernet/qlogic/qed/qed_int.c
+index 2adedc6fb6cf..bed6bfd0201e 100644
+--- a/drivers/net/ethernet/qlogic/qed/qed_int.c
++++ b/drivers/net/ethernet/qlogic/qed/qed_int.c
+@@ -1377,7 +1377,7 @@ static const char *attn_master_to_str(u8 master)
+ 	case 9: return "DBU";
+ 	case 10: return "DMAE";
+ 	default:
+-		return "Unkown";
++		return "Unknown";
+ 	}
+ }
+ 
+@@ -1555,7 +1555,7 @@ static int qed_dorq_attn_cb(struct qed_hwfn *p_hwfn)
+ 				     DORQ_REG_DB_DROP_DETAILS);
+ 
+ 		DP_INFO(p_hwfn->cdev,
+-			"DORQ db_drop: adress 0x%08x Opaque FID 0x%04x Size [bytes] 0x%08x Reason: 0x%08x\n",
++			"DORQ db_drop: address 0x%08x Opaque FID 0x%04x Size [bytes] 0x%08x Reason: 0x%08x\n",
+ 			qed_rd(p_hwfn, p_hwfn->p_dpc_ptt,
+ 			       DORQ_REG_DB_DROP_DETAILS_ADDRESS),
+ 			(u16)(details & QED_DORQ_ATTENTION_OPAQUE_MASK),
+diff --git a/drivers/net/ethernet/qlogic/qed/qed_sp_commands.c b/drivers/net/ethernet/qlogic/qed/qed_sp_commands.c
+index 2888eb0628f8..c42c0ec49826 100644
+--- a/drivers/net/ethernet/qlogic/qed/qed_sp_commands.c
++++ b/drivers/net/ethernet/qlogic/qed/qed_sp_commands.c
+@@ -369,7 +369,7 @@ int qed_sp_pf_start(struct qed_hwfn *p_hwfn,
+ 		p_ramrod->personality = PERSONALITY_RDMA_AND_ETH;
+ 		break;
+ 	default:
+-		DP_NOTICE(p_hwfn, "Unkown personality %d\n",
++		DP_NOTICE(p_hwfn, "Unknown personality %d\n",
+ 			  p_hwfn->hw_info.personality);
+ 		p_ramrod->personality = PERSONALITY_ETH;
+ 	}
+diff --git a/drivers/net/wireless/ath/ath10k/pci.c b/drivers/net/wireless/ath/ath10k/pci.c
+index 0457e315d336..b541a1c74488 100644
+--- a/drivers/net/wireless/ath/ath10k/pci.c
++++ b/drivers/net/wireless/ath/ath10k/pci.c
+@@ -2091,7 +2091,7 @@ int ath10k_pci_init_config(struct ath10k *ar)
+ 
+ 	ret = ath10k_pci_diag_read32(ar, ealloc_targ_addr, &ealloc_value);
+ 	if (ret != 0) {
+-		ath10k_err(ar, "Faile to get early alloc val: %d\n", ret);
++		ath10k_err(ar, "Failed to get early alloc val: %d\n", ret);
+ 		return ret;
+ 	}
+ 
+diff --git a/drivers/net/wireless/ath/wil6210/txrx.c b/drivers/net/wireless/ath/wil6210/txrx.c
+index 4c38520d4dd2..3553e4f93b20 100644
+--- a/drivers/net/wireless/ath/wil6210/txrx.c
++++ b/drivers/net/wireless/ath/wil6210/txrx.c
+@@ -326,7 +326,7 @@ static void wil_rx_add_radiotap_header(struct wil6210_priv *wil,
+ 
+ 	if (skb_headroom(skb) < rtap_len &&
+ 	    pskb_expand_head(skb, rtap_len, 0, GFP_ATOMIC)) {
+-		wil_err(wil, "Unable to expand headrom to %d\n", rtap_len);
++		wil_err(wil, "Unable to expand headroom to %d\n", rtap_len);
+ 		return;
+ 	}
+ 
+diff --git a/drivers/net/wireless/realtek/rtlwifi/rtl8723ae/fw.c b/drivers/net/wireless/realtek/rtlwifi/rtl8723ae/fw.c
+index 1186755e55b8..e5505387260b 100644
+--- a/drivers/net/wireless/realtek/rtlwifi/rtl8723ae/fw.c
++++ b/drivers/net/wireless/realtek/rtlwifi/rtl8723ae/fw.c
+@@ -134,7 +134,7 @@ static void _rtl8723e_fill_h2c_command(struct ieee80211_hw *hw, u8 element_id,
+ 			wait_h2c_limmit--;
+ 			if (wait_h2c_limmit == 0) {
+ 				RT_TRACE(rtlpriv, COMP_CMD, DBG_LOUD,
+-					 "Wating too long for FW read clear HMEBox(%d)!\n",
++					 "Waiting too long for FW read clear HMEBox(%d)!\n",
+ 					 boxnum);
+ 				break;
+ 			}
+diff --git a/drivers/scsi/aic7xxx/aicasm/aicasm.c b/drivers/scsi/aic7xxx/aicasm/aicasm.c
+index 2e3117aa382f..21ac265280bf 100644
+--- a/drivers/scsi/aic7xxx/aicasm/aicasm.c
++++ b/drivers/scsi/aic7xxx/aicasm/aicasm.c
+@@ -254,7 +254,7 @@ main(int argc, char *argv[])
+ 	argv += optind;
+ 
+ 	if (argc != 1) {
+-		fprintf(stderr, "%s: No input file specifiled\n", appname);
++		fprintf(stderr, "%s: No input file specified\n", appname);
+ 		usage();
+ 		/* NOTREACHED */
+ 	}
+diff --git a/drivers/usb/dwc3/gadget.c b/drivers/usb/dwc3/gadget.c
+index 1dfa56a5f1c5..40e9fc2355ca 100644
+--- a/drivers/usb/dwc3/gadget.c
++++ b/drivers/usb/dwc3/gadget.c
+@@ -2491,7 +2491,7 @@ static void dwc3_gadget_conndone_interrupt(struct dwc3 *dwc)
+ 		 */
+ 		WARN_ONCE(dwc->revision < DWC3_REVISION_240A
+ 				&& dwc->has_lpm_erratum,
+-				"LPM Erratum not available on dwc3 revisisions < 2.40a\n");
++				"LPM Erratum not available on dwc3 revisions < 2.40a\n");
+ 
+ 		if (dwc->has_lpm_erratum && dwc->revision >= DWC3_REVISION_240A)
+ 			reg |= DWC3_DCTL_LPM_ERRATA(dwc->lpm_nyet_threshold);
+diff --git a/scripts/gcc-plugins/latent_entropy_plugin.c b/scripts/gcc-plugins/latent_entropy_plugin.c
+index 8160f1c1b56e..12541126575b 100644
+--- a/scripts/gcc-plugins/latent_entropy_plugin.c
++++ b/scripts/gcc-plugins/latent_entropy_plugin.c
+@@ -619,7 +619,7 @@ __visible int plugin_init(struct plugin_name_args *plugin_info,
+ 			enabled = false;
+ 			continue;
+ 		}
+-		error(G_("unkown option '-fplugin-arg-%s-%s'"), plugin_name, argv[i].key);
++		error(G_("unknown option '-fplugin-arg-%s-%s'"), plugin_name, argv[i].key);
+ 	}
+ 
+ 	register_callback(plugin_name, PLUGIN_INFO, NULL,
+diff --git a/scripts/gcc-plugins/sancov_plugin.c b/scripts/gcc-plugins/sancov_plugin.c
+index 7ea0b3f50739..70f5fe0d590a 100644
+--- a/scripts/gcc-plugins/sancov_plugin.c
++++ b/scripts/gcc-plugins/sancov_plugin.c
+@@ -126,7 +126,7 @@ __visible int plugin_init(struct plugin_name_args *plugin_info, struct plugin_gc
+ 			enable = false;
+ 			continue;
+ 		}
+-		error(G_("unkown option '-fplugin-arg-%s-%s'"), plugin_name, argv[i].key);
++		error(G_("unknown option '-fplugin-arg-%s-%s'"), plugin_name, argv[i].key);
+ 	}
+ 
+ 	register_callback(plugin_name, PLUGIN_INFO, NULL, &sancov_plugin_info);
+diff --git a/tools/power/acpi/tools/ec/ec_access.c b/tools/power/acpi/tools/ec/ec_access.c
+index 6b8aaed44f2c..5f50642386db 100644
+--- a/tools/power/acpi/tools/ec/ec_access.c
++++ b/tools/power/acpi/tools/ec/ec_access.c
+@@ -46,7 +46,7 @@ void usage(char progname[], int exit_status)
+ 	puts("\t-b offset          : Read value at byte_offset (in hex)");
+ 	puts("\t-w offset -v value : Write value at byte_offset");
+ 	puts("\t-h                 : Print this help\n\n");
+-	puts("Offsets and values are in hexadecimal number sytem.");
++	puts("Offsets and values are in hexadecimal number system.");
+ 	puts("The offset and value must be between 0 and 0xff.");
+ 	exit(exit_status);
+ }

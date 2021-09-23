@@ -1,0 +1,29 @@
+['f3a7f6f67fc7ec5bb47a6ad6b947d66759e6d9e4', '9.txt', 'LogLevel']
+commit f3a7f6f67fc7ec5bb47a6ad6b947d66759e6d9e4
+Author: Michal Simek <michal.simek@xilinx.com>
+Date:   Fri Aug 4 09:39:17 2017 +0200
+
+    watchdog: cadence_wdt: Show information when driver is probed
+    
+    Showing message that driver is loaded is common across drivers.
+    This change also fixes checkpatch (--strict) warning
+    "Alignment should match open parenthesis".
+    
+    Signed-off-by: Michal Simek <michal.simek@xilinx.com>
+    Reviewed-by: Guenter Roeck <linux@roeck-us.net>
+    Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+    Signed-off-by: Wim Van Sebroeck <wim@iguana.be>
+
+diff --git a/drivers/watchdog/cadence_wdt.c b/drivers/watchdog/cadence_wdt.c
+index dadd3b0c2d49..064cf7b6c1c5 100644
+--- a/drivers/watchdog/cadence_wdt.c
++++ b/drivers/watchdog/cadence_wdt.c
+@@ -368,7 +368,7 @@ static int cdns_wdt_probe(struct platform_device *pdev)
+ 	}
+ 	platform_set_drvdata(pdev, wdt);
+ 
+-	dev_dbg(&pdev->dev, "Xilinx Watchdog Timer at %p with timeout %ds%s\n",
++	dev_info(&pdev->dev, "Xilinx Watchdog Timer at %p with timeout %ds%s\n",
+ 		 wdt->regs, cdns_wdt_device->timeout,
+ 		 nowayout ? ", nowayout" : "");
+ 

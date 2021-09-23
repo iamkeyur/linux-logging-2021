@@ -1,0 +1,50 @@
+['fc4e0c97d10da4ef9578a7013ad6b9708bacbf51', '202.txt', 'Typo']
+commit fc4e0c97d10da4ef9578a7013ad6b9708bacbf51
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu Feb 7 09:39:02 2019 +0000
+
+    iio: adc: ads124s08: fix spelling mistake "converions" -> "conversions"
+    
+    There is a spelling mistake in several dev_err messages. Fix these.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Acked-by: Dan Murphy <dmurphy@ti.com>
+    Signed-off-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+
+diff --git a/drivers/iio/adc/ti-ads124s08.c b/drivers/iio/adc/ti-ads124s08.c
+index c2cf58908fc8..53f17e4f2f23 100644
+--- a/drivers/iio/adc/ti-ads124s08.c
++++ b/drivers/iio/adc/ti-ads124s08.c
+@@ -232,7 +232,7 @@ static int ads124s_read_raw(struct iio_dev *indio_dev,
+ 
+ 		ret = ads124s_write_cmd(indio_dev, ADS124S08_START_CONV);
+ 		if (ret) {
+-			dev_err(&priv->spi->dev, "Start converions failed\n");
++			dev_err(&priv->spi->dev, "Start conversions failed\n");
+ 			goto out;
+ 		}
+ 
+@@ -246,7 +246,7 @@ static int ads124s_read_raw(struct iio_dev *indio_dev,
+ 
+ 		ret = ads124s_write_cmd(indio_dev, ADS124S08_STOP_CONV);
+ 		if (ret) {
+-			dev_err(&priv->spi->dev, "Stop converions failed\n");
++			dev_err(&priv->spi->dev, "Stop conversions failed\n");
+ 			goto out;
+ 		}
+ 
+@@ -283,12 +283,12 @@ static irqreturn_t ads124s_trigger_handler(int irq, void *p)
+ 
+ 		ret = ads124s_write_cmd(indio_dev, ADS124S08_START_CONV);
+ 		if (ret)
+-			dev_err(&priv->spi->dev, "Start ADC converions failed\n");
++			dev_err(&priv->spi->dev, "Start ADC conversions failed\n");
+ 
+ 		buffer[j] = ads124s_read(indio_dev, scan_index);
+ 		ret = ads124s_write_cmd(indio_dev, ADS124S08_STOP_CONV);
+ 		if (ret)
+-			dev_err(&priv->spi->dev, "Stop ADC converions failed\n");
++			dev_err(&priv->spi->dev, "Stop ADC conversions failed\n");
+ 
+ 		j++;
+ 	}

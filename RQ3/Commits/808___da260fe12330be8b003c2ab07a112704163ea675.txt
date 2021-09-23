@@ -1,0 +1,33 @@
+['da260fe12330be8b003c2ab07a112704163ea675', '230.txt', 'Typo']
+commit da260fe12330be8b003c2ab07a112704163ea675
+Author: Borislav Petkov <bp@suse.de>
+Date:   Fri Sep 7 12:35:21 2018 +0200
+
+    jump_label: Fix typo in warning message
+    
+    There's no 'allocatote' - use the next best thing: 'allocate' :-)
+    
+    Signed-off-by: Borislav Petkov <bp@suse.de>
+    Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+    Cc: Jason Baron <jbaron@akamai.com>
+    Cc: Josh Poimboeuf <jpoimboe@redhat.com>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Steven Rostedt (VMware) <rostedt@goodmis.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Link: http://lkml.kernel.org/r/20180907103521.31344-1-bp@alien8.de
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+diff --git a/kernel/jump_label.c b/kernel/jump_label.c
+index 01ebdf1f9f40..2e62503bea0d 100644
+--- a/kernel/jump_label.c
++++ b/kernel/jump_label.c
+@@ -678,7 +678,7 @@ jump_label_module_notify(struct notifier_block *self, unsigned long val,
+ 	case MODULE_STATE_COMING:
+ 		ret = jump_label_add_module(mod);
+ 		if (ret) {
+-			WARN(1, "Failed to allocatote memory: jump_label may not work properly.\n");
++			WARN(1, "Failed to allocate memory: jump_label may not work properly.\n");
+ 			jump_label_del_module(mod);
+ 		}
+ 		break;

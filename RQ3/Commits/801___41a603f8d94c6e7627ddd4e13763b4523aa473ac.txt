@@ -1,0 +1,58 @@
+['41a603f8d94c6e7627ddd4e13763b4523aa473ac', '222.txt', 'ModernizeLog']
+commit 41a603f8d94c6e7627ddd4e13763b4523aa473ac
+Author: Ricardo Silva <rjpdasilva@gmail.com>
+Date:   Mon May 15 16:40:14 2017 -0300
+
+    [media] lirc_zilog: Use __func__ for logging function name
+    
+    Fix all checkpatch reported issues for "CHECK: Prefer using '"%s...",
+    __func__' to using '<func_name>', ..."
+    
+    Use recommended style. Additionally, __func__ was already used in
+    similar cases throughout the code, so make it all consistent.
+    
+    Signed-off-by: Ricardo Silva <rjpdasilva@gmail.com>
+    Signed-off-by: Sean Young <sean@mess.org>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+
+diff --git a/drivers/staging/media/lirc/lirc_zilog.c b/drivers/staging/media/lirc/lirc_zilog.c
+index b9761a8b0bc2..4af0068ab0c5 100644
+--- a/drivers/staging/media/lirc/lirc_zilog.c
++++ b/drivers/staging/media/lirc/lirc_zilog.c
+@@ -1203,7 +1203,7 @@ static unsigned int poll(struct file *filep, poll_table *wait)
+ 	struct lirc_buffer *rbuf = ir->l.rbuf;
+ 	unsigned int ret;
+ 
+-	dev_dbg(ir->l.dev, "poll called\n");
++	dev_dbg(ir->l.dev, "%s called\n", __func__);
+ 
+ 	rx = get_ir_rx(ir);
+ 	if (!rx) {
+@@ -1211,7 +1211,7 @@ static unsigned int poll(struct file *filep, poll_table *wait)
+ 		 * Revisit this, if our poll function ever reports writeable
+ 		 * status for Tx
+ 		 */
+-		dev_dbg(ir->l.dev, "poll result = POLLERR\n");
++		dev_dbg(ir->l.dev, "%s result = POLLERR\n", __func__);
+ 		return POLLERR;
+ 	}
+ 
+@@ -1224,7 +1224,7 @@ static unsigned int poll(struct file *filep, poll_table *wait)
+ 	/* Indicate what ops could happen immediately without blocking */
+ 	ret = lirc_buffer_empty(rbuf) ? 0 : (POLLIN | POLLRDNORM);
+ 
+-	dev_dbg(ir->l.dev, "poll result = %s\n",
++	dev_dbg(ir->l.dev, "%s result = %s\n", __func__,
+ 		ret ? "POLLIN|POLLRDNORM" : "none");
+ 	return ret;
+ }
+@@ -1332,7 +1332,8 @@ static int close(struct inode *node, struct file *filep)
+ 	struct IR *ir = filep->private_data;
+ 
+ 	if (!ir) {
+-		pr_err("ir: close: no private_data attached to the file!\n");
++		pr_err("ir: %s: no private_data attached to the file!\n",
++		       __func__);
+ 		return -ENODEV;
+ 	}
+ 

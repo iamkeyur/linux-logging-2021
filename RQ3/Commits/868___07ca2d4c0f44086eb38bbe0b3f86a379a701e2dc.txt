@@ -1,0 +1,63 @@
+['07ca2d4c0f44086eb38bbe0b3f86a379a701e2dc', '85.txt', 'LogLevel']
+commit 07ca2d4c0f44086eb38bbe0b3f86a379a701e2dc
+Author: Hirokazu Honda <hiroh@chromium.org>
+Date:   Tue May 30 05:49:01 2017 -0400
+
+    media: vb2: core: Lower the log level of debug outputs
+    
+    Some debug output whose log level is set 1 flooded the log.
+    Their log level is lowered to find the important log easily.
+    
+    Signed-off-by: Hirokazu Honda <hiroh@chromium.org>
+    Signed-off-by: Hans Verkuil <hans.verkuil@cisco.com>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+
+diff --git a/drivers/media/v4l2-core/videobuf2-core.c b/drivers/media/v4l2-core/videobuf2-core.c
+index 14f83cecfa92..0924594989b4 100644
+--- a/drivers/media/v4l2-core/videobuf2-core.c
++++ b/drivers/media/v4l2-core/videobuf2-core.c
+@@ -1139,7 +1139,7 @@ static int __prepare_dmabuf(struct vb2_buffer *vb, const void *pb)
+ 			continue;
+ 		}
+ 
+-		dprintk(1, "buffer for plane %d changed\n", plane);
++		dprintk(3, "buffer for plane %d changed\n", plane);
+ 
+ 		if (!reacquired) {
+ 			reacquired = true;
+@@ -1298,7 +1298,7 @@ int vb2_core_prepare_buf(struct vb2_queue *q, unsigned int index, void *pb)
+ 	/* Fill buffer information for the userspace */
+ 	call_void_bufop(q, fill_user_buffer, vb, pb);
+ 
+-	dprintk(1, "prepare of buffer %d succeeded\n", vb->index);
++	dprintk(2, "prepare of buffer %d succeeded\n", vb->index);
+ 
+ 	return ret;
+ }
+@@ -1428,7 +1428,7 @@ int vb2_core_qbuf(struct vb2_queue *q, unsigned int index, void *pb)
+ 			return ret;
+ 	}
+ 
+-	dprintk(1, "qbuf of buffer %d succeeded\n", vb->index);
++	dprintk(2, "qbuf of buffer %d succeeded\n", vb->index);
+ 	return 0;
+ }
+ EXPORT_SYMBOL_GPL(vb2_core_qbuf);
+@@ -1476,7 +1476,7 @@ static int __vb2_wait_for_done_vb(struct vb2_queue *q, int nonblocking)
+ 		}
+ 
+ 		if (nonblocking) {
+-			dprintk(1, "nonblocking and no buffers to dequeue, will not wait\n");
++			dprintk(3, "nonblocking and no buffers to dequeue, will not wait\n");
+ 			return -EAGAIN;
+ 		}
+ 
+@@ -1623,7 +1623,7 @@ int vb2_core_dqbuf(struct vb2_queue *q, unsigned int *pindex, void *pb,
+ 	/* go back to dequeued state */
+ 	__vb2_dqbuf(vb);
+ 
+-	dprintk(1, "dqbuf of buffer %d, with state %d\n",
++	dprintk(2, "dqbuf of buffer %d, with state %d\n",
+ 			vb->index, vb->state);
+ 
+ 	return 0;

@@ -1,0 +1,24 @@
+['82875163a8ef1e25477402c5ebb8f5beaea5e93e', '922.txt', 'WrongInformation']
+commit 82875163a8ef1e25477402c5ebb8f5beaea5e93e
+Author: Axel Lin <axel.lin@ingics.com>
+Date:   Sat Mar 11 20:57:07 2017 +0800
+
+    ASoC: cs35l35: Fix display revision id
+    
+    Signed-off-by: Axel Lin <axel.lin@ingics.com>
+    Acked-by: Paul Handrigan <Paul.Handrigan@cirrus.com>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/sound/soc/codecs/cs35l35.c b/sound/soc/codecs/cs35l35.c
+index 7c4d74ec32cb..a9e45dea309e 100644
+--- a/sound/soc/codecs/cs35l35.c
++++ b/sound/soc/codecs/cs35l35.c
+@@ -1463,7 +1463,7 @@ static int cs35l35_i2c_probe(struct i2c_client *i2c_client,
+ 	}
+ 
+ 	dev_info(dev, "Cirrus Logic CS35L35 (%x), Revision: %02X\n",
+-		 devid, ret & 0xFF);
++		 devid, reg & 0xFF);
+ 
+ 	/* Set the INT Masks for critical errors */
+ 	regmap_write(cs35l35->regmap, CS35L35_INT_MASK_1,

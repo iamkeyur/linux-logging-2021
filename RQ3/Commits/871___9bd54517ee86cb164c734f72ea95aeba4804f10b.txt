@@ -1,0 +1,37 @@
+['9bd54517ee86cb164c734f72ea95aeba4804f10b', '90.txt', 'LogLevel']
+commit 9bd54517ee86cb164c734f72ea95aeba4804f10b
+Author: Alexey Brodkin <Alexey.Brodkin@synopsys.com>
+Date:   Thu Jun 23 11:00:39 2016 +0300
+
+    arc: unwind: warn only once if DW2_UNWIND is disabled
+    
+    If CONFIG_ARC_DW2_UNWIND is disabled every time arc_unwind_core()
+    gets called following message gets printed in debug console:
+    ----------------->8---------------
+    CONFIG_ARC_DW2_UNWIND needs to be enabled
+    ----------------->8---------------
+    
+    That message makes sense if user indeed wants to see a backtrace or
+    get nice function call-graphs in perf but what if user disabled
+    unwinder for the purpose? Why pollute his debug console?
+    
+    So instead we'll warn user about possibly missing feature once and
+    let him decide if that was what he or she really wanted.
+    
+    Signed-off-by: Alexey Brodkin <abrodkin@synopsys.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Vineet Gupta <vgupta@synopsys.com>
+
+diff --git a/arch/arc/kernel/stacktrace.c b/arch/arc/kernel/stacktrace.c
+index e0efff15a5ae..b9192a653b7e 100644
+--- a/arch/arc/kernel/stacktrace.c
++++ b/arch/arc/kernel/stacktrace.c
+@@ -142,7 +142,7 @@ arc_unwind_core(struct task_struct *tsk, struct pt_regs *regs,
+ 	 * prelogue is setup (callee regs saved and then fp set and not other
+ 	 * way around
+ 	 */
+-	pr_warn("CONFIG_ARC_DW2_UNWIND needs to be enabled\n");
++	pr_warn_once("CONFIG_ARC_DW2_UNWIND needs to be enabled\n");
+ 	return 0;
+ 
+ #endif

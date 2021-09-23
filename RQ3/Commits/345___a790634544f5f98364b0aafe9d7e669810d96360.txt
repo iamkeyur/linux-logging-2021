@@ -1,0 +1,47 @@
+['a790634544f5f98364b0aafe9d7e669810d96360', '626.txt', 'Formatting']
+commit a790634544f5f98364b0aafe9d7e669810d96360
+Author: Heiko Carstens <heiko.carstens@de.ibm.com>
+Date:   Mon Oct 17 11:59:58 2016 +0200
+
+    s390/dumpstack: use pr_cont where appropriate
+    
+    Use pr_cont instead of simple printk calls when lines will be
+    continued. This fixes the kernel output of various lines printed on
+    e.g. a warning:
+    
+    Before:
+    [    0.840604] Krnl PSW : 0404c00180000000 000000000017d1d2
+    [    0.840606]  (try_to_wake_up+0x382/0x5e0)
+    
+    [    0.840610]            R:0 T:1 IO:0 EX:0 Key:0 M:1 W:0 P:0 AS:3 CC:0 PM:0
+    [    0.840611]  RI:0 EA:3
+    
+    After:
+    [    0.831772] Krnl PSW : 0404c00180000000 000000000017d14a (try_to_wake_up+0x382/0x5e0)
+    [    0.831776]            R:0 T:1 IO:0 EX:0 Key:0 M:1 W:0 P:0 AS:3 CC:0 PM:0 RI:0 EA:3
+    
+    Signed-off-by: Heiko Carstens <heiko.carstens@de.ibm.com>
+    Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+
+diff --git a/arch/s390/kernel/dumpstack.c b/arch/s390/kernel/dumpstack.c
+index 518f615ad0a2..4bebe72b7780 100644
+--- a/arch/s390/kernel/dumpstack.c
++++ b/arch/s390/kernel/dumpstack.c
+@@ -168,13 +168,13 @@ void show_registers(struct pt_regs *regs)
+ 	mode = user_mode(regs) ? "User" : "Krnl";
+ 	printk("%s PSW : %p %p", mode, (void *)regs->psw.mask, (void *)regs->psw.addr);
+ 	if (!user_mode(regs))
+-		printk(" (%pSR)", (void *)regs->psw.addr);
+-	printk("\n");
++		pr_cont(" (%pSR)", (void *)regs->psw.addr);
++	pr_cont("\n");
+ 	printk("           R:%x T:%x IO:%x EX:%x Key:%x M:%x W:%x "
+ 	       "P:%x AS:%x CC:%x PM:%x", psw->r, psw->t, psw->i, psw->e,
+ 	       psw->key, psw->m, psw->w, psw->p, psw->as, psw->cc, psw->pm);
+-	printk(" RI:%x EA:%x", psw->ri, psw->eaba);
+-	printk("\n%s GPRS: %016lx %016lx %016lx %016lx\n", mode,
++	pr_cont(" RI:%x EA:%x\n", psw->ri, psw->eaba);
++	printk("%s GPRS: %016lx %016lx %016lx %016lx\n", mode,
+ 	       regs->gprs[0], regs->gprs[1], regs->gprs[2], regs->gprs[3]);
+ 	printk("           %016lx %016lx %016lx %016lx\n",
+ 	       regs->gprs[4], regs->gprs[5], regs->gprs[6], regs->gprs[7]);

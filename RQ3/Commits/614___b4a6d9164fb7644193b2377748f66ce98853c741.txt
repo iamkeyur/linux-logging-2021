@@ -1,0 +1,38 @@
+['b4a6d9164fb7644193b2377748f66ce98853c741', '324.txt', 'Typo']
+commit b4a6d9164fb7644193b2377748f66ce98853c741
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Mon Sep 24 17:25:25 2018 +0100
+
+    staging: rtl8723bs: fix spelling mistake "toogle" -> "toggle"
+    
+    Trivial fix to spelling mistake in struct field name
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/rtl8723bs/core/rtw_debug.c b/drivers/staging/rtl8723bs/core/rtw_debug.c
+index f852fde47350..a2a2cefd1786 100644
+--- a/drivers/staging/rtl8723bs/core/rtw_debug.c
++++ b/drivers/staging/rtl8723bs/core/rtw_debug.c
+@@ -657,7 +657,7 @@ int proc_get_suspend_resume_info(struct seq_file *m, void *v)
+ 	DBG_871X_SEL_NL(m, "dbg_enwow_dload_fw_fail_cnt =%d\n", pdbgpriv->dbg_enwow_dload_fw_fail_cnt);
+ 	DBG_871X_SEL_NL(m, "dbg_ips_drvopen_fail_cnt =%d\n", pdbgpriv->dbg_ips_drvopen_fail_cnt);
+ 	DBG_871X_SEL_NL(m, "dbg_poll_fail_cnt =%d\n", pdbgpriv->dbg_poll_fail_cnt);
+-	DBG_871X_SEL_NL(m, "dbg_rpwm_toogle_cnt =%d\n", pdbgpriv->dbg_rpwm_toogle_cnt);
++	DBG_871X_SEL_NL(m, "dbg_rpwm_toggle_cnt =%d\n", pdbgpriv->dbg_rpwm_toggle_cnt);
+ 	DBG_871X_SEL_NL(m, "dbg_rpwm_timeout_fail_cnt =%d\n", pdbgpriv->dbg_rpwm_timeout_fail_cnt);
+ 
+ 	return 0;
+diff --git a/drivers/staging/rtl8723bs/include/drv_types.h b/drivers/staging/rtl8723bs/include/drv_types.h
+index c57f290f605a..062fda9962be 100644
+--- a/drivers/staging/rtl8723bs/include/drv_types.h
++++ b/drivers/staging/rtl8723bs/include/drv_types.h
+@@ -381,7 +381,7 @@ struct debug_priv {
+ 	u32 dbg_enwow_dload_fw_fail_cnt;
+ 	u32 dbg_ips_drvopen_fail_cnt;
+ 	u32 dbg_poll_fail_cnt;
+-	u32 dbg_rpwm_toogle_cnt;
++	u32 dbg_rpwm_toggle_cnt;
+ 	u32 dbg_rpwm_timeout_fail_cnt;
+ 	u64 dbg_rx_fifo_last_overflow;
+ 	u64 dbg_rx_fifo_curr_overflow;

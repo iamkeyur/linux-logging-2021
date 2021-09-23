@@ -1,0 +1,27 @@
+['847cb1a3566ca5b47b94a8e90f881b533f35cf07', '460.txt', 'Typo']
+commit 847cb1a3566ca5b47b94a8e90f881b533f35cf07
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu Aug 24 09:25:53 2017 +0100
+
+    RDMA/qedr: fix spelling mistake: "invlaid" -> "invalid"
+    
+    Trivial fix to spelling mistake in DP_ERR error message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Reviewed-by: Leon Romanovsky <leonro@mellanox.com>
+    Reviewed-by: Ram Amrani <Ram.Amrani@cavium.com>
+    Signed-off-by: Doug Ledford <dledford@redhat.com>
+
+diff --git a/drivers/infiniband/hw/qedr/verbs.c b/drivers/infiniband/hw/qedr/verbs.c
+index 9ee2dce3e5bb..769ac07c3c8e 100644
+--- a/drivers/infiniband/hw/qedr/verbs.c
++++ b/drivers/infiniband/hw/qedr/verbs.c
+@@ -491,7 +491,7 @@ struct ib_pd *qedr_alloc_pd(struct ib_device *ibdev,
+ 		 (udata && context) ? "User Lib" : "Kernel");
+ 
+ 	if (!dev->rdma_ctx) {
+-		DP_ERR(dev, "invlaid RDMA context\n");
++		DP_ERR(dev, "invalid RDMA context\n");
+ 		return ERR_PTR(-EINVAL);
+ 	}
+ 

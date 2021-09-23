@@ -1,0 +1,25 @@
+['bbc1f57aa87066a188ef34330bc1f091b95b1a6b', '571.txt', 'Typo']
+commit bbc1f57aa87066a188ef34330bc1f091b95b1a6b
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Mon Sep 24 00:04:08 2018 +0100
+
+    USB: serial: cypress_m8: fix spelling mistake "retreiving" -> "retrieving"
+    
+    Trivial fix to spelling mistake in dev_dbg message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Johan Hovold <johan@kernel.org>
+
+diff --git a/drivers/usb/serial/cypress_m8.c b/drivers/usb/serial/cypress_m8.c
+index e0035c023120..31c6091be46a 100644
+--- a/drivers/usb/serial/cypress_m8.c
++++ b/drivers/usb/serial/cypress_m8.c
+@@ -378,7 +378,7 @@ static int cypress_serial_control(struct tty_struct *tty,
+ 			retval = -ENOTTY;
+ 			goto out;
+ 		}
+-		dev_dbg(dev, "%s - retreiving serial line settings\n", __func__);
++		dev_dbg(dev, "%s - retrieving serial line settings\n", __func__);
+ 		do {
+ 			retval = usb_control_msg(port->serial->dev,
+ 					usb_rcvctrlpipe(port->serial->dev, 0),

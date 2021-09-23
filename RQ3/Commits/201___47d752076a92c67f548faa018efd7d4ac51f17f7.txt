@@ -1,0 +1,25 @@
+['47d752076a92c67f548faa018efd7d4ac51f17f7', '781.txt', 'Typo']
+commit 47d752076a92c67f548faa018efd7d4ac51f17f7
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu Mar 30 10:58:08 2017 +0100
+
+    block/sed-opal: fix spelling mistake: "Lifcycle" -> "Lifecycle"
+    
+    trivial fix to spelling mistake in pr_err error message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Jens Axboe <axboe@fb.com>
+
+diff --git a/block/sed-opal.c b/block/sed-opal.c
+index 14035f826b5e..6736c7873d4a 100644
+--- a/block/sed-opal.c
++++ b/block/sed-opal.c
+@@ -1831,7 +1831,7 @@ static int get_lsp_lifecycle_cont(struct opal_dev *dev)
+ 	/* 0x08 is Manufacured Inactive */
+ 	/* 0x09 is Manufactured */
+ 	if (lc_status != OPAL_MANUFACTURED_INACTIVE) {
+-		pr_err("Couldn't determine the status of the Lifcycle state\n");
++		pr_err("Couldn't determine the status of the Lifecycle state\n");
+ 		return -ENODEV;
+ 	}
+ 

@@ -1,0 +1,25 @@
+['48e362dd96f37d819042f848888b2c6407e01e6d', '943.txt', 'Typo']
+commit 48e362dd96f37d819042f848888b2c6407e01e6d
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Fri Mar 2 09:10:30 2018 +0000
+
+    ia64/err-inject: fix spelling mistake: "capapbilities" -> "capabilities"
+    
+    Trivial fix to spelling mistake in debug message text.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Tony Luck <tony.luck@intel.com>
+
+diff --git a/arch/ia64/kernel/err_inject.c b/arch/ia64/kernel/err_inject.c
+index 658a8e06a69b..8b5b8e6bc9d9 100644
+--- a/arch/ia64/kernel/err_inject.c
++++ b/arch/ia64/kernel/err_inject.c
+@@ -117,7 +117,7 @@ store_call_start(struct device *dev, struct device_attribute *attr,
+ 
+ #ifdef ERR_INJ_DEBUG
+ 	printk(KERN_DEBUG "Returns: status=%d,\n", (int)status[cpu]);
+-	printk(KERN_DEBUG "capapbilities=%lx,\n", capabilities[cpu]);
++	printk(KERN_DEBUG "capabilities=%lx,\n", capabilities[cpu]);
+ 	printk(KERN_DEBUG "resources=%lx\n", resources[cpu]);
+ #endif
+ 	return size;

@@ -1,0 +1,27 @@
+['359603a3847e58843881db87e5f464bb85539e95', '174.txt', 'Typo']
+commit 359603a3847e58843881db87e5f464bb85539e95
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Sat Jul 20 22:58:40 2019 +0100
+
+    scsi: megaraid_sas: fix spelling mistake "megarid_sas" -> "megaraid_sas"
+    
+    Fix spelling mistake in kernel warning message and replace printk with with
+    pr_warn.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Acked-by: Sumit Saxena <sumit.saxena@broadcom.com>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/scsi/megaraid/megaraid_sas_base.c b/drivers/scsi/megaraid/megaraid_sas_base.c
+index b2339d04a700..2590746c81e3 100644
+--- a/drivers/scsi/megaraid/megaraid_sas_base.c
++++ b/drivers/scsi/megaraid/megaraid_sas_base.c
+@@ -8763,7 +8763,7 @@ static int __init megasas_init(void)
+ 
+ 	if ((event_log_level < MFI_EVT_CLASS_DEBUG) ||
+ 	    (event_log_level > MFI_EVT_CLASS_DEAD)) {
+-		printk(KERN_WARNING "megarid_sas: provided event log level is out of range, setting it to default 2(CLASS_CRITICAL), permissible range is: -2 to 4\n");
++		pr_warn("megaraid_sas: provided event log level is out of range, setting it to default 2(CLASS_CRITICAL), permissible range is: -2 to 4\n");
+ 		event_log_level = MFI_EVT_CLASS_CRITICAL;
+ 	}
+ 

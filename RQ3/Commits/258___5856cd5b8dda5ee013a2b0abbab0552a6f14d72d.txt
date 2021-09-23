@@ -1,0 +1,47 @@
+['5856cd5b8dda5ee013a2b0abbab0552a6f14d72d', '719.txt', 'FixFormatSpecifier']
+commit 5856cd5b8dda5ee013a2b0abbab0552a6f14d72d
+Author: Oleg Drokin <green@linuxhacker.ru>
+Date:   Fri Aug 26 23:12:23 2016 -0400
+
+    rtlwifi/rtl8192de: Fix print format string
+    
+    %ul was likely meant as %lu to print an unsigned long,
+    not an unsigned with a letter l at the end.
+    But in fact the value printed is u32 anyway, so just drop
+    the l completely.
+    
+    Signed-off-by: Oleg Drokin <green@linuxhacker.ru>
+    Acked-by: Larry Finger <Larry.Finger@lwfinger.net>
+    Signed-off-by: Kalle Valo <kvalo@codeaurora.org>
+
+diff --git a/drivers/net/wireless/realtek/rtlwifi/rtl8192de/phy.c b/drivers/net/wireless/realtek/rtlwifi/rtl8192de/phy.c
+index d334d2a5ea63..2a4810d32182 100644
+--- a/drivers/net/wireless/realtek/rtlwifi/rtl8192de/phy.c
++++ b/drivers/net/wireless/realtek/rtlwifi/rtl8192de/phy.c
+@@ -588,7 +588,7 @@ static bool _rtl92d_phy_config_bb_with_headerfile(struct ieee80211_hw *hw,
+ 				 * setting. */
+ 				udelay(1);
+ 				RT_TRACE(rtlpriv, COMP_INIT, DBG_TRACE,
+-					 "The Rtl819XAGCTAB_Array_Table[0] is %ul Rtl819XPHY_REGArray[1] is %ul\n",
++					 "The Rtl819XAGCTAB_Array_Table[0] is %u Rtl819XPHY_REGArray[1] is %u\n",
+ 					 agctab_array_table[i],
+ 					 agctab_array_table[i + 1]);
+ 			}
+@@ -604,7 +604,7 @@ static bool _rtl92d_phy_config_bb_with_headerfile(struct ieee80211_hw *hw,
+ 					 * setting. */
+ 					udelay(1);
+ 					RT_TRACE(rtlpriv, COMP_INIT, DBG_TRACE,
+-						 "The Rtl819XAGCTAB_Array_Table[0] is %ul Rtl819XPHY_REGArray[1] is %ul\n",
++						 "The Rtl819XAGCTAB_Array_Table[0] is %u Rtl819XPHY_REGArray[1] is %u\n",
+ 						 agctab_array_table[i],
+ 						 agctab_array_table[i + 1]);
+ 				}
+@@ -620,7 +620,7 @@ static bool _rtl92d_phy_config_bb_with_headerfile(struct ieee80211_hw *hw,
+ 					 * setting. */
+ 					udelay(1);
+ 					RT_TRACE(rtlpriv, COMP_INIT, DBG_TRACE,
+-						 "The Rtl819XAGCTAB_5GArray_Table[0] is %ul Rtl819XPHY_REGArray[1] is %ul\n",
++						 "The Rtl819XAGCTAB_5GArray_Table[0] is %u Rtl819XPHY_REGArray[1] is %u\n",
+ 						 agctab_5garray_table[i],
+ 						 agctab_5garray_table[i + 1]);
+ 				}

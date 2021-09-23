@@ -1,0 +1,29 @@
+['acef2690d16f38a0687552b391674201ad7c5783', '100.txt', 'Typo']
+commit acef2690d16f38a0687552b391674201ad7c5783
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Mon Jul 3 20:21:39 2017 +0100
+
+    scsi: qedf: fix spelling mistake: "offlading" -> "offloading"
+    
+    Trivial fix to spelling mistake in QEDF_INFO message and remove
+    duplicated "since" (thanks to Tyrel Datwyler for spotting the latter
+    issue).
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Acked-by: Chad Dupuis <chad.dupuis@cavium.com>
+    Reviewed-by: Tyrel Datwyler <tyreld@linux.vnet.ibm.com>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/scsi/qedf/qedf_main.c b/drivers/scsi/qedf/qedf_main.c
+index b58bba4604e8..7786c97e033f 100644
+--- a/drivers/scsi/qedf/qedf_main.c
++++ b/drivers/scsi/qedf/qedf_main.c
+@@ -1227,7 +1227,7 @@ static void qedf_rport_event_handler(struct fc_lport *lport,
+ 
+ 		if (rdata->spp_type != FC_TYPE_FCP) {
+ 			QEDF_INFO(&(qedf->dbg_ctx), QEDF_LOG_DISC,
+-			    "Not offlading since since spp type isn't FCP\n");
++			    "Not offloading since spp type isn't FCP\n");
+ 			break;
+ 		}
+ 		if (!(rdata->ids.roles & FC_RPORT_ROLE_FCP_TARGET)) {

@@ -1,0 +1,25 @@
+['bc1750f366902449f36f15f4a692a495fe6bcdfe', '357.txt', 'Typo']
+commit bc1750f366902449f36f15f4a692a495fe6bcdfe
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu Feb 23 00:20:53 2017 +0000
+
+    bpf: fix spelling mistake: "proccessed" -> "processed"
+    
+    trivial fix to spelling mistake in verbose log message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/kernel/bpf/verifier.c b/kernel/bpf/verifier.c
+index d2bded2b250c..3fc6e39b223e 100644
+--- a/kernel/bpf/verifier.c
++++ b/kernel/bpf/verifier.c
+@@ -2776,7 +2776,7 @@ static int do_check(struct bpf_verifier_env *env)
+ 		class = BPF_CLASS(insn->code);
+ 
+ 		if (++insn_processed > BPF_COMPLEXITY_LIMIT_INSNS) {
+-			verbose("BPF program is too large. Proccessed %d insn\n",
++			verbose("BPF program is too large. Processed %d insn\n",
+ 				insn_processed);
+ 			return -E2BIG;
+ 		}

@@ -1,0 +1,40 @@
+['806bfe31c96f77e917eac476ba87164f7bbd1366', '595.txt', 'ModernizeLog']
+commit 806bfe31c96f77e917eac476ba87164f7bbd1366
+Author: Thierry Escande <thierry.escande@collabora.com>
+Date:   Tue Jun 7 16:21:53 2016 +0200
+
+    NFC: llcp: Use dynamic debug for hex dump
+    
+    LLCP skb tx and rx functions now use print_hex_dump_debug() making
+    these verbose traces controllable using dynamic debug.
+    
+    Signed-off-by: Thierry Escande <thierry.escande@collabora.com>
+    Signed-off-by: Samuel Ortiz <sameo@linux.intel.com>
+
+diff --git a/net/nfc/llcp_core.c b/net/nfc/llcp_core.c
+index 98876274a1ee..e69786c6804c 100644
+--- a/net/nfc/llcp_core.c
++++ b/net/nfc/llcp_core.c
+@@ -732,9 +732,8 @@ static void nfc_llcp_tx_work(struct work_struct *work)
+ 			int ret;
+ 
+ 			pr_debug("Sending pending skb\n");
+-			print_hex_dump(KERN_DEBUG, "LLCP Tx: ",
+-				       DUMP_PREFIX_OFFSET, 16, 1,
+-				       skb->data, skb->len, true);
++			print_hex_dump_debug("LLCP Tx: ", DUMP_PREFIX_OFFSET,
++					     16, 1, skb->data, skb->len, true);
+ 
+ 			if (ptype == LLCP_PDU_DISC && sk != NULL &&
+ 			    sk->sk_state == LLCP_DISCONNECTING) {
+@@ -1412,8 +1411,8 @@ static void nfc_llcp_rx_skb(struct nfc_llcp_local *local, struct sk_buff *skb)
+ 	pr_debug("ptype 0x%x dsap 0x%x ssap 0x%x\n", ptype, dsap, ssap);
+ 
+ 	if (ptype != LLCP_PDU_SYMM)
+-		print_hex_dump(KERN_DEBUG, "LLCP Rx: ", DUMP_PREFIX_OFFSET,
+-			       16, 1, skb->data, skb->len, true);
++		print_hex_dump_debug("LLCP Rx: ", DUMP_PREFIX_OFFSET, 16, 1,
++				     skb->data, skb->len, true);
+ 
+ 	switch (ptype) {
+ 	case LLCP_PDU_SYMM:

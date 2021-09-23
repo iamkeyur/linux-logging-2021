@@ -1,0 +1,44 @@
+['4d062487f3431f124e3a2420c0da0b7a2388dc80', '685.txt', 'Formatting']
+commit 4d062487f3431f124e3a2420c0da0b7a2388dc80
+Author: Heiko Carstens <heiko.carstens@de.ibm.com>
+Date:   Mon Oct 17 12:07:35 2016 +0200
+
+    s390/disassambler: use pr_cont where appropriate
+    
+    Just like for dumpstack use pr_cont instead of simple printk calls to
+    fix the output when disassembling a piece of code.
+    
+    Before:
+    [    0.840627] Krnl Code: 000000000017d1c6: a77400f7            brc     7,17d3b4
+    [    0.840630]
+                              000000000017d1ca: 92015000            mvi     0(%r5),1
+    [    0.840634]
+                             #000000000017d1ce: a7f40001            brc     15,17d1d0
+    
+    After:
+    [    0.831792] Krnl Code: 000000000017d13e: a77400f7            brc     7,17d32c
+                              000000000017d142: 92015000            mvi     0(%r5),1
+                             #000000000017d146: a7f40001            brc     15,17d148
+    
+    Signed-off-by: Heiko Carstens <heiko.carstens@de.ibm.com>
+    Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+
+diff --git a/arch/s390/kernel/dis.c b/arch/s390/kernel/dis.c
+index 43446fa2a4e5..c74c59236f44 100644
+--- a/arch/s390/kernel/dis.c
++++ b/arch/s390/kernel/dis.c
+@@ -2014,12 +2014,12 @@ void show_code(struct pt_regs *regs)
+ 			*ptr++ = '\t';
+ 		ptr += print_insn(ptr, code + start, addr);
+ 		start += opsize;
+-		printk("%s", buffer);
++		pr_cont("%s", buffer);
+ 		ptr = buffer;
+ 		ptr += sprintf(ptr, "\n          ");
+ 		hops++;
+ 	}
+-	printk("\n");
++	pr_cont("\n");
+ }
+ 
+ void print_fn_code(unsigned char *code, unsigned long len)

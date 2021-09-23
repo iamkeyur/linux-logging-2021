@@ -1,0 +1,25 @@
+['b5b086abe08cb88533cf2c14f7d8b22636657e28', '860.txt', 'Typo']
+commit b5b086abe08cb88533cf2c14f7d8b22636657e28
+Author: Willis Monroe <willismonroe@gmail.com>
+Date:   Tue Apr 11 09:10:06 2017 -0700
+
+    mfd: palmas: Fixed spelling mistake in error message
+    
+    Fixed a small spelling mistake ("updat" -> "update") in an error message.
+    
+    Signed-off-by: Willis Monroe <willismonroe@gmail.com>
+    Signed-off-by: Lee Jones <lee.jones@linaro.org>
+
+diff --git a/drivers/mfd/palmas.c b/drivers/mfd/palmas.c
+index f0c559d9fa43..9103affedcbc 100644
+--- a/drivers/mfd/palmas.c
++++ b/drivers/mfd/palmas.c
+@@ -581,7 +581,7 @@ static int palmas_i2c_probe(struct i2c_client *i2c,
+ 			PALMAS_POLARITY_CTRL, PALMAS_POLARITY_CTRL_INT_POLARITY,
+ 			reg);
+ 	if (ret < 0) {
+-		dev_err(palmas->dev, "POLARITY_CTRL updat failed: %d\n", ret);
++		dev_err(palmas->dev, "POLARITY_CTRL update failed: %d\n", ret);
+ 		goto err_i2c;
+ 	}
+ 

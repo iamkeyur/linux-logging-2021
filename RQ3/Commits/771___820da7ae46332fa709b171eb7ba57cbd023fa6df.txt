@@ -1,0 +1,45 @@
+['820da7ae46332fa709b171eb7ba57cbd023fa6df', '19.txt', 'LogLevel']
+commit 820da7ae46332fa709b171eb7ba57cbd023fa6df
+Author: Jani Nikula <jani.nikula@intel.com>
+Date:   Wed Nov 25 16:47:23 2015 +0200
+
+    Revert "drm/i915: shut up gen8+ SDE irq dmesg noise"
+    
+    This reverts
+    
+    commit 97e5ed1111dcc5300a0f59a55248cd243937a8ab
+    Author: Daniel Vetter <daniel.vetter@ffwll.ch>
+    Date:   Fri Oct 23 10:56:12 2015 +0200
+    
+        drm/i915: shut up gen8+ SDE irq dmesg noise
+    
+    With the proper fix ("drm/i915: fix the SDE irq dmesg warnings
+    properly") reliably in place, bring back the error message.
+    
+    Cc: Daniel Vetter <daniel.vetter@ffwll.ch>
+    Reviewed-by: Ville Syrjälä <ville.syrjala@linux.intel.com>
+    Acked-by: Daniel Vetter <daniel.vetter@ffwll.ch>
+    Signed-off-by: Jani Nikula <jani.nikula@intel.com>
+    Link: http://patchwork.freedesktop.org/patch/msgid/1448462843-32739-2-git-send-email-jani.nikula@intel.com
+
+diff --git a/drivers/gpu/drm/i915/i915_irq.c b/drivers/gpu/drm/i915/i915_irq.c
+index 671f76ccd8df..0677e87c89d7 100644
+--- a/drivers/gpu/drm/i915/i915_irq.c
++++ b/drivers/gpu/drm/i915/i915_irq.c
+@@ -2365,13 +2365,9 @@ static irqreturn_t gen8_irq_handler(int irq, void *arg)
+ 				spt_irq_handler(dev, pch_iir);
+ 			else
+ 				cpt_irq_handler(dev, pch_iir);
+-		} else {
+-			/*
+-			 * Like on previous PCH there seems to be something
+-			 * fishy going on with forwarding PCH interrupts.
+-			 */
+-			DRM_DEBUG_DRIVER("The master control interrupt lied (SDE)!\n");
+-		}
++		} else
++			DRM_ERROR("The master control interrupt lied (SDE)!\n");
++
+ 	}
+ 
+ 	I915_WRITE_FW(GEN8_MASTER_IRQ, GEN8_MASTER_IRQ_CONTROL);

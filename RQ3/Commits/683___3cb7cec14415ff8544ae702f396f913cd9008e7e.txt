@@ -1,0 +1,36 @@
+['3cb7cec14415ff8544ae702f396f913cd9008e7e', '243.txt', 'LogLevel']
+commit 3cb7cec14415ff8544ae702f396f913cd9008e7e
+Author: Vedang Patel <vedang.patel@intel.com>
+Date:   Fri Jun 24 17:37:09 2016 -0700
+
+    ASoC: hdac_hdmi: Increase loglevel of hex dump printed
+    
+    The hdac_hdmi codec driver prints the ELD information everytime an
+    external monitor is connected. Make it so that the information is only
+    printed when someone trying to debug the driver explicitly enables it.
+    
+    print_hex_dump_bytes (which just calls print_hex_dump) uses
+    printk(KERN_DEBUG,... which is different from dev_dbg used elsewhere in
+    the driver: it's always enabled at compile-time. Change it to
+    print_hex_dump_debug for logging consistency.
+    
+    Signed-off-by: Vedang Patel <vedang.patel@intel.com>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/sound/soc/codecs/hdac_hdmi.c b/sound/soc/codecs/hdac_hdmi.c
+index 181cd3bf0b92..62d21812b9b8 100644
+--- a/sound/soc/codecs/hdac_hdmi.c
++++ b/sound/soc/codecs/hdac_hdmi.c
+@@ -1124,8 +1124,10 @@ static void hdac_hdmi_present_sense(struct hdac_hdmi_pin *pin, int repoll)
+ 			}
+ 			hdac_hdmi_parse_eld(edev, pin);
+ 
+-			print_hex_dump_bytes("ELD: ", DUMP_PREFIX_OFFSET,
+-					pin->eld.eld_buffer, pin->eld.eld_size);
++			print_hex_dump_debug("ELD: ",
++					DUMP_PREFIX_OFFSET, 16, 1,
++					pin->eld.eld_buffer, pin->eld.eld_size,
++					true);
+ 		} else {
+ 			pin->eld.monitor_present = false;
+ 			pin->eld.eld_valid = false;

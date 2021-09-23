@@ -1,0 +1,26 @@
+['b2c4ba5cf712fede57dd3e15922ae647dde55a82', '649.txt', 'Typo']
+commit b2c4ba5cf712fede57dd3e15922ae647dde55a82
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Fri Oct 28 19:25:59 2016 +0100
+
+    mtd: mtdswap: fix spelling mistake "erassure" -> "erasure"
+    
+    Trivial fix to spelling mistake in dev_err message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    [Brian: add EOL newline]
+    Signed-off-by: Brian Norris <computersforpeace@gmail.com>
+
+diff --git a/drivers/mtd/mtdswap.c b/drivers/mtd/mtdswap.c
+index cb06bdd21a1b..c40e2c951758 100644
+--- a/drivers/mtd/mtdswap.c
++++ b/drivers/mtd/mtdswap.c
+@@ -587,7 +587,7 @@ static int mtdswap_erase_block(struct mtdswap_dev *d, struct swap_eb *eb)
+ 	ret = wait_event_interruptible(wq, erase.state == MTD_ERASE_DONE ||
+ 					   erase.state == MTD_ERASE_FAILED);
+ 	if (ret) {
+-		dev_err(d->dev, "Interrupted erase block %#llx erassure on %s",
++		dev_err(d->dev, "Interrupted erase block %#llx erasure on %s\n",
+ 			erase.addr, mtd->name);
+ 		return -EINTR;
+ 	}

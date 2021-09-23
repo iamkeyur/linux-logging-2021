@@ -1,0 +1,59 @@
+['f950f025364ad3ad4834cd1058737f272b2cc665', '682.txt', 'FixFormatSpecifier']
+commit f950f025364ad3ad4834cd1058737f272b2cc665
+Author: Vinod Koul <vkoul@kernel.org>
+Date:   Fri Jul 1 22:54:40 2016 +0530
+
+    dmaengine: fsl_raid: fix size_t print specifiers
+    
+    size_t should be printed with %zu, not %lu as driver did, so fix these
+    warning by doing this change
+    
+    drivers/dma/fsl_raid.c: In function 'fsl_re_prep_dma_genq':
+    drivers/dma/fsl_raid.c:341:4: warning: format '%lu' expects argument of type
+    'long unsigned int', but argument 3 has type 'size_t' [-Wformat=]
+        len, FSL_RE_MAX_DATA_LEN);
+        ^
+    drivers/dma/fsl_raid.c: In function 'fsl_re_prep_dma_pq':
+    drivers/dma/fsl_raid.c:428:4: warning: format '%lu' expects argument of type
+    'long unsigned int', but argument 3 has type 'size_t' [-Wformat=]
+        len, FSL_RE_MAX_DATA_LEN);
+        ^
+    drivers/dma/fsl_raid.c: In function 'fsl_re_prep_dma_memcpy':
+    drivers/dma/fsl_raid.c:549:4: warning: format '%lu' expects argument of type
+    'long unsigned int', but argument 3 has type 'size_t' [-Wformat=]
+        len, FSL_RE_MAX_DATA_LEN);
+        ^
+    
+    Signed-off-by: Vinod Koul <vinod.koul@intel.com>
+
+diff --git a/drivers/dma/fsl_raid.c b/drivers/dma/fsl_raid.c
+index 1b71d1fea395..ec9c73b7abe6 100644
+--- a/drivers/dma/fsl_raid.c
++++ b/drivers/dma/fsl_raid.c
+@@ -337,7 +337,7 @@ static struct dma_async_tx_descriptor *fsl_re_prep_dma_genq(
+ 
+ 	re_chan = container_of(chan, struct fsl_re_chan, chan);
+ 	if (len > FSL_RE_MAX_DATA_LEN) {
+-		dev_err(re_chan->dev, "genq tx length %lu, max length %d\n",
++		dev_err(re_chan->dev, "genq tx length %zu, max length %d\n",
+ 			len, FSL_RE_MAX_DATA_LEN);
+ 		return NULL;
+ 	}
+@@ -424,7 +424,7 @@ static struct dma_async_tx_descriptor *fsl_re_prep_dma_pq(
+ 
+ 	re_chan = container_of(chan, struct fsl_re_chan, chan);
+ 	if (len > FSL_RE_MAX_DATA_LEN) {
+-		dev_err(re_chan->dev, "pq tx length is %lu, max length is %d\n",
++		dev_err(re_chan->dev, "pq tx length is %zu, max length is %d\n",
+ 			len, FSL_RE_MAX_DATA_LEN);
+ 		return NULL;
+ 	}
+@@ -545,7 +545,7 @@ static struct dma_async_tx_descriptor *fsl_re_prep_dma_memcpy(
+ 	re_chan = container_of(chan, struct fsl_re_chan, chan);
+ 
+ 	if (len > FSL_RE_MAX_DATA_LEN) {
+-		dev_err(re_chan->dev, "cp tx length is %lu, max length is %d\n",
++		dev_err(re_chan->dev, "cp tx length is %zu, max length is %d\n",
+ 			len, FSL_RE_MAX_DATA_LEN);
+ 		return NULL;
+ 	}

@@ -1,0 +1,26 @@
+['028e0a67ea679ff958176eac97d1319a8d685fad', '78.txt', 'Typo']
+commit 028e0a67ea679ff958176eac97d1319a8d685fad
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Sat Aug 5 14:11:50 2017 +0100
+
+    IB/hfi1: fix spelling mistake: "Maximim" -> "Maximum"
+    
+    Trivial fix to spelling mistake in pr_warn_ratelimited warning message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Acked-by: Dennis Dalessandro <dennis.dalessandro@intel.com>
+    Signed-off-by: Doug Ledford <dledford@redhat.com>
+
+diff --git a/drivers/infiniband/hw/hfi1/mad.c b/drivers/infiniband/hw/hfi1/mad.c
+index cdcb4d021480..37b19bfae02a 100644
+--- a/drivers/infiniband/hw/hfi1/mad.c
++++ b/drivers/infiniband/hw/hfi1/mad.c
+@@ -173,7 +173,7 @@ static struct trap_node *check_and_add_trap(struct hfi1_ibport *ibp,
+ 			trap_list->list_len++;
+ 			list_add_tail(&trap->list, &trap_list->list);
+ 		} else {
+-			pr_warn_ratelimited("hfi1: Maximim trap limit reached for 0x%0x traps\n",
++			pr_warn_ratelimited("hfi1: Maximum trap limit reached for 0x%0x traps\n",
+ 					    trap->data.generic_type);
+ 			kfree(trap);
+ 		}

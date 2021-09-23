@@ -1,0 +1,31 @@
+['b08726bf2ea03d1eabf8908c70a3518fa502313b', '183.txt', 'LogLevel']
+commit b08726bf2ea03d1eabf8908c70a3518fa502313b
+Author: Sakari Ailus <sakari.ailus@linux.intel.com>
+Date:   Thu Sep 8 10:50:07 2016 -0300
+
+    [media] smiapp-pll: Don't complain aloud about failing PLL calculation
+    
+    Don't complain about a failure to compute the pre_pll divisor. The
+    function is used to determine whether a particular combination of bits per
+    sample value and a link frequency can be used, in which case there are
+    lots of unnecessary driver messages. During normal operation the failure
+    generally does not happen. Use dev_dbg() instead.
+    
+    Signed-off-by: Sakari Ailus <sakari.ailus@linux.intel.com>
+    Reviewed-by: Sebastian Reichel <sre@kernel.org>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+
+diff --git a/drivers/media/i2c/smiapp-pll.c b/drivers/media/i2c/smiapp-pll.c
+index e3348db56c46..771db56332b2 100644
+--- a/drivers/media/i2c/smiapp-pll.c
++++ b/drivers/media/i2c/smiapp-pll.c
+@@ -479,7 +479,8 @@ int smiapp_pll_calculate(struct device *dev,
+ 		return 0;
+ 	}
+ 
+-	dev_info(dev, "unable to compute pre_pll divisor\n");
++	dev_dbg(dev, "unable to compute pre_pll divisor\n");
++
+ 	return rval;
+ }
+ EXPORT_SYMBOL_GPL(smiapp_pll_calculate);

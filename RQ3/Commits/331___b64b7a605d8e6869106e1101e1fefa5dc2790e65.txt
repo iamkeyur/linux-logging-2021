@@ -1,0 +1,30 @@
+['b64b7a605d8e6869106e1101e1fefa5dc2790e65', '641.txt', 'Typo']
+commit b64b7a605d8e6869106e1101e1fefa5dc2790e65
+Author: Dhinakaran Pandiyan <dhinakaran.pandiyan@intel.com>
+Date:   Tue Apr 4 11:16:05 2017 -0700
+
+    drm/i915: Typo fix - 'pipe bpc' to 'pipe bpp'
+    
+    Noticed this while I was looking at some debug output,
+     [drm:intel_hdmi_compute_config [i915]] picking bpc to 12 for HDMI output
+     [drm:intel_hdmi_compute_config [i915]] forcing pipe bpc to 36 for HDMI
+    
+    I believe the second line should be pipe *bpp*
+    
+    Signed-off-by: Dhinakaran Pandiyan <dhinakaran.pandiyan@intel.com>
+    Signed-off-by: Jani Nikula <jani.nikula@intel.com>
+    Link: http://patchwork.freedesktop.org/patch/msgid/1491329765-14340-1-git-send-email-dhinakaran.pandiyan@intel.com
+
+diff --git a/drivers/gpu/drm/i915/intel_hdmi.c b/drivers/gpu/drm/i915/intel_hdmi.c
+index 1d623b5e09d6..6efc3cb8c471 100644
+--- a/drivers/gpu/drm/i915/intel_hdmi.c
++++ b/drivers/gpu/drm/i915/intel_hdmi.c
+@@ -1392,7 +1392,7 @@ bool intel_hdmi_compute_config(struct intel_encoder *encoder,
+ 	}
+ 
+ 	if (!pipe_config->bw_constrained) {
+-		DRM_DEBUG_KMS("forcing pipe bpc to %i for HDMI\n", desired_bpp);
++		DRM_DEBUG_KMS("forcing pipe bpp to %i for HDMI\n", desired_bpp);
+ 		pipe_config->pipe_bpp = desired_bpp;
+ 	}
+ 

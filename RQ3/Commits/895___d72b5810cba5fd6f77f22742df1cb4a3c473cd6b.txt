@@ -1,0 +1,28 @@
+['d72b5810cba5fd6f77f22742df1cb4a3c473cd6b', '1505.txt', 'Clarify/Reword']
+commit d72b5810cba5fd6f77f22742df1cb4a3c473cd6b
+Author: Viresh Kumar <viresh.kumar@linaro.org>
+Date:   Thu May 19 18:26:27 2016 +0530
+
+    greybus: fw-management: Fix error message's text
+    
+    Just reword it to make it sound better.
+    
+    Compile tested.
+    
+    Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+    Reviewed-by: Johan Hovold <johan@hovoldconsulting.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@google.com>
+
+diff --git a/drivers/staging/greybus/fw-management.c b/drivers/staging/greybus/fw-management.c
+index 96758f417d7b..da36de313a2c 100644
+--- a/drivers/staging/greybus/fw-management.c
++++ b/drivers/staging/greybus/fw-management.c
+@@ -352,7 +352,7 @@ static int fw_mgmt_backend_fw_updated_operation(struct gb_operation *op)
+ 
+ 	if (fw_mgmt->backend_fw_status != GB_FW_BACKEND_FW_STATUS_SUCCESS)
+ 		dev_err(fw_mgmt->parent,
+-			"failed to backend load firmware, status:%02x\n",
++			"failed to load backend firmware: %02x\n",
+ 			fw_mgmt->backend_fw_status);
+ 
+ 	complete(&fw_mgmt->completion);

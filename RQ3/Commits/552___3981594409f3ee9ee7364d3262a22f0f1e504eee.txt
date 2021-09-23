@@ -1,0 +1,32 @@
+['3981594409f3ee9ee7364d3262a22f0f1e504eee', '393.txt', 'LogLevel']
+commit 3981594409f3ee9ee7364d3262a22f0f1e504eee
+Author: Mintz, Yuval <Yuval.Mintz@cavium.com>
+Date:   Thu Mar 23 15:50:18 2017 +0200
+
+    qed: Reduce verbosity of unimplemented MFW messages
+    
+    Management firmware and driver are meant to be both backward and forward
+    compatibile with each other.
+    
+    If a new mangement firmware would work with an older driver,
+    it's possible that driver would receive indications which are meaningless
+    to it. That's perfectly acceptible from the firmware part - so no need to
+    log such messages at default verbosity; That would only serve to confuse
+    users.
+    
+    Signed-off-by: Yuval Mintz <Yuval.Mintz@cavium.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/qlogic/qed/qed_mcp.c b/drivers/net/ethernet/qlogic/qed/qed_mcp.c
+index d1fcd874ce9a..ccea0eae7b60 100644
+--- a/drivers/net/ethernet/qlogic/qed/qed_mcp.c
++++ b/drivers/net/ethernet/qlogic/qed/qed_mcp.c
+@@ -1114,7 +1114,7 @@ int qed_mcp_handle_events(struct qed_hwfn *p_hwfn,
+ 			qed_mcp_update_bw(p_hwfn, p_ptt);
+ 			break;
+ 		default:
+-			DP_NOTICE(p_hwfn, "Unimplemented MFW message %d\n", i);
++			DP_INFO(p_hwfn, "Unimplemented MFW message %d\n", i);
+ 			rc = -EINVAL;
+ 		}
+ 	}

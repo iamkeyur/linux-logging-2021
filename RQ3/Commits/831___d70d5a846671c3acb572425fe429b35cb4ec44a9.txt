@@ -1,0 +1,216 @@
+['d70d5a846671c3acb572425fe429b35cb4ec44a9', '4.txt', 'AddInfo']
+commit d70d5a846671c3acb572425fe429b35cb4ec44a9
+Author: Mathias Nyman <mathias.nyman@linux.intel.com>
+Date:   Fri Apr 26 16:23:30 2019 +0300
+
+    xhci: add port and bus number to port dynamic debugging
+    
+    Improve port related dynamic debugging by printing out the bus number,
+    port number and port status register content each time there is a port
+    related debug messages.
+    
+    Use the same port numbering method as usbcore to simplify debugging.
+    i.e. starting with port number 1.
+    
+    Signed-off-by: Mathias Nyman <mathias.nyman@linux.intel.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/usb/host/xhci-hub.c b/drivers/usb/host/xhci-hub.c
+index 96a740543183..3abe70ff1b1e 100644
+--- a/drivers/usb/host/xhci-hub.c
++++ b/drivers/usb/host/xhci-hub.c
+@@ -487,8 +487,8 @@ static void xhci_disable_port(struct usb_hcd *hcd, struct xhci_hcd *xhci,
+ 	/* Write 1 to disable the port */
+ 	writel(port_status | PORT_PE, addr);
+ 	port_status = readl(addr);
+-	xhci_dbg(xhci, "disable port, actual port %d status  = 0x%x\n",
+-			wIndex, port_status);
++	xhci_dbg(xhci, "disable port %d-%d, portsc: 0x%x\n",
++		 hcd->self.busnum, wIndex + 1, port_status);
+ }
+ 
+ static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
+@@ -537,8 +537,9 @@ static void xhci_clear_port_change_bit(struct xhci_hcd *xhci, u16 wValue,
+ 	/* Change bits are all write 1 to clear */
+ 	writel(port_status | status, addr);
+ 	port_status = readl(addr);
+-	xhci_dbg(xhci, "clear port %s change, actual port %d status  = 0x%x\n",
+-			port_change_bit, wIndex, port_status);
++
++	xhci_dbg(xhci, "clear port%d %s change, portsc: 0x%x\n",
++		 wIndex + 1, port_change_bit, port_status);
+ }
+ 
+ struct xhci_hub *xhci_get_rhub(struct usb_hcd *hcd)
+@@ -565,13 +566,16 @@ static void xhci_set_port_power(struct xhci_hcd *xhci, struct usb_hcd *hcd,
+ 	rhub = xhci_get_rhub(hcd);
+ 	port = rhub->ports[index];
+ 	temp = readl(port->addr);
++
++	xhci_dbg(xhci, "set port power %d-%d %s, portsc: 0x%x\n",
++		 hcd->self.busnum, index + 1, on ? "ON" : "OFF", temp);
++
+ 	temp = xhci_port_state_to_neutral(temp);
++
+ 	if (on) {
+ 		/* Power on */
+ 		writel(temp | PORT_POWER, port->addr);
+-		temp = readl(port->addr);
+-		xhci_dbg(xhci, "set port power, actual port %d status  = 0x%x\n",
+-						index, temp);
++		readl(port->addr);
+ 	} else {
+ 		/* Power off */
+ 		writel(temp & ~PORT_POWER, port->addr);
+@@ -666,12 +670,17 @@ void xhci_set_link_state(struct xhci_hcd *xhci, struct xhci_port *port,
+ 			 u32 link_state)
+ {
+ 	u32 temp;
++	u32 portsc;
+ 
+-	temp = readl(port->addr);
+-	temp = xhci_port_state_to_neutral(temp);
++	portsc = readl(port->addr);
++	temp = xhci_port_state_to_neutral(portsc);
+ 	temp &= ~PORT_PLS_MASK;
+ 	temp |= PORT_LINK_STROBE | link_state;
+ 	writel(temp, port->addr);
++
++	xhci_dbg(xhci, "Set port %d-%d link state, portsc: 0x%x, write 0x%x",
++		 port->rhub->hcd->self.busnum, port->hcd_portnum + 1,
++		 portsc, temp);
+ }
+ 
+ static void xhci_set_remote_wake_mask(struct xhci_hcd *xhci,
+@@ -840,7 +849,9 @@ static int xhci_handle_usb2_port_link_resume(struct xhci_port *port,
+ 	} else if (time_after_eq(jiffies, bus_state->resume_done[wIndex])) {
+ 		int time_left;
+ 
+-		xhci_dbg(xhci, "Resume USB2 port %d\n", wIndex + 1);
++		xhci_dbg(xhci, "resume USB2 port %d-%d\n",
++			 hcd->self.busnum, wIndex + 1);
++
+ 		bus_state->resume_done[wIndex] = 0;
+ 		clear_bit(wIndex, &bus_state->resuming_ports);
+ 
+@@ -867,9 +878,8 @@ static int xhci_handle_usb2_port_link_resume(struct xhci_port *port,
+ 		} else {
+ 			int port_status = readl(port->addr);
+ 
+-			xhci_warn(xhci, "Port resume %i msec timed out, portsc = 0x%x\n",
+-				  XHCI_MAX_REXIT_TIMEOUT_MS,
+-				  port_status);
++			xhci_warn(xhci, "Port resume timed out, port %d-%d: 0x%x\n",
++				  hcd->self.busnum, wIndex + 1, port_status);
+ 			*status |= USB_PORT_STAT_SUSPEND;
+ 			clear_bit(wIndex, &bus_state->rexit_ports);
+ 		}
+@@ -1124,9 +1134,8 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
+ 		if (status == 0xffffffff)
+ 			goto error;
+ 
+-		xhci_dbg(xhci, "get port status, actual port %d status  = 0x%x\n",
+-				wIndex, temp);
+-		xhci_dbg(xhci, "Get port status returned 0x%x\n", status);
++		xhci_dbg(xhci, "Get port status %d-%d read: 0x%x, return 0x%x",
++			 hcd->self.busnum, wIndex + 1, temp, status);
+ 
+ 		put_unaligned(cpu_to_le32(status), (__le32 *) buf);
+ 		/* if USB 3.1 extended port status return additional 4 bytes */
+@@ -1182,7 +1191,8 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
+ 			temp = readl(ports[wIndex]->addr);
+ 			if ((temp & PORT_PE) == 0 || (temp & PORT_RESET)
+ 				|| (temp & PORT_PLS_MASK) >= XDEV_U3) {
+-				xhci_warn(xhci, "USB core suspending device not in U0/U1/U2.\n");
++				xhci_warn(xhci, "USB core suspending port %d-%d not in U0/U1/U2\n",
++					  hcd->self.busnum, wIndex + 1);
+ 				goto error;
+ 			}
+ 
+diff --git a/drivers/usb/host/xhci-ring.c b/drivers/usb/host/xhci-ring.c
+index 28250319d0b8..fed3385aeac0 100644
+--- a/drivers/usb/host/xhci-ring.c
++++ b/drivers/usb/host/xhci-ring.c
+@@ -1569,18 +1569,19 @@ static void handle_port_status(struct xhci_hcd *xhci,
+ 			  "WARN: xHC returned failed port status event\n");
+ 
+ 	port_id = GET_PORT_ID(le32_to_cpu(event->generic.field[0]));
+-	xhci_dbg(xhci, "Port Status Change Event for port %d\n", port_id);
+-
+ 	max_ports = HCS_MAX_PORTS(xhci->hcs_params1);
++
+ 	if ((port_id <= 0) || (port_id > max_ports)) {
+-		xhci_warn(xhci, "Invalid port id %d\n", port_id);
++		xhci_warn(xhci, "Port change event with invalid port ID %d\n",
++			  port_id);
+ 		inc_deq(xhci, xhci->event_ring);
+ 		return;
+ 	}
+ 
+ 	port = &xhci->hw_ports[port_id - 1];
+ 	if (!port || !port->rhub || port->hcd_portnum == DUPLICATE_ENTRY) {
+-		xhci_warn(xhci, "Event for invalid port %u\n", port_id);
++		xhci_warn(xhci, "Port change event, no port for port ID %u\n",
++			  port_id);
+ 		bogus_port_status = true;
+ 		goto cleanup;
+ 	}
+@@ -1597,6 +1598,9 @@ static void handle_port_status(struct xhci_hcd *xhci,
+ 	hcd_portnum = port->hcd_portnum;
+ 	portsc = readl(port->addr);
+ 
++	xhci_dbg(xhci, "Port change event, %d-%d, id %d, portsc: 0x%x\n",
++		 hcd->self.busnum, hcd_portnum + 1, port_id, portsc);
++
+ 	trace_xhci_handle_port_status(hcd_portnum, portsc);
+ 
+ 	if (hcd->state == HC_STATE_SUSPENDED) {
+diff --git a/drivers/usb/host/xhci.c b/drivers/usb/host/xhci.c
+index 255f93f741a0..cdccbdfb479e 100644
+--- a/drivers/usb/host/xhci.c
++++ b/drivers/usb/host/xhci.c
+@@ -893,7 +893,7 @@ static void xhci_disable_port_wake_on_bits(struct xhci_hcd *xhci)
+ 	struct xhci_port **ports;
+ 	int port_index;
+ 	unsigned long flags;
+-	u32 t1, t2;
++	u32 t1, t2, portsc;
+ 
+ 	spin_lock_irqsave(&xhci->lock, flags);
+ 
+@@ -902,10 +902,15 @@ static void xhci_disable_port_wake_on_bits(struct xhci_hcd *xhci)
+ 	ports = xhci->usb3_rhub.ports;
+ 	while (port_index--) {
+ 		t1 = readl(ports[port_index]->addr);
++		portsc = t1;
+ 		t1 = xhci_port_state_to_neutral(t1);
+ 		t2 = t1 & ~PORT_WAKE_BITS;
+-		if (t1 != t2)
++		if (t1 != t2) {
+ 			writel(t2, ports[port_index]->addr);
++			xhci_dbg(xhci, "disable wake bits port %d-%d, portsc: 0x%x, write: 0x%x\n",
++				 xhci->usb3_rhub.hcd->self.busnum,
++				 port_index + 1, portsc, t2);
++		}
+ 	}
+ 
+ 	/* disable usb2 ports Wake bits */
+@@ -913,12 +918,16 @@ static void xhci_disable_port_wake_on_bits(struct xhci_hcd *xhci)
+ 	ports = xhci->usb2_rhub.ports;
+ 	while (port_index--) {
+ 		t1 = readl(ports[port_index]->addr);
++		portsc = t1;
+ 		t1 = xhci_port_state_to_neutral(t1);
+ 		t2 = t1 & ~PORT_WAKE_BITS;
+-		if (t1 != t2)
++		if (t1 != t2) {
+ 			writel(t2, ports[port_index]->addr);
++			xhci_dbg(xhci, "disable wake bits port %d-%d, portsc: 0x%x, write: 0x%x\n",
++				 xhci->usb2_rhub.hcd->self.busnum,
++				 port_index + 1, portsc, t2);
++		}
+ 	}
+-
+ 	spin_unlock_irqrestore(&xhci->lock, flags);
+ }
+ 

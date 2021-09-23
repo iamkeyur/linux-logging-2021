@@ -1,0 +1,25 @@
+['aa9fff5dcc7721b78f9915c9ce614c1297d4182c', '181.txt', 'Typo']
+commit aa9fff5dcc7721b78f9915c9ce614c1297d4182c
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Sat Nov 28 16:27:34 2015 +0000
+
+    ARM: mach-imx: iomux-imx31: fix spelling mistake in error message
+    
+    Minor issue, fix spelling mistake, nonexistant -> nonexistent
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Shawn Guo <shawnguo@kernel.org>
+
+diff --git a/arch/arm/mach-imx/iomux-imx31.c b/arch/arm/mach-imx/iomux-imx31.c
+index 6dd22cabf4d3..0b5ba4bf572a 100644
+--- a/arch/arm/mach-imx/iomux-imx31.c
++++ b/arch/arm/mach-imx/iomux-imx31.c
+@@ -100,7 +100,7 @@ int mxc_iomux_alloc_pin(unsigned int pin, const char *label)
+ 	unsigned pad = pin & IOMUX_PADNUM_MASK;
+ 
+ 	if (pad >= (PIN_MAX + 1)) {
+-		printk(KERN_ERR "mxc_iomux: Attempt to request nonexistant pin %u for \"%s\"\n",
++		printk(KERN_ERR "mxc_iomux: Attempt to request nonexistent pin %u for \"%s\"\n",
+ 			pad, label ? label : "?");
+ 		return -EINVAL;
+ 	}

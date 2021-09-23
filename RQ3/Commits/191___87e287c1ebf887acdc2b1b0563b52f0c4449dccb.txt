@@ -1,0 +1,29 @@
+['87e287c1ebf887acdc2b1b0563b52f0c4449dccb', '791.txt', 'LogLevel']
+commit 87e287c1ebf887acdc2b1b0563b52f0c4449dccb
+Author: John Garry <john.garry@huawei.com>
+Date:   Fri Jan 20 20:45:20 2017 +0800
+
+    scsi: hisi_sas: downgrade refclk message
+    
+    The message to inform that the controller has no refclk
+    is currently at warning level, which is unnecessary, so
+    downgrade to debug.
+    
+    Signed-off-by: John Garry <john.garry@huawei.com>
+    Reviewed-by: Xiang Chen <chenxiang66@hisilicon.com>
+    Reviewed-by: Johannes Thumshirn <jthumshirn@suse.de>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/scsi/hisi_sas/hisi_sas_main.c b/drivers/scsi/hisi_sas/hisi_sas_main.c
+index 22dba0143bdc..eee7ae2c771f 100644
+--- a/drivers/scsi/hisi_sas/hisi_sas_main.c
++++ b/drivers/scsi/hisi_sas/hisi_sas_main.c
+@@ -1453,7 +1453,7 @@ static struct Scsi_Host *hisi_sas_shost_alloc(struct platform_device *pdev,
+ 
+ 	refclk = devm_clk_get(&pdev->dev, NULL);
+ 	if (IS_ERR(refclk))
+-		dev_info(dev, "no ref clk property\n");
++		dev_dbg(dev, "no ref clk property\n");
+ 	else
+ 		hisi_hba->refclk_frequency_mhz = clk_get_rate(refclk) / 1000000;
+ 

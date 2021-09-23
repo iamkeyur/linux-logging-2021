@@ -1,0 +1,27 @@
+['6073b7719a63b42f0272917b4b2b552f5002f53d', '764.txt', 'Mislead/Ambiguous']
+commit 6073b7719a63b42f0272917b4b2b552f5002f53d
+Author: Xiang Chen <chenxiang66@hisilicon.com>
+Date:   Thu Mar 23 01:25:38 2017 +0800
+
+    scsi: hisi_sas: use dev_is_sata to identify SATA or SAS disk
+    
+    When SMP IO is sent, sas_protocol_ata couldn't judge whether the disk is
+    SATA or SAS disk.  So use dev_is_sata to identify SATA or SAS disk.
+    
+    Signed-off-by: Xiang Chen <chenxiang66@hisilicon.com>
+    Signed-off-by: John Garry <john.garry@huawei.com>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/scsi/hisi_sas/hisi_sas_main.c b/drivers/scsi/hisi_sas/hisi_sas_main.c
+index dcceff9043b0..9890dfdd4111 100644
+--- a/drivers/scsi/hisi_sas/hisi_sas_main.c
++++ b/drivers/scsi/hisi_sas/hisi_sas_main.c
+@@ -218,7 +218,7 @@ static int hisi_sas_task_prep(struct sas_task *task, struct hisi_hba *hisi_hba,
+ 	port = to_hisi_sas_port(sas_port);
+ 	if (port && !port->port_attached) {
+ 		dev_info(dev, "task prep: %s port%d not attach device\n",
+-			 (sas_protocol_ata(task->task_proto)) ?
++			 (dev_is_sata(device)) ?
+ 			 "SATA/STP" : "SAS",
+ 			 device->port->id);
+ 

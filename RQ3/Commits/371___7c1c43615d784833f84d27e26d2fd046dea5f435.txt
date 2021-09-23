@@ -1,0 +1,29 @@
+['7c1c43615d784833f84d27e26d2fd046dea5f435', '594.txt', 'Formatting']
+commit 7c1c43615d784833f84d27e26d2fd046dea5f435
+Author: Tobin C. Harding <me@tobin.cc>
+Date:   Tue Apr 18 10:35:42 2017 +1000
+
+    staging: ks7010: fix checkpatch SPLIT_STRING
+    
+    Checkpatch emits WARNING: quoted string split across lines.
+    
+    Concatenate string onto single line.
+    
+    Signed-off-by: Tobin C. Harding <me@tobin.cc>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/ks7010/ks7010_sdio.c b/drivers/staging/ks7010/ks7010_sdio.c
+index 4e62241164c1..ec1179916106 100644
+--- a/drivers/staging/ks7010/ks7010_sdio.c
++++ b/drivers/staging/ks7010/ks7010_sdio.c
+@@ -871,8 +871,8 @@ static int ks7010_sdio_probe(struct sdio_func *func,
+ 
+ 	sdio_set_drvdata(func, card);
+ 
+-	DPRINTK(5, "class = 0x%X, vendor = 0x%X, "
+-		"device = 0x%X\n", func->class, func->vendor, func->device);
++	DPRINTK(5, "class = 0x%X, vendor = 0x%X, device = 0x%X\n",
++		func->class, func->vendor, func->device);
+ 
+ 	/* private memory allocate */
+ 	netdev = alloc_etherdev(sizeof(*priv));

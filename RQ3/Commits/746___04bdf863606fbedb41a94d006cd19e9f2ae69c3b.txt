@@ -1,0 +1,26 @@
+['04bdf863606fbedb41a94d006cd19e9f2ae69c3b', '162.txt', 'LogLevel']
+commit 04bdf863606fbedb41a94d006cd19e9f2ae69c3b
+Author: Daniel Scheller <d.scheller@gmx.net>
+Date:   Sun Oct 15 16:51:53 2017 -0400
+
+    media: ddbridge/ci: change debug printing to debug severity
+    
+    slot_ts_enable_xo2() logged debug output to info instead of debug, so
+    fix this up.
+    
+    Signed-off-by: Daniel Scheller <d.scheller@gmx.net>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+
+diff --git a/drivers/media/pci/ddbridge/ddbridge-ci.c b/drivers/media/pci/ddbridge/ddbridge-ci.c
+index c775b17c3228..457c711aaced 100644
+--- a/drivers/media/pci/ddbridge/ddbridge-ci.c
++++ b/drivers/media/pci/ddbridge/ddbridge-ci.c
+@@ -260,7 +260,7 @@ static int slot_ts_enable_xo2(struct dvb_ca_en50221 *ca, int slot)
+ {
+ 	struct ddb_ci *ci = ca->data;
+ 
+-	dev_info(ci->port->dev->dev, "%s\n", __func__);
++	dev_dbg(ci->port->dev->dev, "%s\n", __func__);
+ 	write_creg(ci, 0x00, 0x10);
+ 	return 0;
+ }

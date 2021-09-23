@@ -1,0 +1,26 @@
+['5bf0b6e1af98a012e8871a89c2082353c3f70fee', '159.txt', 'FixFormatSpecifier']
+commit 5bf0b6e1af98a012e8871a89c2082353c3f70fee
+Author: Vishal Verma <vishal.l.verma@intel.com>
+Date:   Fri Jul 22 17:21:31 2016 -0600
+
+    pmem: clarify a debug print in pmem_clear_poison
+    
+    Prefix the sector number being cleared with a '0x' to make it clear that
+    this is a hex value.
+    
+    Signed-off-by: Vishal Verma <vishal.l.verma@intel.com>
+    Signed-off-by: Dan Williams <dan.j.williams@intel.com>
+
+diff --git a/drivers/nvdimm/pmem.c b/drivers/nvdimm/pmem.c
+index 7251b4b6da84..9f75eb85cf7c 100644
+--- a/drivers/nvdimm/pmem.c
++++ b/drivers/nvdimm/pmem.c
+@@ -58,7 +58,7 @@ static void pmem_clear_poison(struct pmem_device *pmem, phys_addr_t offset,
+ 	cleared = nvdimm_clear_poison(dev, pmem->phys_addr + offset, len);
+ 
+ 	if (cleared > 0 && cleared / 512) {
+-		dev_dbg(dev, "%s: %llx clear %ld sector%s\n",
++		dev_dbg(dev, "%s: %#llx clear %ld sector%s\n",
+ 				__func__, (unsigned long long) sector,
+ 				cleared / 512, cleared / 512 > 1 ? "s" : "");
+ 		badblocks_clear(&pmem->bb, sector, cleared / 512);

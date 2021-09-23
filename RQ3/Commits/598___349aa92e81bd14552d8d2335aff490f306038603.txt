@@ -1,0 +1,43 @@
+['349aa92e81bd14552d8d2335aff490f306038603', '340.txt', 'WrongInformation']
+commit 349aa92e81bd14552d8d2335aff490f306038603
+Author: Masahiro Yamada <yamada.masahiro@socionext.com>
+Date:   Thu Oct 20 16:12:49 2016 +0900
+
+    PM / OPP: fix debug/error messages in dev_pm_opp_of_get_sharing_cpus()
+    
+    These log messages are wrong because _of_get_opp_desc_node() returns
+    an operating-points-v2 node.
+    
+    Commit a6eed752f5fb ("PM / OPP: passing NULL to PTR_ERR()") fixed
+    static checker warnings, and reworded the messages at the same time
+    (but the latter was not mentioned in the git-log).
+    
+    Restore the correct messages.
+    
+    Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+    Acked-by: Viresh Kumar <viresh.kumar@linaro.org>
+    Reviewed-by: Stephen Boyd <sboyd@codeaurora.org>
+    Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+
+diff --git a/drivers/base/power/opp/of.c b/drivers/base/power/opp/of.c
+index 6480137bd256..5b3755e49731 100644
+--- a/drivers/base/power/opp/of.c
++++ b/drivers/base/power/opp/of.c
+@@ -562,7 +562,7 @@ int dev_pm_opp_of_get_sharing_cpus(struct device *cpu_dev,
+ 	/* Get OPP descriptor node */
+ 	np = _of_get_opp_desc_node(cpu_dev);
+ 	if (!np) {
+-		dev_dbg(cpu_dev, "%s: Couldn't find cpu_dev node.\n", __func__);
++		dev_dbg(cpu_dev, "%s: Couldn't find opp node.\n", __func__);
+ 		return -ENOENT;
+ 	}
+ 
+@@ -587,7 +587,7 @@ int dev_pm_opp_of_get_sharing_cpus(struct device *cpu_dev,
+ 		/* Get OPP descriptor node */
+ 		tmp_np = _of_get_opp_desc_node(tcpu_dev);
+ 		if (!tmp_np) {
+-			dev_err(tcpu_dev, "%s: Couldn't find tcpu_dev node.\n",
++			dev_err(tcpu_dev, "%s: Couldn't find opp node.\n",
+ 				__func__);
+ 			ret = -ENOENT;
+ 			goto put_cpu_node;

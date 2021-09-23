@@ -1,0 +1,47 @@
+['7acf79b6b2160540af87f47a55d7e3e5637ddeb5', '675.txt', 'Typo']
+commit 7acf79b6b2160540af87f47a55d7e3e5637ddeb5
+Author: Michal Simek <michal.simek@xilinx.com>
+Date:   Mon Oct 8 13:58:47 2018 +0200
+
+    of: base: Fix english spelling in of_alias_get_alias_list()
+    
+    Fix english spelling in of_alias_get_alias_list().
+    
+    Reported-by: Geert Uytterhoeven <geert@linux-m68k.org>
+    Reported-by: Randy Dunlap <rdunlap@infradead.org>
+    Fixes: b1078c355d76 ("of: base: Introduce of_alias_get_alias_list() to check alias IDs")
+    Signed-off-by: Michal Simek <michal.simek@xilinx.com>
+    Acked-by: Rob Herring <robh@kernel.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/of/base.c b/drivers/of/base.c
+index 33011b88ed3f..908de45f966b 100644
+--- a/drivers/of/base.c
++++ b/drivers/of/base.c
+@@ -1948,7 +1948,7 @@ EXPORT_SYMBOL_GPL(of_alias_get_id);
+  * @matches:	Array of OF device match structures to search in
+  * @stem:	Alias stem of the given device_node
+  * @bitmap:	Bitmap field pointer
+- * @nbits:	Maximum number of alias ID which can be recorded it bitmap
++ * @nbits:	Maximum number of alias IDs which can be recorded in bitmap
+  *
+  * The function travels the lookup table to record alias ids for the given
+  * device match structures and alias stem.
+@@ -1971,7 +1971,7 @@ int of_alias_get_alias_list(const struct of_device_id *matches,
+ 			 __func__, app->stem, app->id);
+ 
+ 		if (strcmp(app->stem, stem) != 0) {
+-			pr_debug("%s: stem comparison doesn't passed %s\n",
++			pr_debug("%s: stem comparison didn't pass %s\n",
+ 				 __func__, app->stem);
+ 			continue;
+ 		}
+@@ -1986,7 +1986,7 @@ int of_alias_get_alias_list(const struct of_device_id *matches,
+ 			pr_debug("%s: Allocated ID %d\n", __func__, app->id);
+ 			set_bit(app->id, bitmap);
+ 		}
+-		/* Alias exist but it not compatible with matches */
++		/* Alias exists but is not compatible with matches */
+ 	}
+ 	mutex_unlock(&of_mutex);
+ 

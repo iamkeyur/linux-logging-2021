@@ -1,0 +1,25 @@
+['df408e9cd04a1dd15a46e40d8de346fa1f3564d2', '105.txt', 'Typo']
+commit df408e9cd04a1dd15a46e40d8de346fa1f3564d2
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Sun Apr 24 23:02:09 2016 +0100
+
+    pinctrl: sirf/atlas7: trivial fix of spelling mistake on flagged
+    
+    fix spelling mistake, flaged -> flagged
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+
+diff --git a/drivers/pinctrl/sirf/pinctrl-atlas7.c b/drivers/pinctrl/sirf/pinctrl-atlas7.c
+index 3d233fc3448a..168c0f5d4079 100644
+--- a/drivers/pinctrl/sirf/pinctrl-atlas7.c
++++ b/drivers/pinctrl/sirf/pinctrl-atlas7.c
+@@ -5798,7 +5798,7 @@ static void atlas7_gpio_handle_irq(struct irq_desc *desc)
+ 
+ 	status = readl(ATLAS7_GPIO_INT_STATUS(bank));
+ 	if (!status) {
+-		pr_warn("%s: gpio [%s] status %#x no interrupt is flaged\n",
++		pr_warn("%s: gpio [%s] status %#x no interrupt is flagged\n",
+ 			__func__, gc->label, status);
+ 		handle_bad_irq(desc);
+ 		return;

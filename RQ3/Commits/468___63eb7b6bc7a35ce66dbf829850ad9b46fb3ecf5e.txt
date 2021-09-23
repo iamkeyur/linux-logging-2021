@@ -1,0 +1,26 @@
+['63eb7b6bc7a35ce66dbf829850ad9b46fb3ecf5e', '489.txt', 'Typo']
+commit 63eb7b6bc7a35ce66dbf829850ad9b46fb3ecf5e
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Sat Nov 12 18:30:26 2016 +0000
+
+    scsi: isci: fix typo in deg_dbg message
+    
+    Trivial fix to typo "repsonse" to "response" in dev_dbg message.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Reviewed-by: Bart Van Assche <bart.vanassche@sandisk.com>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/scsi/isci/request.c b/drivers/scsi/isci/request.c
+index b709d2b20880..47f66e949745 100644
+--- a/drivers/scsi/isci/request.c
++++ b/drivers/scsi/isci/request.c
+@@ -2473,7 +2473,7 @@ static void isci_request_process_response_iu(
+ 		"%s: resp_iu = %p "
+ 		"resp_iu->status = 0x%x,\nresp_iu->datapres = %d "
+ 		"resp_iu->response_data_len = %x, "
+-		"resp_iu->sense_data_len = %x\nrepsonse data: ",
++		"resp_iu->sense_data_len = %x\nresponse data: ",
+ 		__func__,
+ 		resp_iu,
+ 		resp_iu->status,

@@ -1,0 +1,103 @@
+['d9241ff2f2acbc9241bcb4fb58c36d6a56f8c73a', '438.txt', 'FixFormatSpecifier']
+commit d9241ff2f2acbc9241bcb4fb58c36d6a56f8c73a
+Author: Rob Herring <robh@kernel.org>
+Date:   Tue Jul 18 16:43:35 2017 -0500
+
+    usb: Convert to using %pOF instead of full_name
+    
+    Now that we have a custom printf format specifier, convert users of
+    full_name to use %pOF instead. This is preparation to remove storing
+    of the full path string for each node.
+    
+    Signed-off-by: Rob Herring <robh@kernel.org>
+    Acked-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/usb/common/common.c b/drivers/usb/common/common.c
+index 5ef8da6e67c3..b91ba3332d8f 100644
+--- a/drivers/usb/common/common.c
++++ b/drivers/usb/common/common.c
+@@ -227,8 +227,8 @@ int of_usb_update_otg_caps(struct device_node *np,
+ 				otg_caps->otg_rev = otg_rev;
+ 			break;
+ 		default:
+-			pr_err("%s: unsupported otg-rev: 0x%x\n",
+-						np->full_name, otg_rev);
++			pr_err("%pOF: unsupported otg-rev: 0x%x\n",
++						np, otg_rev);
+ 			return -EINVAL;
+ 		}
+ 	} else {
+diff --git a/drivers/usb/core/ledtrig-usbport.c b/drivers/usb/core/ledtrig-usbport.c
+index 16c19a31dad1..5e265882ad2a 100644
+--- a/drivers/usb/core/ledtrig-usbport.c
++++ b/drivers/usb/core/ledtrig-usbport.c
+@@ -149,8 +149,8 @@ static bool usbport_trig_port_observed(struct usbport_trig_data *usbport_data,
+ 	count = of_count_phandle_with_args(led_np, "trigger-sources",
+ 					   "#trigger-source-cells");
+ 	if (count < 0) {
+-		dev_warn(dev, "Failed to get trigger sources for %s\n",
+-			 led_np->full_name);
++		dev_warn(dev, "Failed to get trigger sources for %pOF\n",
++			 led_np);
+ 		return false;
+ 	}
+ 
+diff --git a/drivers/usb/core/sysfs.c b/drivers/usb/core/sysfs.c
+index dfc68ed24db1..d930bfda4010 100644
+--- a/drivers/usb/core/sysfs.c
++++ b/drivers/usb/core/sysfs.c
+@@ -113,7 +113,7 @@ static ssize_t devspec_show(struct device *dev, struct device_attribute *attr,
+ {
+ 	struct device_node *of_node = dev->of_node;
+ 
+-	return sprintf(buf, "%s\n", of_node_full_name(of_node));
++	return sprintf(buf, "%pOF\n", of_node);
+ }
+ static DEVICE_ATTR_RO(devspec);
+ #endif
+diff --git a/drivers/usb/host/fsl-mph-dr-of.c b/drivers/usb/host/fsl-mph-dr-of.c
+index e90ddb530765..ba557cdba8ef 100644
+--- a/drivers/usb/host/fsl-mph-dr-of.c
++++ b/drivers/usb/host/fsl-mph-dr-of.c
+@@ -55,8 +55,8 @@ static struct fsl_usb2_dev_data *get_dr_mode_data(struct device_node *np)
+ 				return &dr_mode_data[i];
+ 		}
+ 	}
+-	pr_warn("%s: Invalid 'dr_mode' property, fallback to host mode\n",
+-		np->full_name);
++	pr_warn("%pOF: Invalid 'dr_mode' property, fallback to host mode\n",
++		np);
+ 	return &dr_mode_data[0]; /* mode not specified, use host */
+ }
+ 
+diff --git a/drivers/usb/mtu3/mtu3_host.c b/drivers/usb/mtu3/mtu3_host.c
+index cd4d01087855..e42d308b8dc2 100644
+--- a/drivers/usb/mtu3/mtu3_host.c
++++ b/drivers/usb/mtu3/mtu3_host.c
+@@ -258,8 +258,8 @@ int ssusb_host_init(struct ssusb_mtk *ssusb, struct device_node *parent_dn)
+ 
+ 	ret = of_platform_populate(parent_dn, NULL, NULL, parent_dev);
+ 	if (ret) {
+-		dev_dbg(parent_dev, "failed to create child devices at %s\n",
+-				parent_dn->full_name);
++		dev_dbg(parent_dev, "failed to create child devices at %pOF\n",
++				parent_dn);
+ 		return ret;
+ 	}
+ 
+diff --git a/drivers/usb/phy/phy.c b/drivers/usb/phy/phy.c
+index 032f5afaad4b..75f3127407af 100644
+--- a/drivers/usb/phy/phy.c
++++ b/drivers/usb/phy/phy.c
+@@ -302,8 +302,8 @@ struct usb_phy *devm_usb_get_phy_by_phandle(struct device *dev,
+ 
+ 	node = of_parse_phandle(dev->of_node, phandle, index);
+ 	if (!node) {
+-		dev_dbg(dev, "failed to get %s phandle in %s node\n", phandle,
+-			dev->of_node->full_name);
++		dev_dbg(dev, "failed to get %s phandle in %pOF node\n", phandle,
++			dev->of_node);
+ 		return ERR_PTR(-ENODEV);
+ 	}
+ 	phy = devm_usb_get_phy_by_node(dev, node, NULL);

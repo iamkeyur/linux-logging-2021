@@ -1,0 +1,28 @@
+['09b29e1eda78d81218cf2304495c551d7714e0b0', '233.txt', 'Clarify/Reword']
+commit 09b29e1eda78d81218cf2304495c551d7714e0b0
+Author: Michał Kępień <kernel@kempniu.pl>
+Date:   Thu Apr 6 08:46:10 2017 +0200
+
+    platform/x86: fujitsu-laptop: update debug message logged by call_fext_func()
+    
+    Update debug message logged when the acpi_evaluate_integer() call inside
+    call_fext_func() fails so that it covers a broader set of possible
+    errors.
+    
+    Signed-off-by: Michał Kępień <kernel@kempniu.pl>
+    Reviewed-by: Jonathan Woithe <jwoithe@just42.net>
+    Signed-off-by: Darren Hart (VMware) <dvhart@infradead.org>
+
+diff --git a/drivers/platform/x86/fujitsu-laptop.c b/drivers/platform/x86/fujitsu-laptop.c
+index 26149f58dba7..928778ccc4c1 100644
+--- a/drivers/platform/x86/fujitsu-laptop.c
++++ b/drivers/platform/x86/fujitsu-laptop.c
+@@ -232,7 +232,7 @@ static int call_fext_func(int func, int op, int feature, int state)
+ 	status = acpi_evaluate_integer(fujitsu_laptop->acpi_handle, "FUNC",
+ 				       &arg_list, &value);
+ 	if (ACPI_FAILURE(status)) {
+-		vdbg_printk(FUJLAPTOP_DBG_ERROR, "FUNC interface is not present\n");
++		vdbg_printk(FUJLAPTOP_DBG_ERROR, "Failed to evaluate FUNC\n");
+ 		return -ENODEV;
+ 	}
+ 

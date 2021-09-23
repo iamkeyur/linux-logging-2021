@@ -1,0 +1,43 @@
+['dfd4240a52e6f0a925f4b9e0c41effba4ad83d1f', '262.txt', 'Typo']
+commit dfd4240a52e6f0a925f4b9e0c41effba4ad83d1f
+Author: Markus Elfring <elfring@users.sourceforge.net>
+Date:   Mon Apr 17 11:20:41 2017 +0200
+
+    net: mvpp2: Adjust three error messages
+    
+    Use the word "failed" in the string for three function calls.
+    
+    Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/marvell/mvpp2.c b/drivers/net/ethernet/marvell/mvpp2.c
+index 89237abf386d..717d79dcb6aa 100644
+--- a/drivers/net/ethernet/marvell/mvpp2.c
++++ b/drivers/net/ethernet/marvell/mvpp2.c
+@@ -6094,7 +6094,7 @@ static int mvpp2_set_mac_address(struct net_device *dev, void *p)
+ 	mvpp2_ingress_enable(port);
+ 	return 0;
+ log_error:
+-	netdev_err(dev, "fail to change MAC address\n");
++	netdev_err(dev, "failed to change MAC address\n");
+ 	return err;
+ }
+ 
+@@ -6142,7 +6142,7 @@ static int mvpp2_change_mtu(struct net_device *dev, int mtu)
+ 
+ 	return 0;
+ log_error:
+-	netdev_err(dev, "fail to change MTU\n");
++	netdev_err(dev, "failed to change MTU\n");
+ 	return err;
+ }
+ 
+@@ -6311,7 +6311,7 @@ static int mvpp2_ethtool_set_ringparam(struct net_device *dev,
+ err_clean_rxqs:
+ 	mvpp2_cleanup_rxqs(port);
+ err_out:
+-	netdev_err(dev, "fail to change ring parameters");
++	netdev_err(dev, "failed to change ring parameters");
+ 	return err;
+ }
+ 

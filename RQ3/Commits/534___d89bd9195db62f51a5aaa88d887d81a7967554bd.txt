@@ -1,0 +1,45 @@
+['d89bd9195db62f51a5aaa88d887d81a7967554bd', '416.txt', 'LogLevel']
+commit d89bd9195db62f51a5aaa88d887d81a7967554bd
+Author: Bjorn Helgaas <bhelgaas@google.com>
+Date:   Wed Mar 14 07:42:56 2018 -0500
+
+    PCI: Report quirk timings with pci_info() instead of pr_debug()
+    
+    With "initcall_debug", we report how long every PCI quirk took.  Previously
+    we used pr_debug(), which means you have to figure out how to enable debug
+    output.
+    
+    Log these timings using pci_info() instead so it doesn't depend on DEBUG,
+    CONFIG_DYNAMIC_DEBUG, etc.
+    
+    Also, don't log anything at all unless "initcall_debug" is specified.  This
+    matches what we do in do_one_initcall_debug().
+    
+    Signed-off-by: Bjorn Helgaas <bhelgaas@google.com>
+
+diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
+index fc734014206f..4c6825fc8b0f 100644
+--- a/drivers/pci/quirks.c
++++ b/drivers/pci/quirks.c
+@@ -3106,10 +3106,8 @@ static ktime_t fixup_debug_start(struct pci_dev *dev,
+ {
+ 	ktime_t calltime = 0;
+ 
+-	pci_dbg(dev, "calling %pF\n", fn);
+ 	if (initcall_debug) {
+-		pr_debug("calling  %pF @ %i for %s\n",
+-			 fn, task_pid_nr(current), dev_name(&dev->dev));
++		pci_info(dev, "calling  %pF @ %i\n", fn, task_pid_nr(current));
+ 		calltime = ktime_get();
+ 	}
+ 
+@@ -3126,8 +3124,7 @@ static void fixup_debug_report(struct pci_dev *dev, ktime_t calltime,
+ 		rettime = ktime_get();
+ 		delta = ktime_sub(rettime, calltime);
+ 		duration = (unsigned long long) ktime_to_ns(delta) >> 10;
+-		pr_debug("pci fixup %pF returned after %lld usecs for %s\n",
+-			 fn, duration, dev_name(&dev->dev));
++		pci_info(dev, "%pF took %lld usecs\n", fn, duration);
+ 	}
+ }
+ 

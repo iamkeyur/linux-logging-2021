@@ -1,0 +1,42 @@
+['211212d937adb9cd9857151b3c01988d198ae5fd', '168.txt', 'Typo']
+commit 211212d937adb9cd9857151b3c01988d198ae5fd
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Fri Dec 1 09:40:09 2017 +0000
+
+    scsi: csiostor: fix spelling mistake: "Couldnt" -> "Couldn't"
+    
+    Trivial fix to spelling mistake in error message text.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/scsi/csiostor/csio_mb.c b/drivers/scsi/csiostor/csio_mb.c
+index 931b1d8f9f3e..5f4e0a787bd1 100644
+--- a/drivers/scsi/csiostor/csio_mb.c
++++ b/drivers/scsi/csiostor/csio_mb.c
+@@ -1216,7 +1216,7 @@ csio_mb_issue(struct csio_hw *hw, struct csio_mb *mbp)
+ 		/* Queue mbox cmd, if another mbox cmd is active */
+ 		if (mbp->mb_cbfn == NULL) {
+ 			rv = -EBUSY;
+-			csio_dbg(hw, "Couldnt own Mailbox %x op:0x%x\n",
++			csio_dbg(hw, "Couldn't own Mailbox %x op:0x%x\n",
+ 				    hw->pfn, *((uint8_t *)mbp->mb));
+ 
+ 			goto error_out;
+@@ -1244,14 +1244,14 @@ csio_mb_issue(struct csio_hw *hw, struct csio_mb *mbp)
+ 				rv = owner ? -EBUSY : -ETIMEDOUT;
+ 
+ 				csio_dbg(hw,
+-					 "Couldnt own Mailbox %x op:0x%x "
++					 "Couldn't own Mailbox %x op:0x%x "
+ 					 "owner:%x\n",
+ 					 hw->pfn, *((uint8_t *)mbp->mb), owner);
+ 				goto error_out;
+ 			} else {
+ 				if (mbm->mcurrent == NULL) {
+ 					csio_err(hw,
+-						 "Couldnt own Mailbox %x "
++						 "Couldn't own Mailbox %x "
+ 						 "op:0x%x owner:%x\n",
+ 						 hw->pfn, *((uint8_t *)mbp->mb),
+ 						 owner);

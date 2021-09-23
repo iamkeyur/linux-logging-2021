@@ -1,0 +1,36 @@
+['d011fb3164e8694d7839f10a497f8ab6c660149a', '430.txt', 'LogLevel']
+commit d011fb3164e8694d7839f10a497f8ab6c660149a
+Author: Keith Busch <keith.busch@intel.com>
+Date:   Mon Apr 4 15:07:41 2016 -0600
+
+    NVMe: Reduce driver log spamming
+    
+    Reduce error logging when no corrective action is required.
+    
+    Suggessted-by: Chris Petersen <cpetersen@fb.com>
+    Signed-off-by: Keith Busch <keith.busch@intel.com>
+    Signed-off-by: Jens Axboe <axboe@fb.com>
+
+diff --git a/drivers/nvme/host/pci.c b/drivers/nvme/host/pci.c
+index 194e9014811b..4feaed591e83 100644
+--- a/drivers/nvme/host/pci.c
++++ b/drivers/nvme/host/pci.c
+@@ -2060,14 +2060,17 @@ static pci_ers_result_t nvme_error_detected(struct pci_dev *pdev,
+ 	 * shutdown the controller to quiesce. The controller will be restarted
+ 	 * after the slot reset through driver's slot_reset callback.
+ 	 */
+-	dev_warn(dev->ctrl.device, "error detected: state:%d\n", state);
+ 	switch (state) {
+ 	case pci_channel_io_normal:
+ 		return PCI_ERS_RESULT_CAN_RECOVER;
+ 	case pci_channel_io_frozen:
++		dev_warn(dev->ctrl.device,
++			"frozen state error detected, reset controller\n");
+ 		nvme_dev_disable(dev, false);
+ 		return PCI_ERS_RESULT_NEED_RESET;
+ 	case pci_channel_io_perm_failure:
++		dev_warn(dev->ctrl.device,
++			"failure state error detected, request disconnect\n");
+ 		return PCI_ERS_RESULT_DISCONNECT;
+ 	}
+ 	return PCI_ERS_RESULT_NEED_RESET;

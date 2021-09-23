@@ -1,0 +1,34 @@
+['4179bc30b2fe85f827d93e0ae7ae8f49ad3afc02', '5.txt', 'ModernizeLog']
+commit 4179bc30b2fe85f827d93e0ae7ae8f49ad3afc02
+Author: Kyungchan Koh <kkc6196@fb.com>
+Date:   Wed May 24 10:16:27 2017 -0700
+
+    md: uuid debug statement now in processor byte order.
+    
+    Previously, the uuid debug statements were printed in little-endian
+    format, which wasn't consistent in machines that might not be in
+    little-endian byte order. With this change, the output will be
+    consistent for all machines with different byte-ordering.
+    
+    Signed-off-by: Kyungchan Koh <kkc6196@fb.com>
+    Signed-off-by: Shaohua Li <shli@fb.com>
+
+diff --git a/drivers/md/bitmap.c b/drivers/md/bitmap.c
+index bf7419a56454..f4eace5ea184 100644
+--- a/drivers/md/bitmap.c
++++ b/drivers/md/bitmap.c
+@@ -485,10 +485,10 @@ void bitmap_print_sb(struct bitmap *bitmap)
+ 	pr_debug("         magic: %08x\n", le32_to_cpu(sb->magic));
+ 	pr_debug("       version: %d\n", le32_to_cpu(sb->version));
+ 	pr_debug("          uuid: %08x.%08x.%08x.%08x\n",
+-		 *(__u32 *)(sb->uuid+0),
+-		 *(__u32 *)(sb->uuid+4),
+-		 *(__u32 *)(sb->uuid+8),
+-		 *(__u32 *)(sb->uuid+12));
++		 le32_to_cpu(*(__u32 *)(sb->uuid+0)),
++		 le32_to_cpu(*(__u32 *)(sb->uuid+4)),
++		 le32_to_cpu(*(__u32 *)(sb->uuid+8)),
++		 le32_to_cpu(*(__u32 *)(sb->uuid+12)));
+ 	pr_debug("        events: %llu\n",
+ 		 (unsigned long long) le64_to_cpu(sb->events));
+ 	pr_debug("events cleared: %llu\n",

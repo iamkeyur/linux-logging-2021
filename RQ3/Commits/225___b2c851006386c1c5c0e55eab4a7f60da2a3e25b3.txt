@@ -1,0 +1,24 @@
+['b2c851006386c1c5c0e55eab4a7f60da2a3e25b3', '755.txt', 'RedundantInformation']
+commit b2c851006386c1c5c0e55eab4a7f60da2a3e25b3
+Author: David S. Miller <davem@davemloft.net>
+Date:   Tue Nov 20 10:15:36 2018 -0800
+
+    ipv4: Don't try to print ASCII of link level header in martian dumps.
+    
+    This has no value whatsoever.
+    
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/net/ipv4/route.c b/net/ipv4/route.c
+index c0a9d26c06ce..c4ddbc5f01fc 100644
+--- a/net/ipv4/route.c
++++ b/net/ipv4/route.c
+@@ -1677,7 +1677,7 @@ static void ip_handle_martian_source(struct net_device *dev,
+ 			print_hex_dump(KERN_WARNING, "ll header: ",
+ 				       DUMP_PREFIX_OFFSET, 16, 1,
+ 				       skb_mac_header(skb),
+-				       dev->hard_header_len, true);
++				       dev->hard_header_len, false);
+ 		}
+ 	}
+ #endif

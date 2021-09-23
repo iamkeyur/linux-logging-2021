@@ -1,0 +1,48 @@
+['bf7ad539459d39962f3fca749d61bbc731fd81ea', '662.txt', 'Typo']
+commit bf7ad539459d39962f3fca749d61bbc731fd81ea
+Author: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+Date:   Mon Feb 18 14:28:56 2019 -0500
+
+    media: radio: fix several typos
+    
+    Use codespell to fix lots of typos over frontends.
+    
+    Manually verified to avoid false-positives.
+    
+    Signed-off-by: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+
+diff --git a/drivers/media/radio/radio-si476x.c b/drivers/media/radio/radio-si476x.c
+index 269971145f88..0261f4d28f16 100644
+--- a/drivers/media/radio/radio-si476x.c
++++ b/drivers/media/radio/radio-si476x.c
+@@ -1550,7 +1550,7 @@ static int si476x_radio_probe(struct platform_device *pdev)
+ 
+ 	rval = si476x_radio_init_debugfs(radio);
+ 	if (rval < 0) {
+-		dev_err(&pdev->dev, "Could not creat debugfs interface\n");
++		dev_err(&pdev->dev, "Could not create debugfs interface\n");
+ 		goto exit;
+ 	}
+ 
+diff --git a/drivers/media/radio/wl128x/fmdrv.h b/drivers/media/radio/wl128x/fmdrv.h
+index 1ff2eec4ed52..4c0d13539988 100644
+--- a/drivers/media/radio/wl128x/fmdrv.h
++++ b/drivers/media/radio/wl128x/fmdrv.h
+@@ -133,7 +133,7 @@ struct fm_rds {
+ /*
+  * Current RX channel Alternate Frequency cache.
+  * This info is used to switch to other freq (AF)
+- * when current channel signal strengh is below RSSI threshold.
++ * when current channel signal strength is below RSSI threshold.
+  */
+ struct tuned_station_info {
+ 	u16 picode;
+@@ -228,7 +228,7 @@ struct fmdev {
+ 	struct fm_rx rx;	/* FM receiver info */
+ 	struct fmtx_data tx_data;
+ 
+-	/* V4L2 ctrl framwork handler*/
++	/* V4L2 ctrl framework handler*/
+ 	struct v4l2_ctrl_handler ctrl_handler;
+ 
+ 	/* For core assisted locking */

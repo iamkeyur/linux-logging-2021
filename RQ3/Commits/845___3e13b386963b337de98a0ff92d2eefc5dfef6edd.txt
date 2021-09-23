@@ -1,0 +1,30 @@
+['3e13b386963b337de98a0ff92d2eefc5dfef6edd', '53.txt', 'FixFormatSpecifier']
+commit 3e13b386963b337de98a0ff92d2eefc5dfef6edd
+Author: Vinod Koul <vkoul@kernel.org>
+Date:   Wed Sep 14 15:53:08 2016 +0530
+
+    dmaengine: mmp_tdma: use correct print specifiers for size_t
+    
+    This driver warns:
+    
+    drivers/dma/mmp_tdma.c: In function 'mmp_tdma_prep_dma_cyclic':
+    drivers/dma/mmp_tdma.c:437:5: warning: format '%d' expects argument of type 'int', but argument 3 has type 'size_t' [-Wformat=]
+    
+    We should use %zu to print 'size_t' values.
+    
+    Acked-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+    Signed-off-by: Vinod Koul <vinod.koul@intel.com>
+
+diff --git a/drivers/dma/mmp_tdma.c b/drivers/dma/mmp_tdma.c
+index b3441f57a364..d7422b1bf406 100644
+--- a/drivers/dma/mmp_tdma.c
++++ b/drivers/dma/mmp_tdma.c
+@@ -433,7 +433,7 @@ static struct dma_async_tx_descriptor *mmp_tdma_prep_dma_cyclic(
+ 
+ 	if (period_len > TDMA_MAX_XFER_BYTES) {
+ 		dev_err(tdmac->dev,
+-				"maximum period size exceeded: %d > %d\n",
++				"maximum period size exceeded: %zu > %d\n",
+ 				period_len, TDMA_MAX_XFER_BYTES);
+ 		goto err_out;
+ 	}

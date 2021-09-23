@@ -1,0 +1,28 @@
+['b12ca80ca145cecadf841ba27cc061c510cd97ca', '544.txt', 'FixFormatSpecifier']
+commit b12ca80ca145cecadf841ba27cc061c510cd97ca
+Author: Johan Hovold <johan@kernel.org>
+Date:   Fri May 12 12:13:26 2017 +0200
+
+    net: ch9200: add missing USB-descriptor endianness conversions
+    
+    Add the missing endianness conversions to a debug statement printing
+    the USB device-descriptor idVendor and idProduct fields during probe.
+    
+    Signed-off-by: Johan Hovold <johan@kernel.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/usb/ch9200.c b/drivers/net/usb/ch9200.c
+index c4f1c363e24b..9df3c1ffff35 100644
+--- a/drivers/net/usb/ch9200.c
++++ b/drivers/net/usb/ch9200.c
+@@ -310,8 +310,8 @@ static int get_mac_address(struct usbnet *dev, unsigned char *data)
+ 	int rd_mac_len = 0;
+ 
+ 	netdev_dbg(dev->net, "get_mac_address:\n\tusbnet VID:%0x PID:%0x\n",
+-		   dev->udev->descriptor.idVendor,
+-		   dev->udev->descriptor.idProduct);
++		   le16_to_cpu(dev->udev->descriptor.idVendor),
++		   le16_to_cpu(dev->udev->descriptor.idProduct));
+ 
+ 	memset(mac_addr, 0, sizeof(mac_addr));
+ 	rd_mac_len = control_read(dev, REQUEST_READ, 0,

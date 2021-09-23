@@ -1,0 +1,26 @@
+['ef19af9c2852a39878d54f185a1b32b781719542', '146.txt', 'Typo']
+commit ef19af9c2852a39878d54f185a1b32b781719542
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Mon Apr 8 09:20:14 2019 +0100
+
+    scsi: qla2xxx: fix spelling mistake "alredy" -> "already"
+    
+    There is a spelling mistake in a ql_log message. Fix it.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Acked-by: Himanshu Madhani <hmadhani@marvell.com>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/scsi/qla2xxx/qla_nvme.c b/drivers/scsi/qla2xxx/qla_nvme.c
+index 1ca63e80a7fe..3a6160ca9b4a 100644
+--- a/drivers/scsi/qla2xxx/qla_nvme.c
++++ b/drivers/scsi/qla2xxx/qla_nvme.c
+@@ -205,7 +205,7 @@ static void qla_nvme_abort_work(struct work_struct *work)
+ 	if (atomic_read(&sp->ref_count) == 0) {
+ 		WARN_ON(1);
+ 		ql_log(ql_log_info, fcport->vha, 0xffff,
+-			"%s: command alredy aborted on sp: %p\n",
++			"%s: command already aborted on sp: %p\n",
+ 			__func__, sp);
+ 		return;
+ 	}

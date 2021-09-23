@@ -1,0 +1,33 @@
+['f0e82d737d1b727e93adec16cf7132391249356a', '370.txt', 'LogLevel']
+commit f0e82d737d1b727e93adec16cf7132391249356a
+Author: Sekhar Nori <nsekhar@ti.com>
+Date:   Wed Aug 30 13:37:13 2017 +0530
+
+    net: ti: cpsw-common: dont print error if ti_cm_get_macid() fails
+    
+    It is quite common for ti_cm_get_macid() to fail on some of the
+    platforms it is invoked on. They include any platform where
+    mac address is not part of SoC register space.
+    
+    On these platforms, mac address is read and populated in
+    device-tree by bootloader. An example is TI DA850.
+    
+    Downgrade the severity of message to "information", so it does
+    not spam logs when 'quiet' boot is desired.
+    
+    Signed-off-by: Sekhar Nori <nsekhar@ti.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/ti/cpsw-common.c b/drivers/net/ethernet/ti/cpsw-common.c
+index 56ba411421f0..38d1cc557c11 100644
+--- a/drivers/net/ethernet/ti/cpsw-common.c
++++ b/drivers/net/ethernet/ti/cpsw-common.c
+@@ -96,7 +96,7 @@ int ti_cm_get_macid(struct device *dev, int slave, u8 *mac_addr)
+ 	if (of_machine_is_compatible("ti,dra7"))
+ 		return davinci_emac_3517_get_macid(dev, 0x514, slave, mac_addr);
+ 
+-	dev_err(dev, "incompatible machine/device type for reading mac address\n");
++	dev_info(dev, "incompatible machine/device type for reading mac address\n");
+ 	return -ENOENT;
+ }
+ EXPORT_SYMBOL_GPL(ti_cm_get_macid);

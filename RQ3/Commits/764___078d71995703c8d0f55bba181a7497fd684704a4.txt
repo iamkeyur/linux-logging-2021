@@ -1,0 +1,27 @@
+['078d71995703c8d0f55bba181a7497fd684704a4', '182.txt', 'Clarify/Reword']
+commit 078d71995703c8d0f55bba181a7497fd684704a4
+Author: Chad Dupuis <cdupuis@marvell.com>
+Date:   Sun Apr 21 22:44:50 2019 -0700
+
+    scsi: qedf: Change MSI-X load error message
+    
+    Change the message to display load failure.
+    
+    Signed-off-by: Chad Dupuis <cdupuis@marvell.com>
+    Signed-off-by: Saurav Kashyap <skashyap@marvell.com>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/scsi/qedf/qedf_main.c b/drivers/scsi/qedf/qedf_main.c
+index 84834d4490ff..ffaf8f9b747f 100644
+--- a/drivers/scsi/qedf/qedf_main.c
++++ b/drivers/scsi/qedf/qedf_main.c
+@@ -2275,7 +2275,8 @@ static int qedf_setup_int(struct qedf_ctx *qedf)
+ 	    QEDF_SIMD_HANDLER_NUM, qedf_simd_int_handler);
+ 	qedf->int_info.used_cnt = 1;
+ 
+-	QEDF_ERR(&qedf->dbg_ctx, "Only MSI-X supported. Failing probe.\n");
++	QEDF_ERR(&qedf->dbg_ctx,
++		 "Cannot load driver due to a lack of MSI-X vectors.\n");
+ 	return -EINVAL;
+ }
+ 

@@ -1,0 +1,27 @@
+['d8bfceebc41762f7dde960996a24180f9a67cd51', '773.txt', 'WrongInformation']
+commit d8bfceebc41762f7dde960996a24180f9a67cd51
+Author: Sagi Grimberg <sagi@grimberg.me>
+Date:   Wed Oct 11 15:29:07 2017 +0300
+
+    nvme-rdma: fix wrong logging message
+    
+    Not necessarily address resolution failed.
+    
+    Signed-off-by: Sagi Grimberg <sagi@grimberg.me>
+    Reviewed-by: Max Gurtovoy <maxg@mellanox.com>
+    Reviewed-by: Johannes Thumshirn <jthumshirn@suse.de>
+    Signed-off-by: Christoph Hellwig <hch@lst.de>
+
+diff --git a/drivers/nvme/host/rdma.c b/drivers/nvme/host/rdma.c
+index 93c8578a2ddc..02b3388af308 100644
+--- a/drivers/nvme/host/rdma.c
++++ b/drivers/nvme/host/rdma.c
+@@ -544,7 +544,7 @@ static int nvme_rdma_alloc_queue(struct nvme_rdma_ctrl *ctrl,
+ 	ret = nvme_rdma_wait_for_cm(queue);
+ 	if (ret) {
+ 		dev_info(ctrl->ctrl.device,
+-			"rdma_resolve_addr wait failed (%d).\n", ret);
++			"rdma connection establishment failed (%d)\n", ret);
+ 		goto out_destroy_cm_id;
+ 	}
+ 

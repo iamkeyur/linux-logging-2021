@@ -1,0 +1,79 @@
+['d2cb4845bfd1213e49a30682cec18c8825140153', '2.txt', 'FixEarlyLogging']
+commit d2cb4845bfd1213e49a30682cec18c8825140153
+Author: Marcin Ciupak <marcin.s.ciupak@gmail.com>
+Date:   Tue Nov 21 00:03:57 2017 +0100
+
+    staging: pi433: fix (NULL device *) in log message
+    
+    (NULL device *) is printed in log message in pi433_probe and
+    pi433_get_minor functions due to device->dev being used prior to call to
+    device_create function.
+    
+    Signed-off-by: Marcin Ciupak <marcin.s.ciupak@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/pi433/pi433_if.c b/drivers/staging/pi433/pi433_if.c
+index 6f9ab3742bac..c9b5a56ee4d9 100644
+--- a/drivers/staging/pi433/pi433_if.c
++++ b/drivers/staging/pi433/pi433_if.c
+@@ -990,7 +990,7 @@ static int pi433_get_minor(struct pi433_device *device)
+ 		device->minor = retval;
+ 		retval = 0;
+ 	} else if (retval == -ENOSPC) {
+-		dev_err(device->dev, "too many pi433 devices\n");
++		dev_err(&device->spi->dev, "too many pi433 devices\n");
+ 		retval = -EINVAL;
+ 	}
+ 	mutex_unlock(&minor_lock);
+@@ -1098,19 +1098,10 @@ static int pi433_probe(struct spi_device *spi)
+ 	SET_CHECKED(rf69_set_output_power_level	(spi, 13));
+ 	SET_CHECKED(rf69_set_antenna_impedance	(spi, fiftyOhm));
+ 
+-	/* start tx thread */
+-	device->tx_task_struct = kthread_run(pi433_tx_thread,
+-					     device,
+-					     "pi433_tx_task");
+-	if (IS_ERR(device->tx_task_struct)) {
+-		dev_dbg(device->dev, "start of send thread failed");
+-		goto send_thread_failed;
+-	}
+-
+ 	/* determ minor number */
+ 	retval = pi433_get_minor(device);
+ 	if (retval) {
+-		dev_dbg(device->dev, "get of minor number failed");
++		dev_dbg(&spi->dev, "get of minor number failed");
+ 		goto minor_failed;
+ 	}
+ 
+@@ -1133,6 +1124,15 @@ static int pi433_probe(struct spi_device *spi)
+ 			device->minor);
+ 	}
+ 
++	/* start tx thread */
++	device->tx_task_struct = kthread_run(pi433_tx_thread,
++					     device,
++					     "pi433_tx_task");
++	if (IS_ERR(device->tx_task_struct)) {
++		dev_dbg(device->dev, "start of send thread failed");
++		goto send_thread_failed;
++	}
++
+ 	/* create cdev */
+ 	device->cdev = cdev_alloc();
+ 	device->cdev->owner = THIS_MODULE;
+@@ -1149,12 +1149,12 @@ static int pi433_probe(struct spi_device *spi)
+ 	return 0;
+ 
+ cdev_failed:
++	kthread_stop(device->tx_task_struct);
++send_thread_failed:
+ 	device_destroy(pi433_class, device->devt);
+ device_create_failed:
+ 	pi433_free_minor(device);
+ minor_failed:
+-	kthread_stop(device->tx_task_struct);
+-send_thread_failed:
+ 	free_GPIOs(device);
+ GPIO_failed:
+ 	kfree(device);

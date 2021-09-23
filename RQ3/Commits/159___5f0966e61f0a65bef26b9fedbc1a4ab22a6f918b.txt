@@ -1,0 +1,27 @@
+['5f0966e61f0a65bef26b9fedbc1a4ab22a6f918b', '827.txt', 'FixEarlyLogging']
+commit 5f0966e61f0a65bef26b9fedbc1a4ab22a6f918b
+Author: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Date:   Wed Oct 14 23:12:17 2015 +0300
+
+    spi: dw: use plain struct device * at earlier ->probe()
+    
+    The name of the master device is set during registrationg which happens after
+    we issue the error message. Change it to plain struct device * to see which
+    device registration failed.
+    
+    Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/drivers/spi/spi-dw.c b/drivers/spi/spi-dw.c
+index 1153d36ec8a6..749a831f26ce 100644
+--- a/drivers/spi/spi-dw.c
++++ b/drivers/spi/spi-dw.c
+@@ -520,7 +520,7 @@ int dw_spi_add_host(struct device *dev, struct dw_spi *dws)
+ 	ret = devm_request_irq(dev, dws->irq, dw_spi_irq, IRQF_SHARED,
+ 			dws->name, master);
+ 	if (ret < 0) {
+-		dev_err(&master->dev, "can not get IRQ\n");
++		dev_err(dev, "can not get IRQ\n");
+ 		goto err_free_master;
+ 	}
+ 

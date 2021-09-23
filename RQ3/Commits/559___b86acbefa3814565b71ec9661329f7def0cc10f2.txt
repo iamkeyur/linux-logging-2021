@@ -1,0 +1,30 @@
+['b86acbefa3814565b71ec9661329f7def0cc10f2', '384.txt', 'FixFormatSpecifier']
+commit b86acbefa3814565b71ec9661329f7def0cc10f2
+Author: Oleg Drokin <green@linuxhacker.ru>
+Date:   Fri Aug 26 23:05:37 2016 -0400
+
+    mx3fb: Fix print format string
+    
+    %ul was probably meant as %lu since the former would print
+    an unsigned value and a letter l.
+    
+    But in fact the whole value we are printing in u32 anyway, so
+    we don't need the format to be long. Therefore just drop the l
+    altogether.
+    
+    Signed-off-by: Oleg Drokin <green@linuxhacker.ru>
+    Signed-off-by: Tomi Valkeinen <tomi.valkeinen@ti.com>
+
+diff --git a/drivers/video/fbdev/mx3fb.c b/drivers/video/fbdev/mx3fb.c
+index f91b1db262b0..8778e01cebac 100644
+--- a/drivers/video/fbdev/mx3fb.c
++++ b/drivers/video/fbdev/mx3fb.c
+@@ -845,7 +845,7 @@ static int __set_par(struct fb_info *fbi, bool lock)
+ 		if (fbi->var.sync & FB_SYNC_SHARP_MODE)
+ 			mode = IPU_PANEL_SHARP_TFT;
+ 
+-		dev_dbg(fbi->device, "pixclock = %ul Hz\n",
++		dev_dbg(fbi->device, "pixclock = %u Hz\n",
+ 			(u32) (PICOS2KHZ(fbi->var.pixclock) * 1000UL));
+ 
+ 		if (sdc_init_panel(mx3fb, mode,

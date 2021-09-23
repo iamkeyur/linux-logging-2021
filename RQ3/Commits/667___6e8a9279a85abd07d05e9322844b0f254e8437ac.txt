@@ -1,0 +1,25 @@
+['6e8a9279a85abd07d05e9322844b0f254e8437ac', '265.txt', 'Typo']
+commit 6e8a9279a85abd07d05e9322844b0f254e8437ac
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu Jun 23 18:05:56 2016 +0100
+
+    powerpc/powernv: Fix spelling mistake "Retrived" -> "Retrieved"
+    
+    Trivial fix to spelling mistake in pr_debug() message.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+
+diff --git a/arch/powerpc/platforms/powernv/opal-memory-errors.c b/arch/powerpc/platforms/powernv/opal-memory-errors.c
+index 00a29432be39..4495f428b500 100644
+--- a/arch/powerpc/platforms/powernv/opal-memory-errors.c
++++ b/arch/powerpc/platforms/powernv/opal-memory-errors.c
+@@ -44,7 +44,7 @@ static void handle_memory_error_event(struct OpalMemoryErrorData *merr_evt)
+ {
+ 	uint64_t paddr_start, paddr_end;
+ 
+-	pr_debug("%s: Retrived memory error event, type: 0x%x\n",
++	pr_debug("%s: Retrieved memory error event, type: 0x%x\n",
+ 		  __func__, merr_evt->type);
+ 	switch (merr_evt->type) {
+ 	case OPAL_MEM_ERR_TYPE_RESILIENCE:

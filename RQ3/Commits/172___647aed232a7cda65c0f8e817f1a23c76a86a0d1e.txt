@@ -1,0 +1,28 @@
+['647aed232a7cda65c0f8e817f1a23c76a86a0d1e', '810.txt', 'RedundantInformation']
+commit 647aed232a7cda65c0f8e817f1a23c76a86a0d1e
+Author: Florian Fainelli <f.fainelli@gmail.com>
+Date:   Wed Mar 20 09:45:15 2019 -0700
+
+    net: phy: mdio-bcm-unimac: Remove print of base address
+    
+    Since commit ad67b74d2469 ("printk: hash addresses printed with %p")
+    pointers are being hashed when printed. Displaying the virtual memory at
+    bootup time is not helpful, especially given we use a dev_info() which
+    already displays the platform device's address.
+    
+    Signed-off-by: Florian Fainelli <f.fainelli@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/phy/mdio-bcm-unimac.c b/drivers/net/phy/mdio-bcm-unimac.c
+index 8295bc7c8c20..3a592629dc7e 100644
+--- a/drivers/net/phy/mdio-bcm-unimac.c
++++ b/drivers/net/phy/mdio-bcm-unimac.c
+@@ -292,7 +292,7 @@ static int unimac_mdio_probe(struct platform_device *pdev)
+ 
+ 	platform_set_drvdata(pdev, priv);
+ 
+-	dev_info(&pdev->dev, "Broadcom UniMAC MDIO bus at 0x%p\n", priv->base);
++	dev_info(&pdev->dev, "Broadcom UniMAC MDIO bus\n");
+ 
+ 	return 0;
+ 

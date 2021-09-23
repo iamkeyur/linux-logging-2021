@@ -1,0 +1,30 @@
+['396cbebeeb9734aee8efe39431d3b96655bf1e94', '232.txt', 'Formatting']
+commit 396cbebeeb9734aee8efe39431d3b96655bf1e94
+Author: Joonas Lahtinen <joonas.lahtinen@linux.intel.com>
+Date:   Tue May 10 09:08:57 2016 +0300
+
+    ASoC: Intel: Fix printk formatting
+    
+    Format number after 0x in hex.
+    
+    Cc: Jie Yang <yang.jie@linux.intel.com>
+    Cc: Liam Girdwood <lgirdwood@gmail.com>
+    Cc: Mark Brown <broonie@kernel.org>
+    Cc: Jaroslav Kysela <perex@perex.cz>
+    Cc: Takashi Iwai <tiwai@suse.com>
+    Signed-off-by: Joonas Lahtinen <joonas.lahtinen@linux.intel.com>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/sound/soc/intel/haswell/sst-haswell-pcm.c b/sound/soc/intel/haswell/sst-haswell-pcm.c
+index 1aa819c7e09b..994256b39b9c 100644
+--- a/sound/soc/intel/haswell/sst-haswell-pcm.c
++++ b/sound/soc/intel/haswell/sst-haswell-pcm.c
+@@ -445,7 +445,7 @@ static int create_adsp_page_table(struct snd_pcm_substream *substream,
+ 
+ 	pages = snd_sgbuf_aligned_pages(size);
+ 
+-	dev_dbg(rtd->dev, "generating page table for %p size 0x%zu pages %d\n",
++	dev_dbg(rtd->dev, "generating page table for %p size 0x%zx pages %d\n",
+ 		dma_area, size, pages);
+ 
+ 	for (i = 0; i < pages; i++) {

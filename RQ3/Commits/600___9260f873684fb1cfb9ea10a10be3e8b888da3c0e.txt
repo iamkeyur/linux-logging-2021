@@ -1,0 +1,25 @@
+['9260f873684fb1cfb9ea10a10be3e8b888da3c0e', '338.txt', 'Typo']
+commit 9260f873684fb1cfb9ea10a10be3e8b888da3c0e
+Author: Masanari Iida <standby24x7@gmail.com>
+Date:   Tue Mar 20 21:33:09 2018 +0900
+
+    ASoC: mediatek: mt2701: Fix a typo in printk
+    
+    This patch fixes a spelling typo in printk
+    
+    Signed-off-by: Masanari Iida <standby24x7@gmail.com>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/sound/soc/mediatek/mt2701/mt2701-afe-pcm.c b/sound/soc/mediatek/mt2701/mt2701-afe-pcm.c
+index d68b53f7cefe..e96028c06557 100644
+--- a/sound/soc/mediatek/mt2701/mt2701-afe-pcm.c
++++ b/sound/soc/mediatek/mt2701/mt2701-afe-pcm.c
+@@ -336,7 +336,7 @@ static int mt2701_btmrg_hw_params(struct snd_pcm_substream *substream,
+ 	stream_fs = params_rate(params);
+ 
+ 	if ((stream_fs != 8000) && (stream_fs != 16000)) {
+-		dev_err(afe->dev, "%s() btmgr not supprt this stream_fs %d\n",
++		dev_err(afe->dev, "%s() btmgr not support this stream_fs %d\n",
+ 			__func__, stream_fs);
+ 		return -EINVAL;
+ 	}

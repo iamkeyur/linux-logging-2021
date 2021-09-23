@@ -1,0 +1,25 @@
+['98df7446c2a2fcc62a605da054ccc0accda1a6a9', '744.txt', 'Typo']
+commit 98df7446c2a2fcc62a605da054ccc0accda1a6a9
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Tue Apr 23 15:50:22 2019 +0100
+
+    Bluetooth: hci_h5: fix spelling mistake "sliped" -> "slipped"
+    
+    There is a spelling mistake in a BT_DBG debug message. Fix it.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Marcel Holtmann <marcel@holtmann.org>
+
+diff --git a/drivers/bluetooth/hci_h5.c b/drivers/bluetooth/hci_h5.c
+index 069d1c8fde73..3f02ae560120 100644
+--- a/drivers/bluetooth/hci_h5.c
++++ b/drivers/bluetooth/hci_h5.c
+@@ -536,7 +536,7 @@ static void h5_unslip_one_byte(struct h5 *h5, unsigned char c)
+ 	skb_put_data(h5->rx_skb, byte, 1);
+ 	h5->rx_pending--;
+ 
+-	BT_DBG("unsliped 0x%02hhx, rx_pending %zu", *byte, h5->rx_pending);
++	BT_DBG("unslipped 0x%02hhx, rx_pending %zu", *byte, h5->rx_pending);
+ }
+ 
+ static void h5_reset_rx(struct h5 *h5)

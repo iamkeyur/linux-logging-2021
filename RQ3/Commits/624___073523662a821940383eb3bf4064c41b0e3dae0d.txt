@@ -1,0 +1,33 @@
+['073523662a821940383eb3bf4064c41b0e3dae0d', '313.txt', 'WrongInformation']
+commit 073523662a821940383eb3bf4064c41b0e3dae0d
+Author: Guenter Roeck <linux@roeck-us.net>
+Date:   Thu Dec 24 14:22:03 2015 -0800
+
+    watchdog: mena21: Do not use device pointer from struct watchdog_device
+    
+    The device pointer in struct watchdog_device has a different lifetime
+    than the driver code and should not be used in drivers. Use the pointer
+    to the parent device instead.
+    
+    Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+    Signed-off-by: Wim Van Sebroeck <wim@iguana.be>
+
+diff --git a/drivers/watchdog/mena21_wdt.c b/drivers/watchdog/mena21_wdt.c
+index 098fa9c34d6d..af6a7c489f08 100644
+--- a/drivers/watchdog/mena21_wdt.c
++++ b/drivers/watchdog/mena21_wdt.c
+@@ -100,12 +100,12 @@ static int a21_wdt_set_timeout(struct watchdog_device *wdt,
+ 	struct a21_wdt_drv *drv = watchdog_get_drvdata(wdt);
+ 
+ 	if (timeout != 1 && timeout != 30) {
+-		dev_err(wdt->dev, "Only 1 and 30 allowed as timeout\n");
++		dev_err(wdt->parent, "Only 1 and 30 allowed as timeout\n");
+ 		return -EINVAL;
+ 	}
+ 
+ 	if (timeout == 30 && wdt->timeout == 1) {
+-		dev_err(wdt->dev,
++		dev_err(wdt->parent,
+ 			"Transition from fast to slow mode not allowed\n");
+ 		return -EINVAL;
+ 	}

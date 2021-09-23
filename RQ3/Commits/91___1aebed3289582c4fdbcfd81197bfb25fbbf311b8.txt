@@ -1,0 +1,29 @@
+['1aebed3289582c4fdbcfd81197bfb25fbbf311b8', '903.txt', 'LogLevel']
+commit 1aebed3289582c4fdbcfd81197bfb25fbbf311b8
+Author: Daniel Scheller <d.scheller@gmx.net>
+Date:   Sat Feb 24 09:55:57 2018 -0500
+
+    media: dvb_ca_en50221: fix severity of successful CAM init log message
+    
+    A successful CA module initialisation isn't an error. Change the
+    log print to info severity accordingly.
+    
+    Cc: Jasmin Jessich <jasmin@anw.at>
+    Signed-off-by: Daniel Scheller <d.scheller@gmx.net>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+
+diff --git a/drivers/media/dvb-core/dvb_ca_en50221.c b/drivers/media/dvb-core/dvb_ca_en50221.c
+index 204d0f6c678d..97365a863519 100644
+--- a/drivers/media/dvb-core/dvb_ca_en50221.c
++++ b/drivers/media/dvb-core/dvb_ca_en50221.c
+@@ -1254,8 +1254,8 @@ static void dvb_ca_en50221_thread_state_machine(struct dvb_ca_private *ca,
+ 		ca->pub->slot_ts_enable(ca->pub, slot);
+ 		sl->slot_state = DVB_CA_SLOTSTATE_RUNNING;
+ 		dvb_ca_en50221_thread_update_delay(ca);
+-		pr_err("dvb_ca adapter %d: DVB CAM detected and initialised successfully\n",
+-		       ca->dvbdev->adapter->num);
++		pr_info("dvb_ca adapter %d: DVB CAM detected and initialised successfully\n",
++			ca->dvbdev->adapter->num);
+ 		break;
+ 
+ 	case DVB_CA_SLOTSTATE_RUNNING:

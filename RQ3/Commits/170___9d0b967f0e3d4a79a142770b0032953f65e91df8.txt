@@ -1,0 +1,29 @@
+['9d0b967f0e3d4a79a142770b0032953f65e91df8', '813.txt', 'ModernizeLog']
+commit 9d0b967f0e3d4a79a142770b0032953f65e91df8
+Author: Gal Pressman <galp@mellanox.com>
+Date:   Sun Jan 7 12:08:40 2018 +0200
+
+    8139cp: Replace WARN_ONCE with netdev_WARN_ONCE
+    
+    Use the more appropriate netdev_WARN_ONCE instead of WARN_ONCE macro.
+    
+    Signed-off-by: Gal Pressman <galp@mellanox.com>
+    Reviewed-by: Saeed Mahameed <saeedm@mellanox.com>
+    Cc: Realtek linux nic maintainers <nic_swsd@realtek.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/realtek/8139cp.c b/drivers/net/ethernet/realtek/8139cp.c
+index e7ab23e87de2..81045dfa1cd8 100644
+--- a/drivers/net/ethernet/realtek/8139cp.c
++++ b/drivers/net/ethernet/realtek/8139cp.c
+@@ -748,8 +748,8 @@ static netdev_tx_t cp_start_xmit (struct sk_buff *skb,
+ 	mss = skb_shinfo(skb)->gso_size;
+ 
+ 	if (mss > MSSMask) {
+-		WARN_ONCE(1, "Net bug: GSO size %d too large for 8139CP\n",
+-			  mss);
++		netdev_WARN_ONCE(dev, "Net bug: GSO size %d too large for 8139CP\n",
++				 mss);
+ 		goto out_dma_error;
+ 	}
+ 

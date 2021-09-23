@@ -1,0 +1,26 @@
+['5b6615398906150dea92fe67a1613a0151ddd0ba', '335.txt', 'AddInfo']
+commit 5b6615398906150dea92fe67a1613a0151ddd0ba
+Author: Fabio Estevam <fabio.estevam@freescale.com>
+Date:   Sun Nov 1 14:22:51 2015 -0200
+
+    i2c: imx: Improve message log when DMA is not used
+    
+    When DMA cannot be used, it is better to state that the I2C controller
+    will operate in PIO mode.
+    
+    Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+    Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
+
+diff --git a/drivers/i2c/busses/i2c-imx.c b/drivers/i2c/busses/i2c-imx.c
+index 3ffdcf4d7b61..8f62e1f73a6f 100644
+--- a/drivers/i2c/busses/i2c-imx.c
++++ b/drivers/i2c/busses/i2c-imx.c
+@@ -349,7 +349,7 @@ static void i2c_imx_dma_request(struct imx_i2c_struct *i2c_imx,
+ 	dma_release_channel(dma->chan_tx);
+ fail_al:
+ 	devm_kfree(dev, dma);
+-	dev_info(dev, "can't use DMA\n");
++	dev_info(dev, "can't use DMA, using PIO instead.\n");
+ }
+ 
+ static void i2c_imx_dma_callback(void *arg)

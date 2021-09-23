@@ -1,0 +1,45 @@
+['6dc3a355633b97c03950478563807ab72b18f94b', '620.txt', 'Formatting']
+commit 6dc3a355633b97c03950478563807ab72b18f94b
+Author: Mauro Carvalho Chehab <mchehab@kernel.org>
+Date:   Fri Oct 14 07:39:46 2016 -0300
+
+    [media] pvrusb2: use KERNEL_CONT where needed
+    
+    Some continuation messages are not using KERNEL_CONT.
+    
+    Since commit 563873318d32 ("Merge branch 'printk-cleanups"),
+    this won't work as expected anymore. So, let's add KERN_CONT
+    to those lines.
+    
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+
+diff --git a/drivers/media/usb/pvrusb2/pvrusb2-i2c-core.c b/drivers/media/usb/pvrusb2/pvrusb2-i2c-core.c
+index 48d837e39a9c..cc63e5f4c26c 100644
+--- a/drivers/media/usb/pvrusb2/pvrusb2-i2c-core.c
++++ b/drivers/media/usb/pvrusb2/pvrusb2-i2c-core.c
+@@ -491,18 +491,18 @@ static int pvr2_i2c_xfer(struct i2c_adapter *i2c_adap,
+ 				"read" : "write"));
+ 			if ((ret > 0) || !(msgs[idx].flags & I2C_M_RD)) {
+ 				if (cnt > 8) cnt = 8;
+-				printk(" [");
++				printk(KERN_CONT " [");
+ 				for (offs = 0; offs < (cnt>8?8:cnt); offs++) {
+-					if (offs) printk(" ");
+-					printk("%02x",msgs[idx].buf[offs]);
++					if (offs) printk(KERN_CONT " ");
++					printk(KERN_CONT "%02x",msgs[idx].buf[offs]);
+ 				}
+-				if (offs < cnt) printk(" ...");
+-				printk("]");
++				if (offs < cnt) printk(KERN_CONT " ...");
++				printk(KERN_CONT "]");
+ 			}
+ 			if (idx+1 == num) {
+-				printk(" result=%d",ret);
++				printk(KERN_CONT " result=%d",ret);
+ 			}
+-			printk("\n");
++			printk(KERN_CONT "\n");
+ 		}
+ 		if (!num) {
+ 			printk(KERN_INFO

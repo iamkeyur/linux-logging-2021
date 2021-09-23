@@ -1,0 +1,36 @@
+['e7f4d7516aa3ed912946fdf3863be8d1489fd836', '224.txt', 'LogLevel']
+commit e7f4d7516aa3ed912946fdf3863be8d1489fd836
+Author: Brad Love <brad@nextdimension.cc>
+Date:   Fri Jan 12 11:19:41 2018 -0500
+
+    media: lgdt3306a: Announce successful creation
+    
+    The driver is near silent, this adds a simple announcement at the
+    end of probe after the chip has been detected and upgrades a debug
+    message to error if probe has failed.
+    
+    Signed-off-by: Brad Love <brad@nextdimension.cc>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+
+diff --git a/drivers/media/dvb-frontends/lgdt3306a.c b/drivers/media/dvb-frontends/lgdt3306a.c
+index 0ed64604d7af..5b1903358730 100644
+--- a/drivers/media/dvb-frontends/lgdt3306a.c
++++ b/drivers/media/dvb-frontends/lgdt3306a.c
+@@ -2249,6 +2249,8 @@ static int lgdt3306a_probe(struct i2c_client *client,
+ 	*config->i2c_adapter = state->muxc->adapter[0];
+ 	*config->fe = fe;
+ 
++	dev_info(&client->dev, "LG Electronics LGDT3306A successfully identified\n");
++
+ 	return 0;
+ 
+ err_kfree:
+@@ -2256,7 +2258,7 @@ static int lgdt3306a_probe(struct i2c_client *client,
+ err_fe:
+ 	kfree(config);
+ fail:
+-	dev_dbg(&client->dev, "failed=%d\n", ret);
++	dev_warn(&client->dev, "probe failed = %d\n", ret);
+ 	return ret;
+ }
+ 

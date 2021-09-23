@@ -1,0 +1,25 @@
+['fb430b39dbb0def3c7fc47a79fb02c5dfcda9f9c', '664.txt', 'Typo']
+commit fb430b39dbb0def3c7fc47a79fb02c5dfcda9f9c
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Fri Oct 12 15:53:14 2018 +0100
+
+    alpha: fix spelling mistake QSD_PORT_ACTUVE -> QSD_PORT_ACTIVE
+    
+    Trivial fix to spelling mistake in kernel error message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Matt Turner <mattst88@gmail.com>
+
+diff --git a/arch/alpha/kernel/core_wildfire.c b/arch/alpha/kernel/core_wildfire.c
+index 353c03d15442..e8d3b033018d 100644
+--- a/arch/alpha/kernel/core_wildfire.c
++++ b/arch/alpha/kernel/core_wildfire.c
+@@ -559,7 +559,7 @@ wildfire_dump_qsd_regs(int qbbno)
+ 	printk(KERN_ERR " QSD_REV:           0x%16lx\n", qsd->qsd_rev.csr);
+ 	printk(KERN_ERR " QSD_PORT_PRESENT:  0x%16lx\n",
+ 	       qsd->qsd_port_present.csr);
+-	printk(KERN_ERR " QSD_PORT_ACTUVE:   0x%16lx\n",
++	printk(KERN_ERR " QSD_PORT_ACTIVE:   0x%16lx\n",
+ 	       qsd->qsd_port_active.csr);
+ 	printk(KERN_ERR " QSD_FAULT_ENA:     0x%16lx\n",
+ 	       qsd->qsd_fault_ena.csr);

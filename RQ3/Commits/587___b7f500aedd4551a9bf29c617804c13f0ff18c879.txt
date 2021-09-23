@@ -1,0 +1,71 @@
+['b7f500aedd4551a9bf29c617804c13f0ff18c879', '353.txt', 'LogLevel']
+commit b7f500aedd4551a9bf29c617804c13f0ff18c879
+Author: Borislav Petkov <bp@suse.de>
+Date:   Wed Feb 3 12:33:33 2016 +0100
+
+    x86/microcode: Issue update message only once
+    
+    This is especially annoying on large boxes:
+    
+      x86: Booting SMP configuration:
+      .... node  #0, CPUs:          #1
+      microcode: CPU1 microcode updated early to revision 0x428, date = 2014-05-29
+         #2
+      microcode: CPU2 microcode updated early to revision 0x428, date = 2014-05-29
+         #3
+      ...
+    
+    so issue the update message only once.
+    
+    $ grep microcode /proc/cpuinfo
+    
+    shows whether every core got updated properly.
+    
+    Reported-by: Ingo Molnar <mingo@kernel.org>
+    Tested-by: Thomas Voegtle <tv@lio96.de>
+    Signed-off-by: Borislav Petkov <bp@suse.de>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Link: http://lkml.kernel.org/r/1454499225-21544-6-git-send-email-bp@alien8.de
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+diff --git a/arch/x86/kernel/cpu/microcode/amd.c b/arch/x86/kernel/cpu/microcode/amd.c
+index 2233f8a76615..5b63e2f669b0 100644
+--- a/arch/x86/kernel/cpu/microcode/amd.c
++++ b/arch/x86/kernel/cpu/microcode/amd.c
+@@ -432,8 +432,8 @@ int __init save_microcode_in_initrd_amd(void)
+ 		container = cont_va;
+ 
+ 	if (ucode_new_rev)
+-		pr_info("microcode: updated early to new patch_level=0x%08x\n",
+-			ucode_new_rev);
++		pr_info_once("microcode updated early to new patch_level=0x%08x\n",
++			     ucode_new_rev);
+ 
+ 	eax   = cpuid_eax(0x00000001);
+ 	eax   = ((eax >> 8) & 0xf) + ((eax >> 20) & 0xff);
+diff --git a/arch/x86/kernel/cpu/microcode/intel.c b/arch/x86/kernel/cpu/microcode/intel.c
+index 4f4735bd8698..f4bc5fe00d46 100644
+--- a/arch/x86/kernel/cpu/microcode/intel.c
++++ b/arch/x86/kernel/cpu/microcode/intel.c
+@@ -571,14 +571,11 @@ scan_microcode(struct mc_saved_data *mc_saved_data, unsigned long *initrd,
+ static void
+ print_ucode_info(struct ucode_cpu_info *uci, unsigned int date)
+ {
+-	int cpu = smp_processor_id();
+-
+-	pr_info("CPU%d microcode updated early to revision 0x%x, date = %04x-%02x-%02x\n",
+-		cpu,
+-		uci->cpu_sig.rev,
+-		date & 0xffff,
+-		date >> 24,
+-		(date >> 16) & 0xff);
++	pr_info_once("microcode updated early to revision 0x%x, date = %04x-%02x-%02x\n",
++		     uci->cpu_sig.rev,
++		     date & 0xffff,
++		     date >> 24,
++		     (date >> 16) & 0xff);
+ }
+ 
+ #ifdef CONFIG_X86_32

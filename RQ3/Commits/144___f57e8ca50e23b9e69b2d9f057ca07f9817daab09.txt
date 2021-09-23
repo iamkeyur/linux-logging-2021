@@ -1,0 +1,30 @@
+['f57e8ca50e23b9e69b2d9f057ca07f9817daab09', '843.txt', 'AddInfo']
+commit f57e8ca50e23b9e69b2d9f057ca07f9817daab09
+Author: Yuval Shaia <yuval.shaia@oracle.com>
+Date:   Thu Jan 19 16:48:31 2017 +0200
+
+    IB/mad: Add port_num to error message
+    
+    Print the invalid port number to ease troubleshooting.
+    
+    Signed-off-by: Yuval Shaia <yuval.shaia@oracle.com>
+    Reviewed-by: Leon Romanovsky <leonro@mellanox.com>
+    Reviewed-by: Johannes Thumshirn <jthumshirn@suse.de>
+    Reviewed-by: Ira Weiny <ira.weiny@intel.com>
+    Signed-off-by: Doug Ledford <dledford@redhat.com>
+
+diff --git a/drivers/infiniband/core/mad.c b/drivers/infiniband/core/mad.c
+index a009f7132c73..57f231f1c721 100644
+--- a/drivers/infiniband/core/mad.c
++++ b/drivers/infiniband/core/mad.c
+@@ -316,7 +316,9 @@ struct ib_mad_agent *ib_register_mad_agent(struct ib_device *device,
+ 	/* Validate device and port */
+ 	port_priv = ib_get_mad_port(device, port_num);
+ 	if (!port_priv) {
+-		dev_notice(&device->dev, "ib_register_mad_agent: Invalid port\n");
++		dev_notice(&device->dev,
++			   "ib_register_mad_agent: Invalid port %d\n",
++			   port_num);
+ 		ret = ERR_PTR(-ENODEV);
+ 		goto error1;
+ 	}

@@ -1,0 +1,57 @@
+['d1878af3a5a6ac00bc8a3edfecf80539ee9c546e', '267.txt', 'AddInfo']
+commit d1878af3a5a6ac00bc8a3edfecf80539ee9c546e
+Author: Mark Rutland <mark.rutland@arm.com>
+Date:   Thu Dec 6 12:31:44 2018 +0000
+
+    KVM: arm/arm64: Log PSTATE for unhandled sysregs
+    
+    When KVM traps an unhandled sysreg/coproc access from a guest, it logs
+    the guest PC. To aid debugging, it would be helpful to know which
+    exception level the trap came from, along with other PSTATE/CPSR bits,
+    so let's log the PSTATE/CPSR too.
+    
+    Acked-by: Christoffer Dall <christoffer.dall@arm.com>
+    Signed-off-by: Mark Rutland <mark.rutland@arm.com>
+    Signed-off-by: Marc Zyngier <marc.zyngier@arm.com>
+
+diff --git a/arch/arm/kvm/coproc.c b/arch/arm/kvm/coproc.c
+index cb094e55dc5f..222c1635bc7a 100644
+--- a/arch/arm/kvm/coproc.c
++++ b/arch/arm/kvm/coproc.c
+@@ -602,8 +602,8 @@ static int emulate_cp15(struct kvm_vcpu *vcpu,
+ 		}
+ 	} else {
+ 		/* If access function fails, it should complain. */
+-		kvm_err("Unsupported guest CP15 access at: %08lx\n",
+-			*vcpu_pc(vcpu));
++		kvm_err("Unsupported guest CP15 access at: %08lx [%08lx]\n",
++			*vcpu_pc(vcpu), *vcpu_cpsr(vcpu));
+ 		print_cp_instr(params);
+ 		kvm_inject_undefined(vcpu);
+ 	}
+diff --git a/arch/arm64/kvm/sys_regs.c b/arch/arm64/kvm/sys_regs.c
+index 22fbbdbece3c..ecbf67ccabf5 100644
+--- a/arch/arm64/kvm/sys_regs.c
++++ b/arch/arm64/kvm/sys_regs.c
+@@ -1912,8 +1912,8 @@ static void unhandled_cp_access(struct kvm_vcpu *vcpu,
+ 		WARN_ON(1);
+ 	}
+ 
+-	kvm_err("Unsupported guest CP%d access at: %08lx\n",
+-		cp, *vcpu_pc(vcpu));
++	kvm_err("Unsupported guest CP%d access at: %08lx [%08lx]\n",
++		cp, *vcpu_pc(vcpu), *vcpu_cpsr(vcpu));
+ 	print_sys_reg_instr(params);
+ 	kvm_inject_undefined(vcpu);
+ }
+@@ -2063,8 +2063,8 @@ static int emulate_sys_reg(struct kvm_vcpu *vcpu,
+ 	if (likely(r)) {
+ 		perform_access(vcpu, params, r);
+ 	} else {
+-		kvm_err("Unsupported guest sys_reg access at: %lx\n",
+-			*vcpu_pc(vcpu));
++		kvm_err("Unsupported guest sys_reg access at: %lx [%08lx]\n",
++			*vcpu_pc(vcpu), *vcpu_cpsr(vcpu));
+ 		print_sys_reg_instr(params);
+ 		kvm_inject_undefined(vcpu);
+ 	}

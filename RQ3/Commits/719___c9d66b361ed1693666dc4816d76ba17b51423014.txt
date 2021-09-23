@@ -1,0 +1,26 @@
+['c9d66b361ed1693666dc4816d76ba17b51423014', '133.txt', 'Typo']
+commit c9d66b361ed1693666dc4816d76ba17b51423014
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu Apr 18 11:25:10 2019 +0100
+
+    drm/amd/amdgpu: fix spelling mistake "recieve" -> "receive"
+    
+    There is a spelling mistake in a pr_err message. Fix it.
+    
+    Reviewed-by: Mukesh Ojha <mojha@codeaurora.org>
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+diff --git a/drivers/gpu/drm/amd/amdgpu/mxgpu_vi.c b/drivers/gpu/drm/amd/amdgpu/mxgpu_vi.c
+index 6a0fcd67662a..aef9d059ae52 100644
+--- a/drivers/gpu/drm/amd/amdgpu/mxgpu_vi.c
++++ b/drivers/gpu/drm/amd/amdgpu/mxgpu_vi.c
+@@ -515,7 +515,7 @@ static void xgpu_vi_mailbox_flr_work(struct work_struct *work)
+ 
+ 	/* wait until RCV_MSG become 3 */
+ 	if (xgpu_vi_poll_msg(adev, IDH_FLR_NOTIFICATION_CMPL)) {
+-		pr_err("failed to recieve FLR_CMPL\n");
++		pr_err("failed to receive FLR_CMPL\n");
+ 		return;
+ 	}
+ 

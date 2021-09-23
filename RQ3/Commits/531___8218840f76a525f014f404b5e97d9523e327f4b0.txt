@@ -1,0 +1,29 @@
+['8218840f76a525f014f404b5e97d9523e327f4b0', '419.txt', 'FixFormatSpecifier']
+commit 8218840f76a525f014f404b5e97d9523e327f4b0
+Author: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+Date:   Tue Aug 7 08:16:09 2018 -0400
+
+    media: xc4000: get rid of uneeded casts
+    
+    Instead of doing casts, use %zd to print sizes, in order to make
+    smatch happier:
+            drivers/media/tuners/xc4000.c:818 xc4000_fwupload() warn: argument 4 to %d specifier is cast from pointer
+    
+    Signed-off-by: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+
+diff --git a/drivers/media/tuners/xc4000.c b/drivers/media/tuners/xc4000.c
+index 76b3f37f24a8..eb6d65dae748 100644
+--- a/drivers/media/tuners/xc4000.c
++++ b/drivers/media/tuners/xc4000.c
+@@ -815,9 +815,9 @@ static int xc4000_fwupload(struct dvb_frontend *fe)
+ 		p += sizeof(size);
+ 
+ 		if (!size || size > endp - p) {
+-			printk(KERN_ERR "Firmware type (%x), id %llx is corrupted (size=%d, expected %d)\n",
++			printk(KERN_ERR "Firmware type (%x), id %llx is corrupted (size=%zd, expected %d)\n",
+ 			       type, (unsigned long long)id,
+-			       (unsigned)(endp - p), size);
++			       endp - p, size);
+ 			goto corrupt;
+ 		}
+ 

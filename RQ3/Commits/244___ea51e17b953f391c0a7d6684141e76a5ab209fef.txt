@@ -1,0 +1,26 @@
+['ea51e17b953f391c0a7d6684141e76a5ab209fef', '734.txt', 'Typo']
+commit ea51e17b953f391c0a7d6684141e76a5ab209fef
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Mon Sep 24 18:14:37 2018 +0100
+
+    i2c: i2c-isch: fix spelling mistake "unitialized" -> "uninitialized"
+    
+    Trivial fix to spelling mistake in dev_notice message.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Reviewed-by: Jean Delvare <jdelvare@suse.de>
+    Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
+
+diff --git a/drivers/i2c/busses/i2c-isch.c b/drivers/i2c/busses/i2c-isch.c
+index 0cf1379f4e80..5c754bf659e2 100644
+--- a/drivers/i2c/busses/i2c-isch.c
++++ b/drivers/i2c/busses/i2c-isch.c
+@@ -164,7 +164,7 @@ static s32 sch_access(struct i2c_adapter *adap, u16 addr,
+ 		 * run ~75 kHz instead which should do no harm.
+ 		 */
+ 		dev_notice(&sch_adapter.dev,
+-			"Clock divider unitialized. Setting defaults\n");
++			"Clock divider uninitialized. Setting defaults\n");
+ 		outw(backbone_speed / (4 * 100), SMBHSTCLK);
+ 	}
+ 

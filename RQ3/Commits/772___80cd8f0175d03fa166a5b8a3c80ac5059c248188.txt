@@ -1,0 +1,44 @@
+['80cd8f0175d03fa166a5b8a3c80ac5059c248188', '190.txt', 'Typo']
+commit 80cd8f0175d03fa166a5b8a3c80ac5059c248188
+Author: Wei Yongjun <weiyongjun1@huawei.com>
+Date:   Mon Jan 8 22:22:44 2018 +0530
+
+    soundwire: Fix typo in return value check of sdw_read()
+    
+    Fix the typo, 'status' should be instead of 'status2'.
+    
+    Fixes: b0a9c37b0178 ("soundwire: Add slave status handling")
+    Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
+    Acked-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+    Acked-by: Vinod Koul <vinod.koul@intel.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/soundwire/bus.c b/drivers/soundwire/bus.c
+index 7211ecc62015..03313590b661 100644
+--- a/drivers/soundwire/bus.c
++++ b/drivers/soundwire/bus.c
+@@ -671,8 +671,8 @@ static int sdw_handle_dp0_interrupt(struct sdw_slave *slave, u8 *slave_status)
+ 		status2 = sdw_read(slave, SDW_DP0_INT);
+ 		if (status2 < 0) {
+ 			dev_err(slave->bus->dev,
+-				"SDW_DP0_INT read failed:%d", status);
+-			return status;
++				"SDW_DP0_INT read failed:%d", status2);
++			return status2;
+ 		}
+ 		status &= status2;
+ 
+@@ -741,10 +741,10 @@ static int sdw_handle_port_interrupt(struct sdw_slave *slave,
+ 
+ 		/* Read DPN interrupt again */
+ 		status2 = sdw_read(slave, addr);
+-		if (status < 0) {
++		if (status2 < 0) {
+ 			dev_err(slave->bus->dev,
+-					"SDW_DPN_INT read failed:%d", status);
+-			return status;
++					"SDW_DPN_INT read failed:%d", status2);
++			return status2;
+ 		}
+ 		status &= status2;
+ 

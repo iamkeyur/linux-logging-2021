@@ -1,0 +1,26 @@
+['58de51ca77e2166262b043b0ff93290b184a2364', '114.txt', 'FixFormatSpecifier']
+commit 58de51ca77e2166262b043b0ff93290b184a2364
+Author: Rafał Miłecki <rafal@milecki.pl>
+Date:   Fri Jun 23 07:07:14 2017 +0200
+
+    mtd: parsers: trx: fix pr_err format for printing offset
+    
+    This fixes following warning:
+    include/linux/kern_levels.h:4:18: warning: format '%X' expects argument of type 'unsigned int', but argument 2 has type 'size_t {aka long unsigned int}' [-Wformat=]
+    
+    Signed-off-by: Rafał Miłecki <rafal@milecki.pl>
+    Signed-off-by: Brian Norris <computersforpeace@gmail.com>
+
+diff --git a/drivers/mtd/parsers/parser_trx.c b/drivers/mtd/parsers/parser_trx.c
+index e805108afd31..df360a75e1eb 100644
+--- a/drivers/mtd/parsers/parser_trx.c
++++ b/drivers/mtd/parsers/parser_trx.c
+@@ -39,7 +39,7 @@ static const char *parser_trx_data_part_name(struct mtd_info *master,
+ 	err  = mtd_read(master, offset, sizeof(buf), &bytes_read,
+ 			(uint8_t *)&buf);
+ 	if (err && !mtd_is_bitflip(err)) {
+-		pr_err("mtd_read error while parsing (offset: 0x%X): %d\n",
++		pr_err("mtd_read error while parsing (offset: 0x%zX): %d\n",
+ 			offset, err);
+ 		goto out_default;
+ 	}

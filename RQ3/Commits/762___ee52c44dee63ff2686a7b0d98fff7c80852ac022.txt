@@ -1,0 +1,37 @@
+['ee52c44dee63ff2686a7b0d98fff7c80852ac022', '180.txt', 'FixFormatSpecifier']
+commit ee52c44dee63ff2686a7b0d98fff7c80852ac022
+Author: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+Date:   Thu Oct 27 17:47:04 2016 -0700
+
+    block: DAC960: print a hex number after a 0x prefix
+    
+    It makes the message hard to interpret correctly if a base 10 number is
+    prefixed by 0x.  So change to a hex number.
+    
+    Link: http://lkml.kernel.org/r/20161026125658.25728-3-u.kleine-koenig@pengutronix.de
+    Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+diff --git a/drivers/block/DAC960.c b/drivers/block/DAC960.c
+index 811e11c82f32..0809cda93cc0 100644
+--- a/drivers/block/DAC960.c
++++ b/drivers/block/DAC960.c
+@@ -2954,7 +2954,7 @@ DAC960_DetectController(struct pci_dev *PCI_Device,
+ 	case DAC960_PD_Controller:
+ 	  if (!request_region(Controller->IO_Address, 0x80,
+ 			      Controller->FullModelName)) {
+-		DAC960_Error("IO port 0x%d busy for Controller at\n",
++		DAC960_Error("IO port 0x%lx busy for Controller at\n",
+ 			     Controller, Controller->IO_Address);
+ 		goto Failure;
+ 	  }
+@@ -2990,7 +2990,7 @@ DAC960_DetectController(struct pci_dev *PCI_Device,
+ 	case DAC960_P_Controller:
+ 	  if (!request_region(Controller->IO_Address, 0x80,
+ 			      Controller->FullModelName)){
+-		DAC960_Error("IO port 0x%d busy for Controller at\n",
++		DAC960_Error("IO port 0x%lx busy for Controller at\n",
+ 		   	     Controller, Controller->IO_Address);
+ 		goto Failure;
+ 	  }

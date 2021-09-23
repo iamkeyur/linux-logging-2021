@@ -1,0 +1,25 @@
+['24a24d07d688a4625ed7e07d0a9f29127f5c7708', '631.txt', 'Typo']
+commit 24a24d07d688a4625ed7e07d0a9f29127f5c7708
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Sun Aug 28 11:40:41 2016 +0100
+
+    wan/fsl_ucc_hdlc: fix spelling mistake "prameter" -> "parameter"
+    
+    Trivial fix to spelling mistake in dev_err message.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/wan/fsl_ucc_hdlc.c b/drivers/net/wan/fsl_ucc_hdlc.c
+index 6f044450b702..5fbf83d5aa57 100644
+--- a/drivers/net/wan/fsl_ucc_hdlc.c
++++ b/drivers/net/wan/fsl_ucc_hdlc.c
+@@ -162,7 +162,7 @@ static int uhdlc_init(struct ucc_hdlc_private *priv)
+ 				ALIGNMENT_OF_UCC_HDLC_PRAM);
+ 
+ 	if (priv->ucc_pram_offset < 0) {
+-		dev_err(priv->dev, "Can not allocate MURAM for hdlc prameter.\n");
++		dev_err(priv->dev, "Can not allocate MURAM for hdlc parameter.\n");
+ 		ret = -ENOMEM;
+ 		goto free_tx_bd;
+ 	}

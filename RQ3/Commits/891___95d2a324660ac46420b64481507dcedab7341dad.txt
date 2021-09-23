@@ -1,0 +1,38 @@
+['95d2a324660ac46420b64481507dcedab7341dad', '1509.txt', 'NullPtr']
+commit 95d2a324660ac46420b64481507dcedab7341dad
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Mon Aug 15 15:45:04 2016 +0100
+
+    staging: ks7010: don't print skb->dev->name if skb is null
+    
+    A null pointer dereference will occur when skb is null and
+    skb->dev->name is printed.  Replace the skb->dev->name with
+    plain text "ks_wlan" to fix this.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/ks7010/ks_hostif.c b/drivers/staging/ks7010/ks_hostif.c
+index f4cee811cabd..c5fc31c0038d 100644
+--- a/drivers/staging/ks7010/ks_hostif.c
++++ b/drivers/staging/ks7010/ks_hostif.c
+@@ -485,8 +485,7 @@ void hostif_data_indication(struct ks_wlan_private *priv)
+ 			netif_rx(skb);
+ 		} else {
+ 			printk(KERN_WARNING
+-			       "%s: Memory squeeze, dropping packet.\n",
+-			       skb->dev->name);
++			       "ks_wlan: Memory squeeze, dropping packet.\n");
+ 			priv->nstats.rx_dropped++;
+ 		}
+ 		break;
+@@ -521,8 +520,7 @@ void hostif_data_indication(struct ks_wlan_private *priv)
+ 			netif_rx(skb);
+ 		} else {
+ 			printk(KERN_WARNING
+-			       "%s: Memory squeeze, dropping packet.\n",
+-			       skb->dev->name);
++			       "ks_wlan: Memory squeeze, dropping packet.\n");
+ 			priv->nstats.rx_dropped++;
+ 		}
+ 		break;

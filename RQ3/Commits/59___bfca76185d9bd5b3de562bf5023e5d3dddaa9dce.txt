@@ -1,0 +1,51 @@
+['bfca76185d9bd5b3de562bf5023e5d3dddaa9dce', '936.txt', 'Typo']
+commit bfca76185d9bd5b3de562bf5023e5d3dddaa9dce
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Sun Apr 23 18:14:36 2017 +0100
+
+    spi: tegra: fix spelling mistake: "trasfer" -> "transfer"
+    
+    trivial fix to spelling mistake in dbg_err messages
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/drivers/spi/spi-tegra114.c b/drivers/spi/spi-tegra114.c
+index 73779cecc3bb..08012ae5aa66 100644
+--- a/drivers/spi/spi-tegra114.c
++++ b/drivers/spi/spi-tegra114.c
+@@ -837,7 +837,7 @@ static int tegra_spi_transfer_one_message(struct spi_master *master,
+ 						SPI_DMA_TIMEOUT);
+ 		if (WARN_ON(ret == 0)) {
+ 			dev_err(tspi->dev,
+-				"spi trasfer timeout, err %d\n", ret);
++				"spi transfer timeout, err %d\n", ret);
+ 			ret = -EIO;
+ 			goto complete_xfer;
+ 		}
+diff --git a/drivers/spi/spi-tegra20-sflash.c b/drivers/spi/spi-tegra20-sflash.c
+index b6558bb6f9df..2c797ee2664d 100644
+--- a/drivers/spi/spi-tegra20-sflash.c
++++ b/drivers/spi/spi-tegra20-sflash.c
+@@ -341,7 +341,7 @@ static int tegra_sflash_transfer_one_message(struct spi_master *master,
+ 						SPI_DMA_TIMEOUT);
+ 		if (WARN_ON(ret == 0)) {
+ 			dev_err(tsd->dev,
+-				"spi trasfer timeout, err %d\n", ret);
++				"spi transfer timeout, err %d\n", ret);
+ 			ret = -EIO;
+ 			goto exit;
+ 		}
+diff --git a/drivers/spi/spi-tegra20-slink.c b/drivers/spi/spi-tegra20-slink.c
+index 85c91f58b42f..0c06ce424210 100644
+--- a/drivers/spi/spi-tegra20-slink.c
++++ b/drivers/spi/spi-tegra20-slink.c
+@@ -824,7 +824,7 @@ static int tegra_slink_transfer_one(struct spi_master *master,
+ 					  SLINK_DMA_TIMEOUT);
+ 	if (WARN_ON(ret == 0)) {
+ 		dev_err(tspi->dev,
+-			"spi trasfer timeout, err %d\n", ret);
++			"spi transfer timeout, err %d\n", ret);
+ 		return -EIO;
+ 	}
+ 

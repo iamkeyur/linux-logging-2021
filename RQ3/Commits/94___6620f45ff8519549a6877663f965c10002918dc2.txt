@@ -1,0 +1,39 @@
+['6620f45ff8519549a6877663f965c10002918dc2', '900.txt', 'LogLevel']
+commit 6620f45ff8519549a6877663f965c10002918dc2
+Author: Neil Armstrong <narmstrong@baylibre.com>
+Date:   Wed Mar 27 16:13:48 2019 +0100
+
+    clk: meson: vid-pll-div: remove warning and return 0 on invalid config
+    
+    The vid_pll_div is a programmable fractional divider, but vendor gives a
+    limited of known configuration value and it's corresponding fraction.
+    
+    Thus when at reset value (0) or unknown value, we cannot determine the
+    result rate.
+    
+    The initial behaviour was to print a warning, but the warning triggers
+    at each boot and when the clock tree is refreshed.
+    
+    This patch moves the print to debug and returns 0 instead of the
+    parent rate.
+    
+    Fixes: 72dbb8c94d0d ("clk: meson: Add vid_pll divider driver")
+    Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
+    Reviewed-by: Jerome Brunet <jbrunet@baylibre.com>
+    Link: https://lkml.kernel.org/r/20190327151348.27402-1-narmstrong@baylibre.com
+
+diff --git a/drivers/clk/meson/vid-pll-div.c b/drivers/clk/meson/vid-pll-div.c
+index 08bcc01c0923..daff235bc763 100644
+--- a/drivers/clk/meson/vid-pll-div.c
++++ b/drivers/clk/meson/vid-pll-div.c
+@@ -82,8 +82,8 @@ static unsigned long meson_vid_pll_div_recalc_rate(struct clk_hw *hw,
+ 	div = _get_table_val(meson_parm_read(clk->map, &pll_div->val),
+ 			     meson_parm_read(clk->map, &pll_div->sel));
+ 	if (!div || !div->divider) {
+-		pr_info("%s: Invalid config value for vid_pll_div\n", __func__);
+-		return parent_rate;
++		pr_debug("%s: Invalid config value for vid_pll_div\n", __func__);
++		return 0;
+ 	}
+ 
+ 	return DIV_ROUND_UP_ULL(parent_rate * div->multiplier, div->divider);

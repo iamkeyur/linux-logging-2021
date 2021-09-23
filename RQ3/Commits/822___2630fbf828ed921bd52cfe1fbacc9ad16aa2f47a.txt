@@ -1,0 +1,26 @@
+['2630fbf828ed921bd52cfe1fbacc9ad16aa2f47a', '26.txt', 'ModernizeLog']
+commit 2630fbf828ed921bd52cfe1fbacc9ad16aa2f47a
+Author: Johan Hovold <johan@kernel.org>
+Date:   Tue Sep 1 12:25:28 2015 +0200
+
+    greybus: pwm: replace pr_err with dev_err
+    
+    Replace pr_err with the more descriptive dev_err. Also include the error
+    code on failure to register the PWM chip.
+    
+    Signed-off-by: Johan Hovold <johan@hovoldconsulting.com>
+    Reviewed-by: Viresh Kumar <viresh.kumar@linaro.org>
+
+diff --git a/drivers/staging/greybus/pwm.c b/drivers/staging/greybus/pwm.c
+index 5f335895d230..d91905f0f7b3 100644
+--- a/drivers/staging/greybus/pwm.c
++++ b/drivers/staging/greybus/pwm.c
+@@ -204,7 +204,7 @@ static int gb_pwm_connection_init(struct gb_connection *connection)
+ 
+ 	ret = pwmchip_add(pwm);
+ 	if (ret) {
+-		pr_err("Failed to register PWM\n");
++		dev_err(&connection->dev, "failed to register PWM: %d\n", ret);
+ 		goto out_err;
+ 	}
+ 

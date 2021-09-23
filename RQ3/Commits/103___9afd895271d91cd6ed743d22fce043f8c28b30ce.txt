@@ -1,0 +1,36 @@
+['9afd895271d91cd6ed743d22fce043f8c28b30ce', '889.txt', 'FixFormatSpecifier']
+commit 9afd895271d91cd6ed743d22fce043f8c28b30ce
+Author: Arnd Bergmann <arnd@arndb.de>
+Date:   Thu Dec 8 22:57:03 2016 +0100
+
+    net/mlx5e: use %pad format string for dma_addr_t
+    
+    On 32-bit ARM with 64-bit dma_addr_t I get this warning about an
+    incorrect format string:
+    
+    In file included from /git/arm-soc/drivers/net/ethernet/mellanox/mlx5/core/alloc.c:42:0:
+    drivers/net/ethernet/mellanox/mlx5/core/alloc.c: In function ‘mlx5_frag_buf_alloc_node’:
+    drivers/net/ethernet/mellanox/mlx5/core/alloc.c:134:12: error: cast to pointer from integer of different size [-Werror=int-to-pointer-cast]
+    
+    We have the special %pad format for printing dma_addr_t, so use that
+    to print the correct address and avoid the warning.
+    
+    Fixes: 1c1b522808a1 ("net/mlx5e: Implement Fragmented Work Queue (WQ)")
+    Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/mellanox/mlx5/core/alloc.c b/drivers/net/ethernet/mellanox/mlx5/core/alloc.c
+index 44791de5afe6..66bd213f35ce 100644
+--- a/drivers/net/ethernet/mellanox/mlx5/core/alloc.c
++++ b/drivers/net/ethernet/mellanox/mlx5/core/alloc.c
+@@ -130,8 +130,8 @@ int mlx5_frag_buf_alloc_node(struct mlx5_core_dev *dev, int size,
+ 		if (frag->map & ((1 << buf->page_shift) - 1)) {
+ 			dma_free_coherent(&dev->pdev->dev, frag_sz,
+ 					  buf->frags[i].buf, buf->frags[i].map);
+-			mlx5_core_warn(dev, "unexpected map alignment: 0x%p, page_shift=%d\n",
+-				       (void *)frag->map, buf->page_shift);
++			mlx5_core_warn(dev, "unexpected map alignment: %pad, page_shift=%d\n",
++				       &frag->map, buf->page_shift);
+ 			goto err_free_buf;
+ 		}
+ 		size -= frag_sz;

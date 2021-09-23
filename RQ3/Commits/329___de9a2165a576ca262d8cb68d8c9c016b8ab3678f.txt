@@ -1,0 +1,38 @@
+['de9a2165a576ca262d8cb68d8c9c016b8ab3678f', '643.txt', 'ModernizeLog']
+commit de9a2165a576ca262d8cb68d8c9c016b8ab3678f
+Author: LABBE Corentin <clabbe.montjoie@gmail.com>
+Date:   Wed Nov 16 20:09:40 2016 +0100
+
+    net: stmmac: replace hardcoded function name by __func__
+    
+    Some printing have the function name hardcoded.
+    It is better to use __func__ instead.
+    
+    Signed-off-by: Corentin Labbe <clabbe.montjoie@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
+index 791daf4ff950..d160bdb4d29b 100644
+--- a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
++++ b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
+@@ -849,7 +849,7 @@ static int stmmac_init_phy(struct net_device *dev)
+ 
+ 		snprintf(phy_id_fmt, MII_BUS_ID_SIZE + 3, PHY_ID_FMT, bus_id,
+ 			 priv->plat->phy_addr);
+-		netdev_dbg(priv->dev, "stmmac_init_phy: trying to attach to %s\n",
++		netdev_dbg(priv->dev, "%s: trying to attach to %s\n", __func__,
+ 			   phy_id_fmt);
+ 
+ 		phydev = phy_connect(dev, phy_id_fmt, &stmmac_adjust_link,
+@@ -890,9 +890,8 @@ static int stmmac_init_phy(struct net_device *dev)
+ 	if (phydev->is_pseudo_fixed_link)
+ 		phydev->irq = PHY_POLL;
+ 
+-	netdev_dbg(priv->dev,
+-		   "stmmac_init_phy: attached to PHY (UID 0x%x) Link = %d\n",
+-		   phydev->phy_id, phydev->link);
++	netdev_dbg(priv->dev, "%s: attached to PHY (UID 0x%x) Link = %d\n",
++		   __func__, phydev->phy_id, phydev->link);
+ 
+ 	return 0;
+ }

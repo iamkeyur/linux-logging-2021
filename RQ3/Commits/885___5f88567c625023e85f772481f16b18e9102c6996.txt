@@ -1,0 +1,23 @@
+['5f88567c625023e85f772481f16b18e9102c6996', '1515.txt', 'CopyPasteMistakes']
+commit 5f88567c625023e85f772481f16b18e9102c6996
+Author: Alex Deucher <alexander.deucher@amd.com>
+Date:   Fri Mar 25 12:23:49 2016 -0400
+
+    drm/amd/powerplay: fix copy paste error in error message
+    
+    Noticed-by: Vasily Anonimov <vasily.anonimov@googlemail.com>
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+diff --git a/drivers/gpu/drm/amd/powerplay/hwmgr/polaris10_hwmgr.c b/drivers/gpu/drm/amd/powerplay/hwmgr/polaris10_hwmgr.c
+index a5172d154da5..8a90a567d1e4 100644
+--- a/drivers/gpu/drm/amd/powerplay/hwmgr/polaris10_hwmgr.c
++++ b/drivers/gpu/drm/amd/powerplay/hwmgr/polaris10_hwmgr.c
+@@ -2533,7 +2533,7 @@ int polaris10_enable_dpm_tasks(struct pp_hwmgr *hwmgr)
+ 
+ 	tmp_result = polaris10_pcie_performance_request(hwmgr);
+ 	PP_ASSERT_WITH_CODE((0 == tmp_result),
+-			"Failed to enable thermal auto throttle!", result = tmp_result);
++			"pcie performance request failed!", result = tmp_result);
+ 
+ 	return result;
+ }

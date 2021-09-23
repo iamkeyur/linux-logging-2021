@@ -1,0 +1,29 @@
+['c8f02f2108136a6218326fbcd4034b985849667c', '286.txt', 'LogLevel']
+commit c8f02f2108136a6218326fbcd4034b985849667c
+Author: Oliver O'Halloran <oohall@gmail.com>
+Date:   Fri Feb 15 11:48:14 2019 +1100
+
+    powerpc/eeh_cache: Bump log level of eeh_addr_cache_print()
+    
+    To use this function at all #define DEBUG needs to be set in eeh_cache.c.
+    Considering that printing at pr_debug is probably not all that useful since
+    it adds the additional hurdle of requiring you to enable the debug print if
+    dynamic_debug is in use so this patch bumps it to pr_info.
+    
+    Signed-off-by: Oliver O'Halloran <oohall@gmail.com>
+    Reviewed-by: Sam Bobroff <sbobroff@linux.ibm.com>
+    Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+
+diff --git a/arch/powerpc/kernel/eeh_cache.c b/arch/powerpc/kernel/eeh_cache.c
+index 5c5697cced41..9c68f0837385 100644
+--- a/arch/powerpc/kernel/eeh_cache.c
++++ b/arch/powerpc/kernel/eeh_cache.c
+@@ -114,7 +114,7 @@ static void eeh_addr_cache_print(struct pci_io_addr_cache *cache)
+ 	while (n) {
+ 		struct pci_io_addr_range *piar;
+ 		piar = rb_entry(n, struct pci_io_addr_range, rb_node);
+-		pr_debug("PCI: %s addr range %d [%pap-%pap]: %s\n",
++		pr_info("PCI: %s addr range %d [%pap-%pap]: %s\n",
+ 		       (piar->flags & IORESOURCE_IO) ? "i/o" : "mem", cnt,
+ 		       &piar->addr_lo, &piar->addr_hi, pci_name(piar->pcidev));
+ 		cnt++;

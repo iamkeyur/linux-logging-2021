@@ -1,0 +1,25 @@
+['521d93579f863b04fa5eb492f4b14b220d44dd19', '203.txt', 'Typo']
+commit 521d93579f863b04fa5eb492f4b14b220d44dd19
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Sat Jun 4 20:19:58 2016 +0100
+
+    mfd: si476x-i2c: Fix spelling mistake "comptible" -> "compatible"
+    
+    trivial fix to spelling mistake in dev_err message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Lee Jones <lee.jones@linaro.org>
+
+diff --git a/drivers/mfd/si476x-i2c.c b/drivers/mfd/si476x-i2c.c
+index fb4ce6d04c30..c180b7533bba 100644
+--- a/drivers/mfd/si476x-i2c.c
++++ b/drivers/mfd/si476x-i2c.c
+@@ -600,7 +600,7 @@ static int si476x_core_fwver_to_revision(struct si476x_core *core,
+ unknown_revision:
+ 	dev_err(&core->client->dev,
+ 		"Unsupported version of the firmware: %d.%d.%d, "
+-		"reverting to A10 comptible functions\n",
++		"reverting to A10 compatible functions\n",
+ 		major, minor1, minor2);
+ 
+ 	return SI476X_REVISION_A10;

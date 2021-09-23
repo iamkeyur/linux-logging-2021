@@ -1,0 +1,25 @@
+['c72358571aaadf46755d3e38f671233a7dd48f00', '274.txt', 'ModernizeLog']
+commit c72358571aaadf46755d3e38f671233a7dd48f00
+Author: Karim Eshapa <karim.eshapa@gmail.com>
+Date:   Sat May 13 21:05:19 2017 +0200
+
+    crypto: algapi - Use pr_err common logging style.
+    
+    Use more common error logging style.
+    
+    Signed-off-by: Karim Eshapa <karim.eshapa@gmail.com>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+diff --git a/crypto/algapi.c b/crypto/algapi.c
+index 9eed4ef9c971..e4cc7615a139 100644
+--- a/crypto/algapi.c
++++ b/crypto/algapi.c
+@@ -260,7 +260,7 @@ void crypto_alg_tested(const char *name, int err)
+ 			goto found;
+ 	}
+ 
+-	printk(KERN_ERR "alg: Unexpected test result for %s: %d\n", name, err);
++	pr_err("alg: Unexpected test result for %s: %d\n", name, err);
+ 	goto unlock;
+ 
+ found:

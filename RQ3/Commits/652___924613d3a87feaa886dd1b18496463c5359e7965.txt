@@ -1,0 +1,26 @@
+['924613d3a87feaa886dd1b18496463c5359e7965', '280.txt', 'Typo']
+commit 924613d3a87feaa886dd1b18496463c5359e7965
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Mon Mar 19 14:32:59 2018 +0000
+
+    bnx2x: fix spelling mistake: "registeration" -> "registration"
+    
+    Trivial fix to spelling mistake in BNX2X_ERR error message text
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Acked-by: Sudarsana Kalluru <Sudarsana.Kalluru@cavium.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c b/drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c
+index 74fc9af4aadb..b8388e93520a 100644
+--- a/drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c
++++ b/drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c
+@@ -13913,7 +13913,7 @@ static void bnx2x_register_phc(struct bnx2x *bp)
+ 	bp->ptp_clock = ptp_clock_register(&bp->ptp_clock_info, &bp->pdev->dev);
+ 	if (IS_ERR(bp->ptp_clock)) {
+ 		bp->ptp_clock = NULL;
+-		BNX2X_ERR("PTP clock registeration failed\n");
++		BNX2X_ERR("PTP clock registration failed\n");
+ 	}
+ }
+ 

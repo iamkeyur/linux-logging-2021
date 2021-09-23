@@ -1,0 +1,61 @@
+['bb923fdc374420116b8425a49b9bfb38caa35e7f', '693.txt', 'FixFormatSpecifier']
+commit bb923fdc374420116b8425a49b9bfb38caa35e7f
+Author: Rob Herring <robh@kernel.org>
+Date:   Tue Jul 18 16:43:05 2017 -0500
+
+    hwmon: (ads1015) Convert to using %pOF instead of full_name
+    
+    Now that we have a custom printf format specifier, convert users of
+    full_name to use %pOF instead. This is preparation to remove storing
+    of the full path string for each node.
+    
+    Signed-off-by: Rob Herring <robh@kernel.org>
+    Cc: Dirk Eibach <eibach@gdsys.de>
+    Cc: Jean Delvare <jdelvare@suse.com>
+    Cc: Guenter Roeck <linux@roeck-us.net>
+    Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+
+diff --git a/drivers/hwmon/ads1015.c b/drivers/hwmon/ads1015.c
+index 357b42607164..98c704d3366a 100644
+--- a/drivers/hwmon/ads1015.c
++++ b/drivers/hwmon/ads1015.c
+@@ -191,24 +191,23 @@ static int ads1015_get_channels_config_of(struct i2c_client *client)
+ 		unsigned int data_rate = ADS1015_DEFAULT_DATA_RATE;
+ 
+ 		if (of_property_read_u32(node, "reg", &pval)) {
+-			dev_err(&client->dev, "invalid reg on %s\n",
+-				node->full_name);
++			dev_err(&client->dev, "invalid reg on %pOF\n", node);
+ 			continue;
+ 		}
+ 
+ 		channel = pval;
+ 		if (channel >= ADS1015_CHANNELS) {
+ 			dev_err(&client->dev,
+-				"invalid channel index %d on %s\n",
+-				channel, node->full_name);
++				"invalid channel index %d on %pOF\n",
++				channel, node);
+ 			continue;
+ 		}
+ 
+ 		if (!of_property_read_u32(node, "ti,gain", &pval)) {
+ 			pga = pval;
+ 			if (pga > 6) {
+-				dev_err(&client->dev, "invalid gain on %s\n",
+-					node->full_name);
++				dev_err(&client->dev, "invalid gain on %pOF\n",
++					node);
+ 				return -EINVAL;
+ 			}
+ 		}
+@@ -217,8 +216,7 @@ static int ads1015_get_channels_config_of(struct i2c_client *client)
+ 			data_rate = pval;
+ 			if (data_rate > 7) {
+ 				dev_err(&client->dev,
+-					"invalid data_rate on %s\n",
+-					node->full_name);
++					"invalid data_rate on %pOF\n", node);
+ 				return -EINVAL;
+ 			}
+ 		}

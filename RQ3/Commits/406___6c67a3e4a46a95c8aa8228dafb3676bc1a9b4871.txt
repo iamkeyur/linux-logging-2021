@@ -1,0 +1,58 @@
+['6c67a3e4a46a95c8aa8228dafb3676bc1a9b4871', '557.txt', 'LeakInformation']
+commit 6c67a3e4a46a95c8aa8228dafb3676bc1a9b4871
+Author: Vasily Averin <vvs@virtuozzo.com>
+Date:   Wed Nov 8 08:57:32 2017 +0300
+
+    sunrpc: remove net pointer from messages
+    
+    Publishing of net pointer is not safe, use net->ns.inum as net ID
+    [  171.391947] RPC:       created new rpcb local clients
+        (rpcb_local_clnt: ..., rpcb_local_clnt4: ...) for net f00001e7
+    [  171.767188] NFSD: starting 90-second grace period (net f00001e7)
+    
+    Signed-off-by: Vasily Averin <vvs@virtuozzo.com>
+    Signed-off-by: Anna Schumaker <Anna.Schumaker@Netapp.com>
+
+diff --git a/net/sunrpc/rpc_pipe.c b/net/sunrpc/rpc_pipe.c
+index 61a504fb1ae2..7803f3b6aa53 100644
+--- a/net/sunrpc/rpc_pipe.c
++++ b/net/sunrpc/rpc_pipe.c
+@@ -1410,8 +1410,8 @@ rpc_fill_super(struct super_block *sb, void *data, int silent)
+ 		return PTR_ERR(gssd_dentry);
+ 	}
+ 
+-	dprintk("RPC:       sending pipefs MOUNT notification for net %p%s\n",
+-		net, NET_NAME(net));
++	dprintk("RPC:       sending pipefs MOUNT notification for net %x%s\n",
++		net->ns.inum, NET_NAME(net));
+ 	mutex_lock(&sn->pipefs_sb_lock);
+ 	sn->pipefs_sb = sb;
+ 	err = blocking_notifier_call_chain(&rpc_pipefs_notifier_list,
+@@ -1462,8 +1462,8 @@ static void rpc_kill_sb(struct super_block *sb)
+ 		goto out;
+ 	}
+ 	sn->pipefs_sb = NULL;
+-	dprintk("RPC:       sending pipefs UMOUNT notification for net %p%s\n",
+-		net, NET_NAME(net));
++	dprintk("RPC:       sending pipefs UMOUNT notification for net %x%s\n",
++		net->ns.inum, NET_NAME(net));
+ 	blocking_notifier_call_chain(&rpc_pipefs_notifier_list,
+ 					   RPC_PIPEFS_UMOUNT,
+ 					   sb);
+diff --git a/net/sunrpc/rpcb_clnt.c b/net/sunrpc/rpcb_clnt.c
+index ea0676f199c8..c526f8fb37c9 100644
+--- a/net/sunrpc/rpcb_clnt.c
++++ b/net/sunrpc/rpcb_clnt.c
+@@ -216,9 +216,9 @@ static void rpcb_set_local(struct net *net, struct rpc_clnt *clnt,
+ 	smp_wmb(); 
+ 	sn->rpcb_users = 1;
+ 	dprintk("RPC:       created new rpcb local clients (rpcb_local_clnt: "
+-			"%p, rpcb_local_clnt4: %p) for net %p%s\n",
+-			sn->rpcb_local_clnt, sn->rpcb_local_clnt4,
+-			net, (net == &init_net) ? " (init_net)" : "");
++		"%p, rpcb_local_clnt4: %p) for net %x%s\n",
++		sn->rpcb_local_clnt, sn->rpcb_local_clnt4,
++		net->ns.inum, (net == &init_net) ? " (init_net)" : "");
+ }
+ 
+ /*

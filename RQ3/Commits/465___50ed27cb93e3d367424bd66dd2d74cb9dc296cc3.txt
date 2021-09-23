@@ -1,0 +1,29 @@
+['50ed27cb93e3d367424bd66dd2d74cb9dc296cc3', '492.txt', 'AddInfo']
+commit 50ed27cb93e3d367424bd66dd2d74cb9dc296cc3
+Author: Chad Dupuis <cdupuis@marvell.com>
+Date:   Sun Apr 21 22:44:54 2019 -0700
+
+    scsi: qedf: Add port_id for fcport into initiate_cleanup debug message
+    
+    Port ID will help in debugging.
+    
+    Signed-off-by: Chad Dupuis <cdupuis@marvell.com>
+    Signed-off-by: Saurav Kashyap <skashyap@marvell.com>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/scsi/qedf/qedf_io.c b/drivers/scsi/qedf/qedf_io.c
+index 29b456d24fd3..42f9f2a9d8ea 100644
+--- a/drivers/scsi/qedf/qedf_io.c
++++ b/drivers/scsi/qedf/qedf_io.c
+@@ -2154,9 +2154,9 @@ int qedf_initiate_cleanup(struct qedf_ioreq *io_req,
+ 	refcount = kref_read(&io_req->refcount);
+ 
+ 	QEDF_INFO(&qedf->dbg_ctx, QEDF_LOG_IO,
+-		  "Entered xid=0x%x sc_cmd=%p cmd_type=%d flags=0x%lx refcount=%d\n",
++		  "Entered xid=0x%x sc_cmd=%p cmd_type=%d flags=0x%lx refcount=%d fcport=%p port_id=0x%06x\n",
+ 		  io_req->xid, io_req->sc_cmd, io_req->cmd_type, io_req->flags,
+-		  refcount);
++		  refcount, fcport, fcport->rdata->ids.port_id);
+ 
+ 	/* Cleanup cmds re-use the same TID as the original I/O */
+ 	xid = io_req->xid;

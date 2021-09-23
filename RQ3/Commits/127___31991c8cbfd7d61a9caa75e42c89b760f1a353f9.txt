@@ -1,0 +1,26 @@
+['31991c8cbfd7d61a9caa75e42c89b760f1a353f9', '861.txt', 'Typo']
+commit 31991c8cbfd7d61a9caa75e42c89b760f1a353f9
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Wed Apr 12 19:20:10 2017 +0100
+
+    staging/atomisp: fix spelling mistake: "falied" -> "failed"
+    
+    trivial fix to spelling mistake in dev_err error message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Alan Cox <alan@linux.intel.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/media/atomisp/pci/atomisp2/hmm/hmm_bo_dev.c b/drivers/staging/media/atomisp/pci/atomisp2/hmm/hmm_bo_dev.c
+index 87090cea5b9d..d22a2d2388c2 100644
+--- a/drivers/staging/media/atomisp/pci/atomisp2/hmm/hmm_bo_dev.c
++++ b/drivers/staging/media/atomisp/pci/atomisp2/hmm/hmm_bo_dev.c
+@@ -59,7 +59,7 @@ int hmm_bo_device_init(struct hmm_bo_device *bdev,
+ 
+ 	ret = hmm_vm_init(&bdev->vaddr_space, vaddr_start, size);
+ 	if (ret) {
+-		dev_err(atomisp_dev, "hmm_vm_init falied. vaddr_start = 0x%x, size = %d\n",
++		dev_err(atomisp_dev, "hmm_vm_init failed. vaddr_start = 0x%x, size = %d\n",
+ 			vaddr_start, size);
+ 		goto vm_init_err;
+ 	}

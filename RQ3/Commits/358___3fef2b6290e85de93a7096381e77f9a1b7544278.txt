@@ -1,0 +1,27 @@
+['3fef2b6290e85de93a7096381e77f9a1b7544278', '611.txt', 'FixFormatSpecifier']
+commit 3fef2b6290e85de93a7096381e77f9a1b7544278
+Author: Antonio Cardace <anto.cardace@gmail.com>
+Date:   Mon Feb 19 11:37:15 2018 +0000
+
+    x25: use %*ph to print small buffer
+    
+    Use %*ph format to print small buffer as hex string.
+    
+    Suggested-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+    Signed-off-by: Antonio Cardace <anto.cardace@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/net/x25/x25_subr.c b/net/x25/x25_subr.c
+index db0b1315d577..9c214ec681ac 100644
+--- a/net/x25/x25_subr.c
++++ b/net/x25/x25_subr.c
+@@ -335,8 +335,7 @@ int x25_decode(struct sock *sk, struct sk_buff *skb, int *ns, int *nr, int *q,
+ 		}
+ 	}
+ 
+-	pr_debug("invalid PLP frame %02X %02X %02X\n",
+-	       frame[0], frame[1], frame[2]);
++	pr_debug("invalid PLP frame %3ph\n", frame);
+ 
+ 	return X25_ILLEGAL;
+ }

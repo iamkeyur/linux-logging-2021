@@ -1,0 +1,52 @@
+['430317881795172144a606b47744baf2a19b79bb', '328.txt', 'LogLevel']
+commit 430317881795172144a606b47744baf2a19b79bb
+Author: Chris Wilson <chris@chris-wilson.co.uk>
+Date:   Thu Sep 13 14:16:26 2018 +0100
+
+    drm/i915: Mark up a couple of KMS debug messages as such
+    
+    For finding the panel fitter and PLL for a particular modeset is a part
+    of that modeset and should be included with the reset of the
+    DRM_DEBUG_KMS.
+    
+    Signed-off-by: Chris Wilson <chris@chris-wilson.co.uk>
+    Reviewed-by: Rodrigo Vivi <rodrigo.vivi@intel.com>
+    Link: https://patchwork.freedesktop.org/patch/msgid/20180913131629.3978-1-chris@chris-wilson.co.uk
+
+diff --git a/drivers/gpu/drm/i915/intel_display.c b/drivers/gpu/drm/i915/intel_display.c
+index 7e206e5e60cd..376173eb733d 100644
+--- a/drivers/gpu/drm/i915/intel_display.c
++++ b/drivers/gpu/drm/i915/intel_display.c
+@@ -6154,8 +6154,8 @@ static void i9xx_pfit_disable(struct intel_crtc *crtc)
+ 
+ 	assert_pipe_disabled(dev_priv, crtc->pipe);
+ 
+-	DRM_DEBUG_DRIVER("disabling pfit, current: 0x%08x\n",
+-			 I915_READ(PFIT_CONTROL));
++	DRM_DEBUG_KMS("disabling pfit, current: 0x%08x\n",
++		      I915_READ(PFIT_CONTROL));
+ 	I915_WRITE(PFIT_CONTROL, 0);
+ }
+ 
+@@ -8677,8 +8677,8 @@ static int ironlake_crtc_compute_clock(struct intel_crtc *crtc,
+ 	ironlake_compute_dpll(crtc, crtc_state, NULL);
+ 
+ 	if (!intel_get_shared_dpll(crtc, crtc_state, NULL)) {
+-		DRM_DEBUG_DRIVER("failed to find PLL for pipe %c\n",
+-				 pipe_name(crtc->pipe));
++		DRM_DEBUG_KMS("failed to find PLL for pipe %c\n",
++			      pipe_name(crtc->pipe));
+ 		return -EINVAL;
+ 	}
+ 
+@@ -9245,8 +9245,8 @@ static int haswell_crtc_compute_clock(struct intel_crtc *crtc,
+ 			intel_get_crtc_new_encoder(state, crtc_state);
+ 
+ 		if (!intel_get_shared_dpll(crtc, crtc_state, encoder)) {
+-			DRM_DEBUG_DRIVER("failed to find PLL for pipe %c\n",
+-					 pipe_name(crtc->pipe));
++			DRM_DEBUG_KMS("failed to find PLL for pipe %c\n",
++				      pipe_name(crtc->pipe));
+ 			return -EINVAL;
+ 		}
+ 	}

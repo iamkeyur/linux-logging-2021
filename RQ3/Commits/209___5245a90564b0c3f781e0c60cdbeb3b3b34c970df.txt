@@ -1,0 +1,27 @@
+['5245a90564b0c3f781e0c60cdbeb3b3b34c970df', '772.txt', 'NullPtr']
+commit 5245a90564b0c3f781e0c60cdbeb3b3b34c970df
+Author: Johan Hovold <johan@kernel.org>
+Date:   Tue Nov 3 12:11:27 2015 +0100
+
+    greybus: connection: fix potential null-deref when binding protocol
+    
+    We can have connections without bundles so we must not use the bundle
+    device for error messages when failing to look up a protocol.
+    
+    Signed-off-by: Johan Hovold <johan@hovoldconsulting.com>
+    Reviewed-by: Viresh Kumar <viresh.kumar@linaro.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@google.com>
+
+diff --git a/drivers/staging/greybus/connection.c b/drivers/staging/greybus/connection.c
+index c3cd69c0f3ed..294e72e8e1c0 100644
+--- a/drivers/staging/greybus/connection.c
++++ b/drivers/staging/greybus/connection.c
+@@ -510,7 +510,7 @@ int gb_connection_bind_protocol(struct gb_connection *connection)
+ 				   connection->major,
+ 				   connection->minor);
+ 	if (!protocol) {
+-		dev_warn(&connection->bundle->dev,
++		dev_warn(connection->hd->parent,
+ 				"protocol 0x%02hhx version %hhu.%hhu not found\n",
+ 				connection->protocol_id,
+ 				connection->major, connection->minor);

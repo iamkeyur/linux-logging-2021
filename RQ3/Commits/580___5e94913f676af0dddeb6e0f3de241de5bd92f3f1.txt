@@ -1,0 +1,35 @@
+['5e94913f676af0dddeb6e0f3de241de5bd92f3f1', '360.txt', 'Mislead/Ambiguous']
+commit 5e94913f676af0dddeb6e0f3de241de5bd92f3f1
+Author: Javier Martinez Canillas <javier@osg.samsung.com>
+Date:   Fri May 27 10:18:22 2016 -0400
+
+    mwifiex: use better message and error code when OF node doesn't match
+    
+    The Documentation/devicetree/bindings/net/wireless/marvell-sd8xxx.txt DT
+    binding document lists the possible compatible strings that a SDIO child
+    node can have, so the driver checks if the defined in the node matches.
+    
+    But the error message when that's not the case is misleading, so change
+    for one that makes clear what the error really is. Also, returning a -1
+    as errno code is not correct since that's -EPERM. A -EINVAL seems to be
+    a more appropriate one.
+    
+    Signed-off-by: Javier Martinez Canillas <javier@osg.samsung.com>
+    Reviewed-by: Julian Calaby <julian.calaby@gmail.com>
+    Signed-off-by: Kalle Valo <kvalo@codeaurora.org>
+
+diff --git a/drivers/net/wireless/marvell/mwifiex/sdio.c b/drivers/net/wireless/marvell/mwifiex/sdio.c
+index ba7a4936615e..3a2267aeffb9 100644
+--- a/drivers/net/wireless/marvell/mwifiex/sdio.c
++++ b/drivers/net/wireless/marvell/mwifiex/sdio.c
+@@ -103,8 +103,8 @@ static int mwifiex_sdio_probe_of(struct device *dev, struct sdio_mmc_card *card)
+ 	int ret;
+ 
+ 	if (!of_match_node(mwifiex_sdio_of_match_table, dev->of_node)) {
+-		dev_err(dev, "sdio platform data not available\n");
+-		return -1;
++		dev_err(dev, "required compatible string missing\n");
++		return -EINVAL;
+ 	}
+ 
+ 	card->plt_of_node = dev->of_node;

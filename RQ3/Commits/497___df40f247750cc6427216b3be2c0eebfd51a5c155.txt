@@ -1,0 +1,34 @@
+['df40f247750cc6427216b3be2c0eebfd51a5c155', '458.txt', 'ModernizeLog']
+commit df40f247750cc6427216b3be2c0eebfd51a5c155
+Author: Chris Packham <chris.packham@alliedtelesis.co.nz>
+Date:   Mon Jun 26 12:44:34 2017 +1200
+
+    i2c: pca-platform: use dev_warn/dev_info instead of printk
+    
+    Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
+    Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
+
+diff --git a/drivers/i2c/busses/i2c-pca-platform.c b/drivers/i2c/busses/i2c-pca-platform.c
+index 7db481cbf402..395eca0cbb1f 100644
+--- a/drivers/i2c/busses/i2c-pca-platform.c
++++ b/drivers/i2c/busses/i2c-pca-platform.c
+@@ -107,8 +107,8 @@ static int i2c_pca_pf_waitforcompletion(void *pd)
+ static void i2c_pca_pf_dummyreset(void *pd)
+ {
+ 	struct i2c_pca_pf_data *i2c = pd;
+-	printk(KERN_WARNING "%s: No reset-pin found. Chip may get stuck!\n",
+-		i2c->adap.name);
++
++	dev_warn(&i2c->adap.dev, "No reset-pin found. Chip may get stuck!\n");
+ }
+ 
+ static void i2c_pca_pf_resetchip(void *pd)
+@@ -236,7 +236,7 @@ static int i2c_pca_pf_probe(struct platform_device *pdev)
+ 
+ 	platform_set_drvdata(pdev, i2c);
+ 
+-	printk(KERN_INFO "%s registered.\n", i2c->adap.name);
++	dev_info(&pdev->dev, "registered.\n");
+ 
+ 	return 0;
+ }

@@ -1,0 +1,56 @@
+['8e5de1d8c34c63331f12cf7bf7bbf115bba0317a', '71.txt', 'Typo']
+commit 8e5de1d8c34c63331f12cf7bf7bbf115bba0317a
+Author: Lukas Wunner <lukas@wunner.de>
+Date:   Sat Sep 5 11:14:43 2015 +0200
+
+    drm/radeon: Spell vga_switcheroo consistently
+    
+    Currently everyone and their dog has their own favourite spelling
+    for vga_switcheroo. This makes it hard to grep dmesg for log entries
+    relating to vga_switcheroo. It also makes it hard to find related
+    source files in the tree.
+    
+    vga_switcheroo.c uses pr_fmt "vga_switcheroo". Use that everywhere.
+    
+    Signed-off-by: Lukas Wunner <lukas@wunner.de>
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+diff --git a/drivers/gpu/drm/radeon/radeon_atpx_handler.c b/drivers/gpu/drm/radeon/radeon_atpx_handler.c
+index 8bc7d0bbd3c8..a771b9f0bf98 100644
+--- a/drivers/gpu/drm/radeon/radeon_atpx_handler.c
++++ b/drivers/gpu/drm/radeon/radeon_atpx_handler.c
+@@ -535,7 +535,7 @@ static bool radeon_atpx_detect(void)
+ 
+ 	if (has_atpx && vga_count == 2) {
+ 		acpi_get_name(radeon_atpx_priv.atpx.handle, ACPI_FULL_PATHNAME, &buffer);
+-		printk(KERN_INFO "VGA switcheroo: detected switching method %s handle\n",
++		printk(KERN_INFO "vga_switcheroo: detected switching method %s handle\n",
+ 		       acpi_method_name);
+ 		radeon_atpx_priv.atpx_detected = true;
+ 		return true;
+diff --git a/drivers/gpu/drm/radeon/radeon_device.c b/drivers/gpu/drm/radeon/radeon_device.c
+index f3f562f6d848..c566993a2ec3 100644
+--- a/drivers/gpu/drm/radeon/radeon_device.c
++++ b/drivers/gpu/drm/radeon/radeon_device.c
+@@ -1197,7 +1197,7 @@ static void radeon_check_arguments(struct radeon_device *rdev)
+  * radeon_switcheroo_set_state - set switcheroo state
+  *
+  * @pdev: pci dev pointer
+- * @state: vga switcheroo state
++ * @state: vga_switcheroo state
+  *
+  * Callback for the switcheroo driver.  Suspends or resumes the
+  * the asics before or after it is powered up using ACPI methods.
+diff --git a/drivers/gpu/drm/radeon/radeon_kms.c b/drivers/gpu/drm/radeon/radeon_kms.c
+index fd9da282b29c..977f1a5e11a5 100644
+--- a/drivers/gpu/drm/radeon/radeon_kms.c
++++ b/drivers/gpu/drm/radeon/radeon_kms.c
+@@ -602,7 +602,7 @@ static int radeon_info_ioctl(struct drm_device *dev, void *data, struct drm_file
+  *
+  * @dev: drm dev pointer
+  *
+- * Switch vga switcheroo state after last close (all asics).
++ * Switch vga_switcheroo state after last close (all asics).
+  */
+ void radeon_driver_lastclose_kms(struct drm_device *dev)
+ {

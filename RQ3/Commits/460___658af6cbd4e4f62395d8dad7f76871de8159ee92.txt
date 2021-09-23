@@ -1,0 +1,34 @@
+['658af6cbd4e4f62395d8dad7f76871de8159ee92', '497.txt', 'Typo']
+commit 658af6cbd4e4f62395d8dad7f76871de8159ee92
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Mon Sep 4 10:37:50 2017 +0100
+
+    ARC: clk: fix spelling mistake: "configurarion" -> "configuration"
+    
+    Trivial fix to spelling mistake in dev_dbg message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Stephen Boyd <sboyd@codeaurora.org>
+
+diff --git a/drivers/clk/clk-hsdk-pll.c b/drivers/clk/clk-hsdk-pll.c
+index bbf237173b37..c4ee280f454d 100644
+--- a/drivers/clk/clk-hsdk-pll.c
++++ b/drivers/clk/clk-hsdk-pll.c
+@@ -139,7 +139,7 @@ static inline void hsdk_pll_set_cfg(struct hsdk_pll_clk *clk,
+ 	val |= cfg->odiv << CGU_PLL_CTRL_ODIV_SHIFT;
+ 	val |= cfg->band << CGU_PLL_CTRL_BAND_SHIFT;
+ 
+-	dev_dbg(clk->dev, "write configurarion: %#x\n", val);
++	dev_dbg(clk->dev, "write configuration: %#x\n", val);
+ 
+ 	hsdk_pll_write(clk, CGU_PLL_CTRL, val);
+ }
+@@ -169,7 +169,7 @@ static unsigned long hsdk_pll_recalc_rate(struct clk_hw *hw,
+ 
+ 	val = hsdk_pll_read(clk, CGU_PLL_CTRL);
+ 
+-	dev_dbg(clk->dev, "current configurarion: %#x\n", val);
++	dev_dbg(clk->dev, "current configuration: %#x\n", val);
+ 
+ 	/* Check if PLL is disabled */
+ 	if (val & CGU_PLL_CTRL_PD)

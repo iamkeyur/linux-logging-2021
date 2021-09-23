@@ -1,0 +1,39 @@
+['29305d7e8f89a16043a0aff89ce19b6c733ac465', '386.txt', 'Typo']
+commit 29305d7e8f89a16043a0aff89ce19b6c733ac465
+Author: Enric Balletbo i Serra <enric.balletbo@collabora.com>
+Date:   Tue Oct 16 11:53:36 2018 +0200
+
+    drm/bridge: analogix_dp: Fix misleading indentation reported by smatch
+    
+    This patch avoids that building the bridge/analogix source code with
+    smatch triggers complaints about inconsistent indenting. It also fixes
+    a typo in DRM_ERROR message, attch is replaced for attach.
+    
+    Signed-off-by: Enric Balletbo i Serra <enric.balletbo@collabora.com>
+    Reviewed-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+    Signed-off-by: Andrzej Hajda <a.hajda@samsung.com>
+    Link: https://patchwork.freedesktop.org/patch/msgid/20181016095336.15656-1-enric.balletbo@collabora.com
+
+diff --git a/drivers/gpu/drm/bridge/analogix/analogix_dp_core.c b/drivers/gpu/drm/bridge/analogix/analogix_dp_core.c
+index 2f21d3b6850b..753e96129ab7 100644
+--- a/drivers/gpu/drm/bridge/analogix/analogix_dp_core.c
++++ b/drivers/gpu/drm/bridge/analogix/analogix_dp_core.c
+@@ -1219,12 +1219,12 @@ static int analogix_dp_bridge_attach(struct drm_bridge *bridge)
+ 	 * plat_data->attch return, that's why we record the connector
+ 	 * point after plat attached.
+ 	 */
+-	 if (dp->plat_data->attach) {
+-		 ret = dp->plat_data->attach(dp->plat_data, bridge, connector);
+-		 if (ret) {
+-			 DRM_ERROR("Failed at platform attch func\n");
+-			 return ret;
+-		 }
++	if (dp->plat_data->attach) {
++		ret = dp->plat_data->attach(dp->plat_data, bridge, connector);
++		if (ret) {
++			DRM_ERROR("Failed at platform attach func\n");
++			return ret;
++		}
+ 	}
+ 
+ 	if (dp->plat_data->panel) {

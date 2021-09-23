@@ -1,0 +1,27 @@
+['9b8537de47f4a4fbca571a393d36ba725c9795f7', '440.txt', 'Mislead/Ambiguous', 'AddInfo']
+commit 9b8537de47f4a4fbca571a393d36ba725c9795f7
+Author: Olli Salonen <olli.salonen@iki.fi>
+Date:   Wed Mar 9 19:38:28 2016 -0300
+
+    [media] smipcie: MAC address printout formatting
+    
+    Modify the printout for MAC address to be more vendor agnostic.
+    Print also the port number.
+    
+    Signed-off-by: Olli Salonen <olli.salonen@iki.fi>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@osg.samsung.com>
+
+diff --git a/drivers/media/pci/smipcie/smipcie-main.c b/drivers/media/pci/smipcie/smipcie-main.c
+index 993a2d19bd54..4a9275a331b6 100644
+--- a/drivers/media/pci/smipcie/smipcie-main.c
++++ b/drivers/media/pci/smipcie/smipcie-main.c
+@@ -716,7 +716,8 @@ static int smi_fe_init(struct smi_port *port)
+ 	/* init MAC.*/
+ 	ret = smi_read_eeprom(&dev->i2c_bus[0], 0xc0, mac_ee, 16);
+ 	dev_info(&port->dev->pci_dev->dev,
+-		"DVBSky SMI PCIe MAC= %pM\n", mac_ee + (port->idx)*8);
++		"%s port %d MAC: %pM\n", dev->info->name,
++		port->idx, mac_ee + (port->idx)*8);
+ 	memcpy(adap->proposed_mac, mac_ee + (port->idx)*8, 6);
+ 	return ret;
+ }

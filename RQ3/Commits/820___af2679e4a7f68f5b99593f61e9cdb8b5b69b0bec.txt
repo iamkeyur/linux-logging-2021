@@ -1,0 +1,29 @@
+['af2679e4a7f68f5b99593f61e9cdb8b5b69b0bec', '241.txt', 'AddInfo']
+commit af2679e4a7f68f5b99593f61e9cdb8b5b69b0bec
+Author: Liu Bo <bo.li.liu@oracle.com>
+Date:   Thu Jan 25 11:02:48 2018 -0700
+
+    Btrfs: enhance leak debug checker for extent state and extent buffer
+    
+    This prints out eb->bflags since it contains some useful information,
+    e.g. whether eb is dirty.
+    
+    Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+    Reviewed-by: Josef Bacik <jbacik@fb.com>
+    Signed-off-by: David Sterba <dsterba@suse.com>
+
+diff --git a/fs/btrfs/extent_io.c b/fs/btrfs/extent_io.c
+index dfeb74a0be77..5bd7ecefc2bc 100644
+--- a/fs/btrfs/extent_io.c
++++ b/fs/btrfs/extent_io.c
+@@ -76,8 +76,8 @@ void btrfs_leak_debug_check(void)
+ 
+ 	while (!list_empty(&buffers)) {
+ 		eb = list_entry(buffers.next, struct extent_buffer, leak_list);
+-		pr_err("BTRFS: buffer leak start %llu len %lu refs %d\n",
+-		       eb->start, eb->len, atomic_read(&eb->refs));
++		pr_err("BTRFS: buffer leak start %llu len %lu refs %d bflags %lu\n",
++		       eb->start, eb->len, atomic_read(&eb->refs), eb->bflags);
+ 		list_del(&eb->leak_list);
+ 		kmem_cache_free(extent_buffer_cache, eb);
+ 	}

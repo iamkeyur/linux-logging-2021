@@ -1,0 +1,133 @@
+['b9c767fdde6138b945fce386eb481e34a080b7d5', '799.txt', 'Typo']
+commit b9c767fdde6138b945fce386eb481e34a080b7d5
+Author: Siva Rebbagondla <siva.rebbagondla@redpinesignals.com>
+Date:   Tue Feb 12 16:58:34 2019 +0530
+
+    rsi: fix spelling mistakes
+    
+    Trivial fixes to spelling mistakes in various files in rsi folder.
+    
+    Signed-off-by: Siva Rebbagondla <siva.rebbagondla@redpinesignals.com>
+    Signed-off-by: Kalle Valo <kvalo@codeaurora.org>
+
+diff --git a/drivers/net/wireless/rsi/rsi_91x_debugfs.c b/drivers/net/wireless/rsi/rsi_91x_debugfs.c
+index d0c35f3e2012..c71b41e45423 100644
+--- a/drivers/net/wireless/rsi/rsi_91x_debugfs.c
++++ b/drivers/net/wireless/rsi/rsi_91x_debugfs.c
+@@ -59,7 +59,7 @@ static int rsi_sdio_stats_read(struct seq_file *seq, void *data)
+ }
+ 
+ /**
+- * rsi_sdio_stats_open() - This funtion calls single open function of seq_file
++ * rsi_sdio_stats_open() - This function calls single open function of seq_file
+  *			   to open file and read contents from it.
+  * @inode: Pointer to the inode structure.
+  * @file: Pointer to the file structure.
+@@ -93,7 +93,7 @@ static int rsi_version_read(struct seq_file *seq, void *data)
+ }
+ 
+ /**
+- * rsi_version_open() - This funtion calls single open function of seq_file to
++ * rsi_version_open() - This function calls single open function of seq_file to
+  *			open file and read contents from it.
+  * @inode: Pointer to the inode structure.
+  * @file: Pointer to the file structure.
+@@ -178,7 +178,7 @@ static int rsi_stats_read(struct seq_file *seq, void *data)
+ }
+ 
+ /**
+- * rsi_stats_open() - This funtion calls single open function of seq_file to
++ * rsi_stats_open() - This function calls single open function of seq_file to
+  *		      open file and read contents from it.
+  * @inode: Pointer to the inode structure.
+  * @file: Pointer to the file structure.
+@@ -207,7 +207,7 @@ static int rsi_debug_zone_read(struct seq_file *seq, void *data)
+ }
+ 
+ /**
+- * rsi_debug_read() - This funtion calls single open function of seq_file to
++ * rsi_debug_read() - This function calls single open function of seq_file to
+  *		      open file and read contents from it.
+  * @inode: Pointer to the inode structure.
+  * @file: Pointer to the file structure.
+diff --git a/drivers/net/wireless/rsi/rsi_91x_mac80211.c b/drivers/net/wireless/rsi/rsi_91x_mac80211.c
+index b4527e609896..831046e760f8 100644
+--- a/drivers/net/wireless/rsi/rsi_91x_mac80211.c
++++ b/drivers/net/wireless/rsi/rsi_91x_mac80211.c
+@@ -1338,7 +1338,7 @@ static void rsi_fill_rx_status(struct ieee80211_hw *hw,
+ }
+ 
+ /**
+- * rsi_indicate_pkt_to_os() - This function sends recieved packet to mac80211.
++ * rsi_indicate_pkt_to_os() - This function sends received packet to mac80211.
+  * @common: Pointer to the driver private structure.
+  * @skb: Pointer to the socket buffer structure.
+  *
+diff --git a/drivers/net/wireless/rsi/rsi_91x_mgmt.c b/drivers/net/wireless/rsi/rsi_91x_mgmt.c
+index 4c2c776fc86d..8c17842ac507 100644
+--- a/drivers/net/wireless/rsi/rsi_91x_mgmt.c
++++ b/drivers/net/wireless/rsi/rsi_91x_mgmt.c
+@@ -409,8 +409,8 @@ static int rsi_load_radio_caps(struct rsi_common *common)
+  * rsi_mgmt_pkt_to_core() - This function is the entry point for Mgmt module.
+  * @common: Pointer to the driver private structure.
+  * @msg: Pointer to received packet.
+- * @msg_len: Length of the recieved packet.
+- * @type: Type of recieved packet.
++ * @msg_len: Length of the received packet.
++ * @type: Type of received packet.
+  *
+  * Return: 0 on success, -1 on failure.
+  */
+@@ -1547,7 +1547,7 @@ int rsi_send_ps_request(struct rsi_hw *adapter, bool enable,
+ }
+ 
+ /**
+- * rsi_set_antenna() - This fuction send antenna configuration request
++ * rsi_set_antenna() - This function send antenna configuration request
+  *		       to device
+  *
+  * @common: Pointer to the driver private structure.
+@@ -1955,7 +1955,7 @@ int rsi_handle_card_ready(struct rsi_common *common, u8 *msg)
+ 
+ /**
+  * rsi_mgmt_pkt_recv() - This function processes the management packets
+- *			 recieved from the hardware.
++ *			 received from the hardware.
+  * @common: Pointer to the driver private structure.
+  * @msg: Pointer to the received packet.
+  *
+diff --git a/drivers/net/wireless/rsi/rsi_91x_sdio.c b/drivers/net/wireless/rsi/rsi_91x_sdio.c
+index 764ad06cf910..3430d7a0899e 100644
+--- a/drivers/net/wireless/rsi/rsi_91x_sdio.c
++++ b/drivers/net/wireless/rsi/rsi_91x_sdio.c
+@@ -138,7 +138,7 @@ static int rsi_issue_sdiocommand(struct sdio_func *func,
+ }
+ 
+ /**
+- * rsi_handle_interrupt() - This function is called upon the occurence
++ * rsi_handle_interrupt() - This function is called upon the occurrence
+  *			    of an interrupt.
+  * @function: Pointer to the sdio_func structure.
+  *
+@@ -875,7 +875,7 @@ static int rsi_init_sdio_interface(struct rsi_hw *adapter,
+ 		goto fail;
+ 	}
+ 
+-	rsi_dbg(INIT_ZONE, "%s: Setup card succesfully\n", __func__);
++	rsi_dbg(INIT_ZONE, "%s: Setup card successfully\n", __func__);
+ 
+ 	status = rsi_init_sdio_slave_regs(adapter);
+ 	if (status) {
+diff --git a/drivers/net/wireless/rsi/rsi_91x_usb.c b/drivers/net/wireless/rsi/rsi_91x_usb.c
+index d31f9cd1ae90..ac0ef5ea6ffb 100644
+--- a/drivers/net/wireless/rsi/rsi_91x_usb.c
++++ b/drivers/net/wireless/rsi/rsi_91x_usb.c
+@@ -252,7 +252,7 @@ static int rsi_usb_reg_write(struct usb_device *usbdev,
+ 
+ /**
+  * rsi_rx_done_handler() - This function is called when a packet is received
+- *			   from USB stack. This is callback to recieve done.
++ *			   from USB stack. This is callback to receive done.
+  * @urb: Received URB.
+  *
+  * Return: None.

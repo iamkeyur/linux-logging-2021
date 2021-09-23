@@ -1,0 +1,58 @@
+['d1287493abe27a055b739ded3d812952b61e99ab', '845.txt', 'Typo']
+commit d1287493abe27a055b739ded3d812952b61e99ab
+Author: Omer Shpigelman <oshpigelman@habana.ai>
+Date:   Sun May 5 13:24:24 2019 +0300
+
+    habanalabs: minor documentation and prints fixes
+    
+    This patch fixes comments on various structure members and some spelling
+    errors in log messages.
+    
+    Signed-off-by: Omer Shpigelman <oshpigelman@habana.ai>
+    Reviewed-by: Oded Gabbay <oded.gabbay@gmail.com>
+    Signed-off-by: Oded Gabbay <oded.gabbay@gmail.com>
+
+diff --git a/drivers/misc/habanalabs/firmware_if.c b/drivers/misc/habanalabs/firmware_if.c
+index 19d1271a8f5c..de445a1d9f3d 100644
+--- a/drivers/misc/habanalabs/firmware_if.c
++++ b/drivers/misc/habanalabs/firmware_if.c
+@@ -256,7 +256,7 @@ int hl_fw_armcp_info_get(struct hl_device *hdev)
+ 					HL_ARMCP_INFO_TIMEOUT_USEC, &result);
+ 	if (rc) {
+ 		dev_err(hdev->dev,
+-			"Failed to send armcp info pkt, error %d\n", rc);
++			"Failed to send ArmCP info pkt, error %d\n", rc);
+ 		goto out;
+ 	}
+ 
+@@ -291,7 +291,7 @@ int hl_fw_get_eeprom_data(struct hl_device *hdev, void *data, size_t max_size)
+ 					max_size, &eeprom_info_dma_addr);
+ 	if (!eeprom_info_cpu_addr) {
+ 		dev_err(hdev->dev,
+-			"Failed to allocate DMA memory for EEPROM info packet\n");
++			"Failed to allocate DMA memory for ArmCP EEPROM packet\n");
+ 		return -ENOMEM;
+ 	}
+ 
+@@ -307,7 +307,7 @@ int hl_fw_get_eeprom_data(struct hl_device *hdev, void *data, size_t max_size)
+ 
+ 	if (rc) {
+ 		dev_err(hdev->dev,
+-			"Failed to send armcp EEPROM pkt, error %d\n", rc);
++			"Failed to send ArmCP EEPROM packet, error %d\n", rc);
+ 		goto out;
+ 	}
+ 
+diff --git a/drivers/misc/habanalabs/habanalabs.h b/drivers/misc/habanalabs/habanalabs.h
+index adef7d9d7488..7ca97df65da2 100644
+--- a/drivers/misc/habanalabs/habanalabs.h
++++ b/drivers/misc/habanalabs/habanalabs.h
+@@ -123,7 +123,7 @@ enum hl_device_hw_state {
+ /**
+  * struct asic_fixed_properties - ASIC specific immutable properties.
+  * @hw_queues_props: H/W queues properties.
+- * @armcp_info: received various information from ArmCP regarding the H/W. e.g.
++ * @armcp_info: received various information from ArmCP regarding the H/W, e.g.
+  *		available sensors.
+  * @uboot_ver: F/W U-boot version.
+  * @preboot_ver: F/W Preboot version.

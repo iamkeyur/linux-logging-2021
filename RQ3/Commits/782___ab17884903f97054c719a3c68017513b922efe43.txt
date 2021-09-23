@@ -1,0 +1,38 @@
+['ab17884903f97054c719a3c68017513b922efe43', '20.txt', 'Typo']
+commit ab17884903f97054c719a3c68017513b922efe43
+Author: oulijun <oulijun@huawei.com>
+Date:   Thu Apr 26 14:46:24 2018 +0800
+
+    RDMA/hns: Fix a couple misspellings
+    
+    This patch fixes two spelling errors.
+    
+    Signed-off-by: Lijun Ou <oulijun@huawei.com>
+    Signed-off-by: Doug Ledford <dledford@redhat.com>
+
+diff --git a/drivers/infiniband/hw/hns/hns_roce_hw_v2.c b/drivers/infiniband/hw/hns/hns_roce_hw_v2.c
+index 38a0b6b3446e..25916e8522ed 100644
+--- a/drivers/infiniband/hw/hns/hns_roce_hw_v2.c
++++ b/drivers/infiniband/hw/hns/hns_roce_hw_v2.c
+@@ -4487,7 +4487,7 @@ static int hns_roce_v2_create_eq(struct hns_roce_dev *hr_dev,
+ 	ret = hns_roce_cmd_mbox(hr_dev, mailbox->dma, 0, eq->eqn, 0,
+ 				eq_cmd, HNS_ROCE_CMD_TIMEOUT_MSECS);
+ 	if (ret) {
+-		dev_err(dev, "[mailbox cmd] creat eqc failed.\n");
++		dev_err(dev, "[mailbox cmd] create eqc failed.\n");
+ 		goto err_cmd_mbox;
+ 	}
+ 
+diff --git a/drivers/infiniband/hw/hns/hns_roce_qp.c b/drivers/infiniband/hw/hns/hns_roce_qp.c
+index e289a924e789..d4aad34c21e2 100644
+--- a/drivers/infiniband/hw/hns/hns_roce_qp.c
++++ b/drivers/infiniband/hw/hns/hns_roce_qp.c
+@@ -620,7 +620,7 @@ static int hns_roce_create_qp_common(struct hns_roce_dev *hr_dev,
+ 					to_hr_ucontext(ib_pd->uobject->context),
+ 					ucmd.db_addr, &hr_qp->rdb);
+ 			if (ret) {
+-				dev_err(dev, "rp record doorbell map failed!\n");
++				dev_err(dev, "rq record doorbell map failed!\n");
+ 				goto err_mtt;
+ 			}
+ 		}

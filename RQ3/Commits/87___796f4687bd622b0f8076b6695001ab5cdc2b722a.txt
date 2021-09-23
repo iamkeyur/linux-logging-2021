@@ -1,0 +1,43 @@
+['796f4687bd622b0f8076b6695001ab5cdc2b722a', '907.txt', 'Mislead/Ambiguous']
+commit 796f4687bd622b0f8076b6695001ab5cdc2b722a
+Author: Borislav Petkov <bp@suse.de>
+Date:   Thu Oct 27 20:14:45 2016 +0200
+
+    kvm/x86: Show WRMSR data is in hex
+    
+    Add the "0x" prefix to the error messages format to make it unambiguous
+    about what kind of value we're talking about.
+    
+    Signed-off-by: Borislav Petkov <bp@suse.de>
+    Cc: Paolo Bonzini <pbonzini@redhat.com>
+    Cc: "Radim Krčmář" <rkrcmar@redhat.com>
+    Message-Id: <20161027181445.25319-1-bp@alien8.de>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+diff --git a/arch/x86/kvm/x86.c b/arch/x86/kvm/x86.c
+index e375235d81c9..0b2087981c06 100644
+--- a/arch/x86/kvm/x86.c
++++ b/arch/x86/kvm/x86.c
+@@ -2262,7 +2262,7 @@ int kvm_set_msr_common(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
+ 		/* Drop writes to this legacy MSR -- see rdmsr
+ 		 * counterpart for further detail.
+ 		 */
+-		vcpu_unimpl(vcpu, "ignored wrmsr: 0x%x data %llx\n", msr, data);
++		vcpu_unimpl(vcpu, "ignored wrmsr: 0x%x data 0x%llx\n", msr, data);
+ 		break;
+ 	case MSR_AMD64_OSVW_ID_LENGTH:
+ 		if (!guest_cpuid_has_osvw(vcpu))
+@@ -2280,11 +2280,11 @@ int kvm_set_msr_common(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
+ 		if (kvm_pmu_is_valid_msr(vcpu, msr))
+ 			return kvm_pmu_set_msr(vcpu, msr_info);
+ 		if (!ignore_msrs) {
+-			vcpu_unimpl(vcpu, "unhandled wrmsr: 0x%x data %llx\n",
++			vcpu_unimpl(vcpu, "unhandled wrmsr: 0x%x data 0x%llx\n",
+ 				    msr, data);
+ 			return 1;
+ 		} else {
+-			vcpu_unimpl(vcpu, "ignored wrmsr: 0x%x data %llx\n",
++			vcpu_unimpl(vcpu, "ignored wrmsr: 0x%x data 0x%llx\n",
+ 				    msr, data);
+ 			break;
+ 		}

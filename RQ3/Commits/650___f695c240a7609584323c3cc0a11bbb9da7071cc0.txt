@@ -1,0 +1,25 @@
+['f695c240a7609584323c3cc0a11bbb9da7071cc0', '282.txt', 'Typo']
+commit f695c240a7609584323c3cc0a11bbb9da7071cc0
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu Jun 23 10:04:39 2016 -0700
+
+    Input: apanel - spelling mistake - "skiping" -> "skipping"
+    
+    trivial fix to spelling mistake in pr_notice message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+
+diff --git a/drivers/input/misc/apanel.c b/drivers/input/misc/apanel.c
+index a8d2b8db4e35..53630afab606 100644
+--- a/drivers/input/misc/apanel.c
++++ b/drivers/input/misc/apanel.c
+@@ -297,7 +297,7 @@ static int __init apanel_init(void)
+ 
+ 		if (slave != i2c_addr) {
+ 			pr_notice(APANEL ": only one SMBus slave "
+-				  "address supported, skiping device...\n");
++				  "address supported, skipping device...\n");
+ 			continue;
+ 		}
+ 

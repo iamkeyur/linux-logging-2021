@@ -1,0 +1,28 @@
+['a44f8626603292c40bb88e11db0a50bb8c9a900a', '347.txt', 'LogLevel']
+commit a44f8626603292c40bb88e11db0a50bb8c9a900a
+Author: Michel Dänzer <michel.daenzer@amd.com>
+Date:   Fri Feb 23 12:29:04 2018 +0100
+
+    drm/amdgpu/dce6: Use DRM_DEBUG instead of DRM_INFO for HPD IRQ info
+    
+    For consistency with other DCE generations.
+    
+    HPD IRQs appear to be working fine.
+    
+    Reviewed-by: Alex Deucher <alexander.deucher@amd.com>
+    Signed-off-by: Michel Dänzer <michel.daenzer@amd.com>
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+diff --git a/drivers/gpu/drm/amd/amdgpu/dce_v6_0.c b/drivers/gpu/drm/amd/amdgpu/dce_v6_0.c
+index 03f19363f8f6..ee2162e81da9 100644
+--- a/drivers/gpu/drm/amd/amdgpu/dce_v6_0.c
++++ b/drivers/gpu/drm/amd/amdgpu/dce_v6_0.c
+@@ -3037,7 +3037,7 @@ static int dce_v6_0_hpd_irq(struct amdgpu_device *adev,
+ 		tmp |= DC_HPD1_INT_CONTROL__DC_HPD1_INT_ACK_MASK;
+ 		WREG32(mmDC_HPD1_INT_CONTROL + hpd_offsets[hpd], tmp);
+ 		schedule_work(&adev->hotplug_work);
+-		DRM_INFO("IH: HPD%d\n", hpd + 1);
++		DRM_DEBUG("IH: HPD%d\n", hpd + 1);
+ 	}
+ 
+ 	return 0;

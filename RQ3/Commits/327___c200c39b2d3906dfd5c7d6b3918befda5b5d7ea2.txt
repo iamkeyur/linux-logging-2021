@@ -1,0 +1,31 @@
+['c200c39b2d3906dfd5c7d6b3918befda5b5d7ea2', '645.txt', 'Mislead/Ambiguous']
+commit c200c39b2d3906dfd5c7d6b3918befda5b5d7ea2
+Author: Tomeu Vizoso <tomeu.vizoso@collabora.com>
+Date:   Fri Jul 8 09:14:38 2016 +0200
+
+    clk: clk-conf: Fix error message when clock isn't found
+    
+    When failing to lookup the assigned clock for setting its parents, we
+    were previously printing a misleading error message that lead to think
+    that it was the parent clock what couldn't be found.
+    
+    Change error message to make clear that it's the assigned clock what
+    couldn't be found in this case.
+    
+    Signed-off-by: Tomeu Vizoso <tomeu.vizoso@collabora.com>
+    Signed-off-by: Michael Turquette <mturquette@baylibre.com>
+    Link: lkml.kernel.org/r/1467962078-30405-1-git-send-email-tomeu.vizoso@collabora.com
+
+diff --git a/drivers/clk/clk-conf.c b/drivers/clk/clk-conf.c
+index 43a218f35b19..674785d968a3 100644
+--- a/drivers/clk/clk-conf.c
++++ b/drivers/clk/clk-conf.c
+@@ -55,7 +55,7 @@ static int __set_clk_parents(struct device_node *node, bool clk_supplier)
+ 		}
+ 		clk = of_clk_get_from_provider(&clkspec);
+ 		if (IS_ERR(clk)) {
+-			pr_warn("clk: couldn't get parent clock %d for %s\n",
++			pr_warn("clk: couldn't get assigned clock %d for %s\n",
+ 				index, node->full_name);
+ 			rc = PTR_ERR(clk);
+ 			goto err;

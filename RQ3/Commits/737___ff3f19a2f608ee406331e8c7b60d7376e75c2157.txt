@@ -1,0 +1,74 @@
+['ff3f19a2f608ee406331e8c7b60d7376e75c2157', '154.txt', 'ModernizeLog', 'AddInfo']
+commit ff3f19a2f608ee406331e8c7b60d7376e75c2157
+Author: Santosh Shilimkar <santosh.shilimkar@oracle.com>
+Date:   Mon Mar 14 07:43:55 2016 -0700
+
+    RDS: IB: include faddr in connection log
+    
+    Also use pr_* for it.
+    
+    Signed-off-by: Santosh Shilimkar <santosh.shilimkar@oracle.com>
+
+diff --git a/net/rds/ib_cm.c b/net/rds/ib_cm.c
+index 5b2ab95afa07..b9da1e59ecc1 100644
+--- a/net/rds/ib_cm.c
++++ b/net/rds/ib_cm.c
+@@ -113,19 +113,18 @@ void rds_ib_cm_connect_complete(struct rds_connection *conn, struct rdma_cm_even
+ 	}
+ 
+ 	if (conn->c_version < RDS_PROTOCOL(3, 1)) {
+-		printk(KERN_NOTICE "RDS/IB: Connection to %pI4 version %u.%u failed,"
+-		       " no longer supported\n",
+-		       &conn->c_faddr,
+-		       RDS_PROTOCOL_MAJOR(conn->c_version),
+-		       RDS_PROTOCOL_MINOR(conn->c_version));
++		pr_notice("RDS/IB: Connection <%pI4,%pI4> version %u.%u no longer supported\n",
++			  &conn->c_laddr, &conn->c_faddr,
++			  RDS_PROTOCOL_MAJOR(conn->c_version),
++			  RDS_PROTOCOL_MINOR(conn->c_version));
+ 		rds_conn_destroy(conn);
+ 		return;
+ 	} else {
+-		printk(KERN_NOTICE "RDS/IB: connected to %pI4 version %u.%u%s\n",
+-		       &conn->c_faddr,
+-		       RDS_PROTOCOL_MAJOR(conn->c_version),
+-		       RDS_PROTOCOL_MINOR(conn->c_version),
+-		       ic->i_flowctl ? ", flow control" : "");
++		pr_notice("RDS/IB: connected <%pI4,%pI4> version %u.%u%s\n",
++			  &conn->c_laddr, &conn->c_faddr,
++			  RDS_PROTOCOL_MAJOR(conn->c_version),
++			  RDS_PROTOCOL_MINOR(conn->c_version),
++			  ic->i_flowctl ? ", flow control" : "");
+ 	}
+ 
+ 	/*
+diff --git a/net/rds/ib_recv.c b/net/rds/ib_recv.c
+index 606a11f681d2..6803b75eb8bd 100644
+--- a/net/rds/ib_recv.c
++++ b/net/rds/ib_recv.c
+@@ -980,8 +980,8 @@ void rds_ib_recv_cqe_handler(struct rds_ib_connection *ic,
+ 	} else {
+ 		/* We expect errors as the qp is drained during shutdown */
+ 		if (rds_conn_up(conn) || rds_conn_connecting(conn))
+-			rds_ib_conn_error(conn, "recv completion on %pI4 had status %u (%s), disconnecting and reconnecting\n",
+-					  &conn->c_faddr,
++			rds_ib_conn_error(conn, "recv completion on <%pI4,%pI4> had status %u (%s), disconnecting and reconnecting\n",
++					  &conn->c_laddr, &conn->c_faddr,
+ 					  wc->status,
+ 					  ib_wc_status_msg(wc->status));
+ 	}
+diff --git a/net/rds/ib_send.c b/net/rds/ib_send.c
+index 84d90c97332f..19eca5c4c00c 100644
+--- a/net/rds/ib_send.c
++++ b/net/rds/ib_send.c
+@@ -300,8 +300,8 @@ void rds_ib_send_cqe_handler(struct rds_ib_connection *ic, struct ib_wc *wc)
+ 
+ 	/* We expect errors as the qp is drained during shutdown */
+ 	if (wc->status != IB_WC_SUCCESS && rds_conn_up(conn)) {
+-		rds_ib_conn_error(conn, "send completion on %pI4 had status %u (%s), disconnecting and reconnecting\n",
+-				  &conn->c_faddr, wc->status,
++		rds_ib_conn_error(conn, "send completion on <%pI4,%pI4> had status %u (%s), disconnecting and reconnecting\n",
++				  &conn->c_laddr, &conn->c_faddr, wc->status,
+ 				  ib_wc_status_msg(wc->status));
+ 	}
+ }

@@ -1,0 +1,32 @@
+['c219b7ddb6a3524a61a89438d86e4a8639706308', '297.txt', 'Typo']
+commit c219b7ddb6a3524a61a89438d86e4a8639706308
+Author: Steven Rostedt <rostedt@goodmis.org>
+Date:   Wed Feb 10 12:04:22 2016 -0500
+
+    sched/deadline: Fix trivial typo in printk() message
+    
+    It's "too much" not "to much".
+    
+    Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+    Acked-by: Juri Lelli <juri.lelli@arm.com>
+    Cc: Jiri Kosina <trivial@kernel.org>
+    Cc: Juri Lelli <juri.lelli@gmail.com>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Link: http://lkml.kernel.org/r/20160210120422.4ca77e68@gandalf.local.home
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+diff --git a/kernel/sched/deadline.c b/kernel/sched/deadline.c
+index cd64c979d0e1..57b939c81bce 100644
+--- a/kernel/sched/deadline.c
++++ b/kernel/sched/deadline.c
+@@ -420,7 +420,7 @@ static void replenish_dl_entity(struct sched_dl_entity *dl_se,
+ 	 * entity.
+ 	 */
+ 	if (dl_time_before(dl_se->deadline, rq_clock(rq))) {
+-		printk_deferred_once("sched: DL replenish lagged to much\n");
++		printk_deferred_once("sched: DL replenish lagged too much\n");
+ 		dl_se->deadline = rq_clock(rq) + pi_se->dl_deadline;
+ 		dl_se->runtime = pi_se->dl_runtime;
+ 	}

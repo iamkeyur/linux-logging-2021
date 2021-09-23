@@ -1,0 +1,108 @@
+['e708c1488bca54b901c4c3e73462ab2decdb8209', '519.txt', 'ModernizeLog']
+commit e708c1488bca54b901c4c3e73462ab2decdb8209
+Author: Huang Shijie <shijie.huang@arm.com>
+Date:   Wed Aug 3 13:46:03 2016 -0700
+
+    samples/kprobe: convert the printk to pr_info/pr_err
+    
+    We prefer to use the pr_* to print out the log now, this patch converts
+    the printk to pr_info.  In the error path, use the pr_err to replace the
+    printk.
+    
+    Link: http://lkml.kernel.org/r/1464143083-3877-1-git-send-email-shijie.huang@arm.com
+    Signed-off-by: Huang Shijie <shijie.huang@arm.com>
+    Cc: Petr Mladek <pmladek@suse.com>
+    Cc: Steve Capper <steve.capper@arm.com>
+    Cc: Ananth N Mavinakayanahalli <ananth@linux.vnet.ibm.com>
+    Cc: Anil S Keshavamurthy <anil.s.keshavamurthy@intel.com>
+    Cc: Masami Hiramatsu <mhiramat@kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+diff --git a/samples/kprobes/kprobe_example.c b/samples/kprobes/kprobe_example.c
+index f3b61b4ee09c..88b3e2d227ae 100644
+--- a/samples/kprobes/kprobe_example.c
++++ b/samples/kprobes/kprobe_example.c
+@@ -27,23 +27,19 @@ static struct kprobe kp = {
+ static int handler_pre(struct kprobe *p, struct pt_regs *regs)
+ {
+ #ifdef CONFIG_X86
+-	printk(KERN_INFO "<%s> pre_handler: p->addr = 0x%p, ip = %lx,"
+-			" flags = 0x%lx\n",
++	pr_info("<%s> pre_handler: p->addr = 0x%p, ip = %lx, flags = 0x%lx\n",
+ 		p->symbol_name, p->addr, regs->ip, regs->flags);
+ #endif
+ #ifdef CONFIG_PPC
+-	printk(KERN_INFO "<%s> pre_handler: p->addr = 0x%p, nip = 0x%lx,"
+-			" msr = 0x%lx\n",
++	pr_info("<%s> pre_handler: p->addr = 0x%p, nip = 0x%lx, msr = 0x%lx\n",
+ 		p->symbol_name, p->addr, regs->nip, regs->msr);
+ #endif
+ #ifdef CONFIG_MIPS
+-	printk(KERN_INFO "<%s> pre_handler: p->addr = 0x%p, epc = 0x%lx,"
+-			" status = 0x%lx\n",
++	pr_info("<%s> pre_handler: p->addr = 0x%p, epc = 0x%lx, status = 0x%lx\n",
+ 		p->symbol_name, p->addr, regs->cp0_epc, regs->cp0_status);
+ #endif
+ #ifdef CONFIG_TILEGX
+-	printk(KERN_INFO "<%s> pre_handler: p->addr = 0x%p, pc = 0x%lx,"
+-			" ex1 = 0x%lx\n",
++	pr_info("<%s> pre_handler: p->addr = 0x%p, pc = 0x%lx, ex1 = 0x%lx\n",
+ 		p->symbol_name, p->addr, regs->pc, regs->ex1);
+ #endif
+ #ifdef CONFIG_ARM64
+@@ -61,19 +57,19 @@ static void handler_post(struct kprobe *p, struct pt_regs *regs,
+ 				unsigned long flags)
+ {
+ #ifdef CONFIG_X86
+-	printk(KERN_INFO "<%s> post_handler: p->addr = 0x%p, flags = 0x%lx\n",
++	pr_info("<%s> post_handler: p->addr = 0x%p, flags = 0x%lx\n",
+ 		p->symbol_name, p->addr, regs->flags);
+ #endif
+ #ifdef CONFIG_PPC
+-	printk(KERN_INFO "<%s> post_handler: p->addr = 0x%p, msr = 0x%lx\n",
++	pr_info("<%s> post_handler: p->addr = 0x%p, msr = 0x%lx\n",
+ 		p->symbol_name, p->addr, regs->msr);
+ #endif
+ #ifdef CONFIG_MIPS
+-	printk(KERN_INFO "<%s> post_handler: p->addr = 0x%p, status = 0x%lx\n",
++	pr_info("<%s> post_handler: p->addr = 0x%p, status = 0x%lx\n",
+ 		p->symbol_name, p->addr, regs->cp0_status);
+ #endif
+ #ifdef CONFIG_TILEGX
+-	printk(KERN_INFO "<%s> post_handler: p->addr = 0x%p, ex1 = 0x%lx\n",
++	pr_info("<%s> post_handler: p->addr = 0x%p, ex1 = 0x%lx\n",
+ 		p->symbol_name, p->addr, regs->ex1);
+ #endif
+ #ifdef CONFIG_ARM64
+@@ -89,8 +85,7 @@ static void handler_post(struct kprobe *p, struct pt_regs *regs,
+  */
+ static int handler_fault(struct kprobe *p, struct pt_regs *regs, int trapnr)
+ {
+-	printk(KERN_INFO "fault_handler: p->addr = 0x%p, trap #%dn",
+-		p->addr, trapnr);
++	pr_info("fault_handler: p->addr = 0x%p, trap #%dn", p->addr, trapnr);
+ 	/* Return 0 because we don't handle the fault. */
+ 	return 0;
+ }
+@@ -104,17 +99,17 @@ static int __init kprobe_init(void)
+ 
+ 	ret = register_kprobe(&kp);
+ 	if (ret < 0) {
+-		printk(KERN_INFO "register_kprobe failed, returned %d\n", ret);
++		pr_err("register_kprobe failed, returned %d\n", ret);
+ 		return ret;
+ 	}
+-	printk(KERN_INFO "Planted kprobe at %p\n", kp.addr);
++	pr_info("Planted kprobe at %p\n", kp.addr);
+ 	return 0;
+ }
+ 
+ static void __exit kprobe_exit(void)
+ {
+ 	unregister_kprobe(&kp);
+-	printk(KERN_INFO "kprobe at %p unregistered\n", kp.addr);
++	pr_info("kprobe at %p unregistered\n", kp.addr);
+ }
+ 
+ module_init(kprobe_init)

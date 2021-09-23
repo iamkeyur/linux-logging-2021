@@ -1,0 +1,25 @@
+['d4c55da236e660b9f8786c3a2979e0c8eaf93026', '850.txt', 'Typo']
+commit d4c55da236e660b9f8786c3a2979e0c8eaf93026
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Fri Oct 28 19:35:48 2016 +0100
+
+    mfd: si476x-i2c: Fix spelling mistakes "Failet" and "gett"
+    
+    Trivial spelling mistake fixes in dev_err message.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Lee Jones <lee.jones@linaro.org>
+
+diff --git a/drivers/mfd/si476x-i2c.c b/drivers/mfd/si476x-i2c.c
+index c180b7533bba..e6a3d999a376 100644
+--- a/drivers/mfd/si476x-i2c.c
++++ b/drivers/mfd/si476x-i2c.c
+@@ -753,7 +753,7 @@ static int si476x_core_probe(struct i2c_client *client,
+ 				       ARRAY_SIZE(core->supplies),
+ 				       core->supplies);
+ 	if (rval) {
+-		dev_err(&client->dev, "Failet to gett all of the regulators\n");
++		dev_err(&client->dev, "Failed to get all of the regulators\n");
+ 		goto free_gpio;
+ 	}
+ 

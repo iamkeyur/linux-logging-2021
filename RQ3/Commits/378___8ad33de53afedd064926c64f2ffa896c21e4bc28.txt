@@ -1,0 +1,27 @@
+['8ad33de53afedd064926c64f2ffa896c21e4bc28', '587.txt', 'Typo', 'Formatting']
+commit 8ad33de53afedd064926c64f2ffa896c21e4bc28
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Tue Jun 27 15:23:26 2017 +0100
+
+    staging: rtl8192e: fix spelling mistake: "respose" -> "response"
+    
+    Trivial fix to spelling mistake in netdev_info message and split
+    line to clean up an checkpatch line too wide warning.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/rtl8192e/rtllib_softmac.c b/drivers/staging/rtl8192e/rtllib_softmac.c
+index f629e99956b7..64b0034c9c37 100644
+--- a/drivers/staging/rtl8192e/rtllib_softmac.c
++++ b/drivers/staging/rtl8192e/rtllib_softmac.c
+@@ -2310,7 +2310,8 @@ static void rtllib_rx_auth_resp(struct rtllib_device *ieee, struct sk_buff *skb)
+ 	if (errcode) {
+ 		ieee->softmac_stats.rx_auth_rs_err++;
+ 		netdev_info(ieee->dev,
+-			    "Authentication respose status code 0x%x", errcode);
++			    "Authentication response status code 0x%x",
++			    errcode);
+ 		rtllib_associate_abort(ieee);
+ 		return;
+ 	}

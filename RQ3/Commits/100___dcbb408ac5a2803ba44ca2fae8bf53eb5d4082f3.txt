@@ -1,0 +1,39 @@
+['dcbb408ac5a2803ba44ca2fae8bf53eb5d4082f3', '893.txt', 'Typo']
+commit dcbb408ac5a2803ba44ca2fae8bf53eb5d4082f3
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Tue Apr 5 12:12:45 2016 -0500
+
+    PCI: Fix spelling errors
+    
+    Fix spelling of "initalization".
+    
+    [bhelgaas: also fix pci/pci.c]
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Bjorn Helgaas <bhelgaas@google.com>
+
+diff --git a/drivers/pci/host/pcie-xilinx-nwl.c b/drivers/pci/host/pcie-xilinx-nwl.c
+index 5139e6443bbd..3479d30e2be8 100644
+--- a/drivers/pci/host/pcie-xilinx-nwl.c
++++ b/drivers/pci/host/pcie-xilinx-nwl.c
+@@ -819,7 +819,7 @@ static int nwl_pcie_probe(struct platform_device *pdev)
+ 
+ 	err = nwl_pcie_bridge_init(pcie);
+ 	if (err) {
+-		dev_err(pcie->dev, "HW Initalization failed\n");
++		dev_err(pcie->dev, "HW Initialization failed\n");
+ 		return err;
+ 	}
+ 
+diff --git a/drivers/pci/pci.c b/drivers/pci/pci.c
+index 25e0327d4429..e3d6b33fd596 100644
+--- a/drivers/pci/pci.c
++++ b/drivers/pci/pci.c
+@@ -2389,7 +2389,7 @@ static int pci_ea_read(struct pci_dev *dev, int offset)
+ 	return offset + ent_size;
+ }
+ 
+-/* Enhanced Allocation Initalization */
++/* Enhanced Allocation Initialization */
+ void pci_ea_init(struct pci_dev *dev)
+ {
+ 	int ea;

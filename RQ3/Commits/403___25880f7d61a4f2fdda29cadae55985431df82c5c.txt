@@ -1,0 +1,1034 @@
+['25880f7d61a4f2fdda29cadae55985431df82c5c', '560.txt', 'ModernizeLog']
+commit 25880f7d61a4f2fdda29cadae55985431df82c5c
+Author: Joe Perches <joe@perches.com>
+Date:   Wed May 9 08:15:48 2018 -0700
+
+    ipmi: Use more common logging styles
+    
+    Add and use #define pr_fmt/dev_fmt, and remove #define PFX
+    
+    This also prefixes some messages that were not previously prefixed.
+    
+    Miscellanea:
+    
+    o Convert printk(KERN_<level> to pr_<level>(
+    o Use %s, __func__ where appropriate
+    
+    Signed-off-by: Joe Perches <joe@perches.com>
+    Signed-off-by: Corey Minyard <cminyard@mvista.com>
+
+diff --git a/drivers/char/ipmi/ipmi_poweroff.c b/drivers/char/ipmi/ipmi_poweroff.c
+index f6e19410dc57..bc3a18daf97a 100644
+--- a/drivers/char/ipmi/ipmi_poweroff.c
++++ b/drivers/char/ipmi/ipmi_poweroff.c
+@@ -11,6 +11,9 @@
+  *
+  * Copyright 2002,2004 MontaVista Software Inc.
+  */
++
++#define pr_fmt(fmt) "IPMI poweroff: " fmt
++
+ #include <linux/module.h>
+ #include <linux/moduleparam.h>
+ #include <linux/proc_fs.h>
+@@ -21,8 +24,6 @@
+ #include <linux/ipmi.h>
+ #include <linux/ipmi_smi.h>
+ 
+-#define PFX "IPMI poweroff: "
+-
+ static void ipmi_po_smi_gone(int if_num);
+ static void ipmi_po_new_smi(int if_num, struct device *device);
+ 
+@@ -192,7 +193,7 @@ static void pps_poweroff_atca(struct ipmi_user *user)
+ 	smi_addr.channel = IPMI_BMC_CHANNEL;
+ 	smi_addr.lun = 0;
+ 
+-	printk(KERN_INFO PFX "PPS powerdown hook used");
++	pr_info("PPS powerdown hook used\n");
+ 
+ 	send_msg.netfn = IPMI_NETFN_OEM;
+ 	send_msg.cmd = IPMI_ATCA_PPS_GRACEFUL_RESTART;
+@@ -201,10 +202,9 @@ static void pps_poweroff_atca(struct ipmi_user *user)
+ 	rv = ipmi_request_in_rc_mode(user,
+ 				     (struct ipmi_addr *) &smi_addr,
+ 				     &send_msg);
+-	if (rv && rv != IPMI_UNKNOWN_ERR_COMPLETION_CODE) {
+-		printk(KERN_ERR PFX "Unable to send ATCA ,"
+-		       " IPMI error 0x%x\n", rv);
+-	}
++	if (rv && rv != IPMI_UNKNOWN_ERR_COMPLETION_CODE)
++		pr_err("Unable to send ATCA, IPMI error 0x%x\n", rv);
++
+ 	return;
+ }
+ 
+@@ -234,12 +234,10 @@ static int ipmi_atca_detect(struct ipmi_user *user)
+ 					    (struct ipmi_addr *) &smi_addr,
+ 					    &send_msg);
+ 
+-	printk(KERN_INFO PFX "ATCA Detect mfg 0x%X prod 0x%X\n",
+-	       mfg_id, prod_id);
++	pr_info("ATCA Detect mfg 0x%X prod 0x%X\n", mfg_id, prod_id);
+ 	if ((mfg_id == IPMI_MOTOROLA_MANUFACTURER_ID)
+ 	    && (prod_id == IPMI_MOTOROLA_PPS_IPMC_PRODUCT_ID)) {
+-		printk(KERN_INFO PFX
+-		       "Installing Pigeon Point Systems Poweroff Hook\n");
++		pr_info("Installing Pigeon Point Systems Poweroff Hook\n");
+ 		atca_oem_poweroff_hook = pps_poweroff_atca;
+ 	}
+ 	return !rv;
+@@ -259,7 +257,7 @@ static void ipmi_poweroff_atca(struct ipmi_user *user)
+ 	smi_addr.channel = IPMI_BMC_CHANNEL;
+ 	smi_addr.lun = 0;
+ 
+-	printk(KERN_INFO PFX "Powering down via ATCA power command\n");
++	pr_info("Powering down via ATCA power command\n");
+ 
+ 	/*
+ 	 * Power down
+@@ -282,8 +280,8 @@ static void ipmi_poweroff_atca(struct ipmi_user *user)
+ 	 * return code
+ 	 */
+ 	if (rv && rv != IPMI_UNKNOWN_ERR_COMPLETION_CODE) {
+-		printk(KERN_ERR PFX "Unable to send ATCA powerdown message,"
+-		       " IPMI error 0x%x\n", rv);
++		pr_err("Unable to send ATCA powerdown message, IPMI error 0x%x\n",
++		       rv);
+ 		goto out;
+ 	}
+ 
+@@ -334,7 +332,7 @@ static void ipmi_poweroff_cpi1(struct ipmi_user *user)
+ 	smi_addr.channel = IPMI_BMC_CHANNEL;
+ 	smi_addr.lun = 0;
+ 
+-	printk(KERN_INFO PFX "Powering down via CPI1 power command\n");
++	pr_info("Powering down via CPI1 power command\n");
+ 
+ 	/*
+ 	 * Get IPMI ipmb address
+@@ -482,7 +480,7 @@ static void ipmi_poweroff_chassis(struct ipmi_user *user)
+ 	smi_addr.lun = 0;
+ 
+  powercyclefailed:
+-	printk(KERN_INFO PFX "Powering %s via IPMI chassis control command\n",
++	pr_info("Powering %s via IPMI chassis control command\n",
+ 		(poweroff_powercycle ? "cycle" : "down"));
+ 
+ 	/*
+@@ -502,14 +500,14 @@ static void ipmi_poweroff_chassis(struct ipmi_user *user)
+ 	if (rv) {
+ 		if (poweroff_powercycle) {
+ 			/* power cycle failed, default to power down */
+-			printk(KERN_ERR PFX "Unable to send chassis power " \
+-			       "cycle message, IPMI error 0x%x\n", rv);
++			pr_err("Unable to send chassis power cycle message, IPMI error 0x%x\n",
++			       rv);
+ 			poweroff_powercycle = 0;
+ 			goto powercyclefailed;
+ 		}
+ 
+-		printk(KERN_ERR PFX "Unable to send chassis power " \
+-		       "down message, IPMI error 0x%x\n", rv);
++		pr_err("Unable to send chassis power down message, IPMI error 0x%x\n",
++		       rv);
+ 	}
+ }
+ 
+@@ -571,8 +569,7 @@ static void ipmi_po_new_smi(int if_num, struct device *device)
+ 	rv = ipmi_create_user(if_num, &ipmi_poweroff_handler, NULL,
+ 			      &ipmi_user);
+ 	if (rv) {
+-		printk(KERN_ERR PFX "could not create IPMI user, error %d\n",
+-		       rv);
++		pr_err("could not create IPMI user, error %d\n", rv);
+ 		return;
+ 	}
+ 
+@@ -594,14 +591,13 @@ static void ipmi_po_new_smi(int if_num, struct device *device)
+ 					    (struct ipmi_addr *) &smi_addr,
+ 					    &send_msg);
+ 	if (rv) {
+-		printk(KERN_ERR PFX "Unable to send IPMI get device id info,"
+-		       " IPMI error 0x%x\n", rv);
++		pr_err("Unable to send IPMI get device id info, IPMI error 0x%x\n",
++		       rv);
+ 		goto out_err;
+ 	}
+ 
+ 	if (halt_recv_msg.msg.data_len < 12) {
+-		printk(KERN_ERR PFX "(chassis) IPMI get device id info too,"
+-		       " short, was %d bytes, needed %d bytes\n",
++		pr_err("(chassis) IPMI get device id info too short, was %d bytes, needed %d bytes\n",
+ 		       halt_recv_msg.msg.data_len, 12);
+ 		goto out_err;
+ 	}
+@@ -622,14 +618,13 @@ static void ipmi_po_new_smi(int if_num, struct device *device)
+ 	}
+ 
+  out_err:
+-	printk(KERN_ERR PFX "Unable to find a poweroff function that"
+-	       " will work, giving up\n");
++	pr_err("Unable to find a poweroff function that will work, giving up\n");
+ 	ipmi_destroy_user(ipmi_user);
+ 	return;
+ 
+  found:
+-	printk(KERN_INFO PFX "Found a %s style poweroff function\n",
+-	       poweroff_functions[i].platform_type);
++	pr_info("Found a %s style poweroff function\n",
++		poweroff_functions[i].platform_type);
+ 	specific_poweroff_func = poweroff_functions[i].poweroff_func;
+ 	old_poweroff_func = pm_power_off;
+ 	pm_power_off = ipmi_poweroff_function;
+@@ -692,16 +687,15 @@ static int __init ipmi_poweroff_init(void)
+ {
+ 	int rv;
+ 
+-	printk(KERN_INFO "Copyright (C) 2004 MontaVista Software -"
+-	       " IPMI Powerdown via sys_reboot.\n");
++	pr_info("Copyright (C) 2004 MontaVista Software - IPMI Powerdown via sys_reboot\n");
+ 
+ 	if (poweroff_powercycle)
+-		printk(KERN_INFO PFX "Power cycle is enabled.\n");
++		pr_info("Power cycle is enabled\n");
+ 
+ #ifdef CONFIG_PROC_FS
+ 	ipmi_table_header = register_sysctl_table(ipmi_root_table);
+ 	if (!ipmi_table_header) {
+-		printk(KERN_ERR PFX "Unable to register powercycle sysctl\n");
++		pr_err("Unable to register powercycle sysctl\n");
+ 		rv = -ENOMEM;
+ 		goto out_err;
+ 	}
+@@ -712,7 +706,7 @@ static int __init ipmi_poweroff_init(void)
+ #ifdef CONFIG_PROC_FS
+ 	if (rv) {
+ 		unregister_sysctl_table(ipmi_table_header);
+-		printk(KERN_ERR PFX "Unable to register SMI watcher: %d\n", rv);
++		pr_err("Unable to register SMI watcher: %d\n", rv);
+ 		goto out_err;
+ 	}
+ 
+@@ -735,8 +729,7 @@ static void __exit ipmi_poweroff_cleanup(void)
+ 	if (ready) {
+ 		rv = ipmi_destroy_user(ipmi_user);
+ 		if (rv)
+-			printk(KERN_ERR PFX "could not cleanup the IPMI"
+-			       " user: 0x%x\n", rv);
++			pr_err("could not cleanup the IPMI user: 0x%x\n", rv);
+ 		pm_power_off = old_poweroff_func;
+ 	}
+ }
+diff --git a/drivers/char/ipmi/ipmi_si_hardcode.c b/drivers/char/ipmi/ipmi_si_hardcode.c
+index 10219f24546b..487642809c58 100644
+--- a/drivers/char/ipmi/ipmi_si_hardcode.c
++++ b/drivers/char/ipmi/ipmi_si_hardcode.c
+@@ -1,9 +1,10 @@
+ // SPDX-License-Identifier: GPL-2.0+
+ 
++#define pr_fmt(fmt) "ipmi_hardcode: " fmt
++
+ #include <linux/moduleparam.h>
+ #include "ipmi_si.h"
+ 
+-#define PFX "ipmi_hardcode: "
+ /*
+  * There can be 4 IO ports passed in (with or without IRQs), 4 addresses,
+  * a default IO port, and 1 ACPI/SPMI address.  That sets SI_MAX_DRIVERS.
+@@ -100,7 +101,7 @@ int ipmi_si_hardcode_find_bmc(void)
+ 			continue;
+ 
+ 		io.addr_source = SI_HARDCODED;
+-		pr_info(PFX "probing via hardcoded address\n");
++		pr_info("probing via hardcoded address\n");
+ 
+ 		if (!si_type[i] || strcmp(si_type[i], "kcs") == 0) {
+ 			io.si_type = SI_KCS;
+@@ -109,7 +110,7 @@ int ipmi_si_hardcode_find_bmc(void)
+ 		} else if (strcmp(si_type[i], "bt") == 0) {
+ 			io.si_type = SI_BT;
+ 		} else {
+-			pr_warn(PFX "Interface type specified for interface %d, was invalid: %s\n",
++			pr_warn("Interface type specified for interface %d, was invalid: %s\n",
+ 				i, si_type[i]);
+ 			continue;
+ 		}
+@@ -123,7 +124,7 @@ int ipmi_si_hardcode_find_bmc(void)
+ 			io.addr_data = addrs[i];
+ 			io.addr_type = IPMI_MEM_ADDR_SPACE;
+ 		} else {
+-			pr_warn(PFX "Interface type specified for interface %d, but port and address were not set or set to zero.\n",
++			pr_warn("Interface type specified for interface %d, but port and address were not set or set to zero\n",
+ 				i);
+ 			continue;
+ 		}
+diff --git a/drivers/char/ipmi/ipmi_si_hotmod.c b/drivers/char/ipmi/ipmi_si_hotmod.c
+index a98ca42a50b1..c0067fd0480d 100644
+--- a/drivers/char/ipmi/ipmi_si_hotmod.c
++++ b/drivers/char/ipmi/ipmi_si_hotmod.c
+@@ -5,12 +5,13 @@
+  * Handling for dynamically adding/removing IPMI devices through
+  * a module parameter (and thus sysfs).
+  */
++
++#define pr_fmt(fmt) "ipmi_hotmod: " fmt
++
+ #include <linux/moduleparam.h>
+ #include <linux/ipmi.h>
+ #include "ipmi_si.h"
+ 
+-#define PFX "ipmi_hotmod: "
+-
+ static int hotmod_handler(const char *val, const struct kernel_param *kp);
+ 
+ module_param_call(hotmod, hotmod_handler, NULL, NULL, 0200);
+@@ -61,7 +62,7 @@ static int parse_str(const struct hotmod_vals *v, int *val, char *name,
+ 
+ 	s = strchr(*curr, ',');
+ 	if (!s) {
+-		pr_warn(PFX "No hotmod %s given.\n", name);
++		pr_warn("No hotmod %s given\n", name);
+ 		return -EINVAL;
+ 	}
+ 	*s = '\0';
+@@ -74,7 +75,7 @@ static int parse_str(const struct hotmod_vals *v, int *val, char *name,
+ 		}
+ 	}
+ 
+-	pr_warn(PFX "Invalid hotmod %s '%s'\n", name, *curr);
++	pr_warn("Invalid hotmod %s '%s'\n", name, *curr);
+ 	return -EINVAL;
+ }
+ 
+@@ -85,12 +86,12 @@ static int check_hotmod_int_op(const char *curr, const char *option,
+ 
+ 	if (strcmp(curr, name) == 0) {
+ 		if (!option) {
+-			pr_warn(PFX "No option given for '%s'\n", curr);
++			pr_warn("No option given for '%s'\n", curr);
+ 			return -EINVAL;
+ 		}
+ 		*val = simple_strtoul(option, &n, 0);
+ 		if ((*n != '\0') || (*option == '\0')) {
+-			pr_warn(PFX "Bad option given for '%s'\n", curr);
++			pr_warn("Bad option given for '%s'\n", curr);
+ 			return -EINVAL;
+ 		}
+ 		return 1;
+@@ -160,7 +161,7 @@ static int hotmod_handler(const char *val, const struct kernel_param *kp)
+ 		}
+ 		addr = simple_strtoul(curr, &n, 0);
+ 		if ((*n != '\0') || (*curr == '\0')) {
+-			pr_warn(PFX "Invalid hotmod address '%s'\n", curr);
++			pr_warn("Invalid hotmod address '%s'\n", curr);
+ 			break;
+ 		}
+ 
+@@ -203,7 +204,7 @@ static int hotmod_handler(const char *val, const struct kernel_param *kp)
+ 				continue;
+ 
+ 			rv = -EINVAL;
+-			pr_warn(PFX "Invalid hotmod option '%s'\n", curr);
++			pr_warn("Invalid hotmod option '%s'\n", curr);
+ 			goto out;
+ 		}
+ 
+diff --git a/drivers/char/ipmi/ipmi_si_intf.c b/drivers/char/ipmi/ipmi_si_intf.c
+index 5faa917df1b6..132bb508cd19 100644
+--- a/drivers/char/ipmi/ipmi_si_intf.c
++++ b/drivers/char/ipmi/ipmi_si_intf.c
+@@ -19,6 +19,8 @@
+  * and drives the real SMI state machine.
+  */
+ 
++#define pr_fmt(fmt) "ipmi_si: " fmt
++
+ #include <linux/module.h>
+ #include <linux/moduleparam.h>
+ #include <linux/sched.h>
+@@ -41,8 +43,6 @@
+ #include <linux/string.h>
+ #include <linux/ctype.h>
+ 
+-#define PFX "ipmi_si: "
+-
+ /* Measure times between events in the driver. */
+ #undef DEBUG_TIMING
+ 
+@@ -1530,7 +1530,7 @@ static int try_enable_event_buffer(struct smi_info *smi_info)
+ 
+ 	rv = wait_for_msg_done(smi_info);
+ 	if (rv) {
+-		pr_warn(PFX "Error getting response from get global enables command, the event buffer is not enabled.\n");
++		pr_warn("Error getting response from get global enables command, the event buffer is not enabled\n");
+ 		goto out;
+ 	}
+ 
+@@ -1541,7 +1541,7 @@ static int try_enable_event_buffer(struct smi_info *smi_info)
+ 			resp[0] != (IPMI_NETFN_APP_REQUEST | 1) << 2 ||
+ 			resp[1] != IPMI_GET_BMC_GLOBAL_ENABLES_CMD   ||
+ 			resp[2] != 0) {
+-		pr_warn(PFX "Invalid return from get global enables command, cannot enable the event buffer.\n");
++		pr_warn("Invalid return from get global enables command, cannot enable the event buffer\n");
+ 		rv = -EINVAL;
+ 		goto out;
+ 	}
+@@ -1559,7 +1559,7 @@ static int try_enable_event_buffer(struct smi_info *smi_info)
+ 
+ 	rv = wait_for_msg_done(smi_info);
+ 	if (rv) {
+-		pr_warn(PFX "Error getting response from set global, enables command, the event buffer is not enabled.\n");
++		pr_warn("Error getting response from set global, enables command, the event buffer is not enabled\n");
+ 		goto out;
+ 	}
+ 
+@@ -1569,7 +1569,7 @@ static int try_enable_event_buffer(struct smi_info *smi_info)
+ 	if (resp_len < 3 ||
+ 			resp[0] != (IPMI_NETFN_APP_REQUEST | 1) << 2 ||
+ 			resp[1] != IPMI_SET_BMC_GLOBAL_ENABLES_CMD) {
+-		pr_warn(PFX "Invalid return from get global, enables command, not enable the event buffer.\n");
++		pr_warn("Invalid return from get global, enables command, not enable the event buffer\n");
+ 		rv = -EINVAL;
+ 		goto out;
+ 	}
+@@ -1900,7 +1900,7 @@ int ipmi_si_add_smi(struct si_sm_io *io)
+ 		}
+ 	}
+ 
+-	pr_info(PFX "Adding %s-specified %s state machine\n",
++	pr_info("Adding %s-specified %s state machine\n",
+ 		ipmi_addr_src_to_str(new_smi->io.addr_source),
+ 		si_to_str[new_smi->io.si_type]);
+ 
+@@ -1924,7 +1924,7 @@ static int try_smi_init(struct smi_info *new_smi)
+ 	int i;
+ 	char *init_name = NULL;
+ 
+-	pr_info(PFX "Trying %s-specified %s state machine at %s address 0x%lx, slave address 0x%x, irq %d\n",
++	pr_info("Trying %s-specified %s state machine at %s address 0x%lx, slave address 0x%x, irq %d\n",
+ 		ipmi_addr_src_to_str(new_smi->io.addr_source),
+ 		si_to_str[new_smi->io.si_type],
+ 		addr_space_to_str[new_smi->io.addr_type],
+@@ -1964,7 +1964,7 @@ static int try_smi_init(struct smi_info *new_smi)
+ 		new_smi->pdev = platform_device_alloc("ipmi_si",
+ 						      new_smi->si_num);
+ 		if (!new_smi->pdev) {
+-			pr_err(PFX "Unable to allocate platform device\n");
++			pr_err("Unable to allocate platform device\n");
+ 			rv = -ENOMEM;
+ 			goto out_err;
+ 		}
+@@ -2097,7 +2097,7 @@ static int init_ipmi_si(void)
+ 	if (initialized)
+ 		return 0;
+ 
+-	pr_info("IPMI System Interface driver.\n");
++	pr_info("IPMI System Interface driver\n");
+ 
+ 	/* If the user gave us a device, they presumably want us to use it */
+ 	if (!ipmi_si_hardcode_find_bmc())
+@@ -2151,7 +2151,7 @@ static int init_ipmi_si(void)
+ 	if (unload_when_empty && list_empty(&smi_infos)) {
+ 		mutex_unlock(&smi_infos_lock);
+ 		cleanup_ipmi_si();
+-		pr_warn(PFX "Unable to find any System Interface(s)\n");
++		pr_warn("Unable to find any System Interface(s)\n");
+ 		return -ENODEV;
+ 	} else {
+ 		mutex_unlock(&smi_infos_lock);
+diff --git a/drivers/char/ipmi/ipmi_si_pci.c b/drivers/char/ipmi/ipmi_si_pci.c
+index bdba12852a90..5eaa850ce455 100644
+--- a/drivers/char/ipmi/ipmi_si_pci.c
++++ b/drivers/char/ipmi/ipmi_si_pci.c
+@@ -4,12 +4,13 @@
+  *
+  * Handling for IPMI devices on the PCI bus.
+  */
++
++#define pr_fmt(fmt) "ipmi_pci: " fmt
++
+ #include <linux/module.h>
+ #include <linux/pci.h>
+ #include "ipmi_si.h"
+ 
+-#define PFX "ipmi_pci: "
+-
+ static bool pci_registered;
+ 
+ static bool si_trypci = true;
+@@ -40,8 +41,7 @@ static int ipmi_pci_probe_regspacing(struct si_sm_io *io)
+ 		for (regspacing = DEFAULT_REGSPACING; regspacing <= 16;) {
+ 			io->regspacing = regspacing;
+ 			if (io->io_setup(io)) {
+-				dev_err(io->dev,
+-					"Could not setup I/O space\n");
++				dev_err(io->dev, "Could not setup I/O space\n");
+ 				return DEFAULT_REGSPACING;
+ 			}
+ 			/* write invalid cmd */
+@@ -126,7 +126,7 @@ static int ipmi_pci_probe(struct pci_dev *pdev,
+ 	io.dev = &pdev->dev;
+ 
+ 	dev_info(&pdev->dev, "%pR regsize %d spacing %d irq %d\n",
+-		&pdev->resource[0], io.regsize, io.regspacing, io.irq);
++		 &pdev->resource[0], io.regsize, io.regspacing, io.irq);
+ 
+ 	rv = ipmi_si_add_smi(&io);
+ 	if (rv)
+@@ -161,7 +161,7 @@ void ipmi_si_pci_init(void)
+ 	if (si_trypci) {
+ 		int rv = pci_register_driver(&ipmi_pci_driver);
+ 		if (rv)
+-			pr_err(PFX "Unable to register PCI driver: %d\n", rv);
++			pr_err("Unable to register PCI driver: %d\n", rv);
+ 		else
+ 			pci_registered = true;
+ 	}
+diff --git a/drivers/char/ipmi/ipmi_si_platform.c b/drivers/char/ipmi/ipmi_si_platform.c
+index bf69927502bd..999fba24e29c 100644
+--- a/drivers/char/ipmi/ipmi_si_platform.c
++++ b/drivers/char/ipmi/ipmi_si_platform.c
+@@ -5,6 +5,10 @@
+  * Handling for platform devices in IPMI (ACPI, OF, and things
+  * coming from the platform.
+  */
++
++#define pr_fmt(fmt) "ipmi_platform: " fmt
++#define dev_fmt pr_fmt
++
+ #include <linux/types.h>
+ #include <linux/module.h>
+ #include <linux/of_device.h>
+@@ -15,8 +19,6 @@
+ #include "ipmi_si.h"
+ #include "ipmi_dmi.h"
+ 
+-#define PFX "ipmi_platform: "
+-
+ static bool si_tryplatform = true;
+ #ifdef CONFIG_ACPI
+ static bool          si_tryacpi = true;
+@@ -158,7 +160,7 @@ static int platform_ipmi_probe(struct platform_device *pdev)
+ 
+ 	memset(&io, 0, sizeof(io));
+ 	io.addr_source = addr_source;
+-	dev_info(&pdev->dev, PFX "probing via %s\n",
++	dev_info(&pdev->dev, "probing via %s\n",
+ 		 ipmi_addr_src_to_str(addr_source));
+ 
+ 	switch (type) {
+@@ -236,25 +238,25 @@ static int of_ipmi_probe(struct platform_device *pdev)
+ 
+ 	ret = of_address_to_resource(np, 0, &resource);
+ 	if (ret) {
+-		dev_warn(&pdev->dev, PFX "invalid address from OF\n");
++		dev_warn(&pdev->dev, "invalid address from OF\n");
+ 		return ret;
+ 	}
+ 
+ 	regsize = of_get_property(np, "reg-size", &proplen);
+ 	if (regsize && proplen != 4) {
+-		dev_warn(&pdev->dev, PFX "invalid regsize from OF\n");
++		dev_warn(&pdev->dev, "invalid regsize from OF\n");
+ 		return -EINVAL;
+ 	}
+ 
+ 	regspacing = of_get_property(np, "reg-spacing", &proplen);
+ 	if (regspacing && proplen != 4) {
+-		dev_warn(&pdev->dev, PFX "invalid regspacing from OF\n");
++		dev_warn(&pdev->dev, "invalid regspacing from OF\n");
+ 		return -EINVAL;
+ 	}
+ 
+ 	regshift = of_get_property(np, "reg-shift", &proplen);
+ 	if (regshift && proplen != 4) {
+-		dev_warn(&pdev->dev, PFX "invalid regshift from OF\n");
++		dev_warn(&pdev->dev, "invalid regshift from OF\n");
+ 		return -EINVAL;
+ 	}
+ 
+@@ -326,7 +328,7 @@ static int acpi_ipmi_probe(struct platform_device *pdev)
+ 
+ 	memset(&io, 0, sizeof(io));
+ 	io.addr_source = SI_ACPI;
+-	dev_info(&pdev->dev, PFX "probing via ACPI\n");
++	dev_info(&pdev->dev, "probing via ACPI\n");
+ 
+ 	io.addr_info.acpi_info.acpi_handle = handle;
+ 
+@@ -431,7 +433,7 @@ void ipmi_si_platform_init(void)
+ {
+ 	int rv = platform_driver_register(&ipmi_platform_driver);
+ 	if (rv)
+-		pr_err(PFX "Unable to register driver: %d\n", rv);
++		pr_err("Unable to register driver: %d\n", rv);
+ }
+ 
+ void ipmi_si_platform_shutdown(void)
+diff --git a/drivers/char/ipmi/ipmi_ssif.c b/drivers/char/ipmi/ipmi_ssif.c
+index 29e67a80fb20..61bc493765b9 100644
+--- a/drivers/char/ipmi/ipmi_ssif.c
++++ b/drivers/char/ipmi/ipmi_ssif.c
+@@ -27,6 +27,8 @@
+  * interface into the I2C driver, I believe.
+  */
+ 
++#define pr_fmt(fmt) "ipmi_ssif: " fmt
++
+ #if defined(MODVERSIONS)
+ #include <linux/modversions.h>
+ #endif
+@@ -52,7 +54,6 @@
+ #include "ipmi_si_sm.h"
+ #include "ipmi_dmi.h"
+ 
+-#define PFX "ipmi_ssif: "
+ #define DEVICE_NAME "ipmi_ssif"
+ 
+ #define IPMI_GET_SYSTEM_INTERFACE_CAPABILITIES_CMD	0x57
+@@ -316,9 +317,8 @@ static void deliver_recv_msg(struct ssif_info *ssif_info,
+ {
+ 	if (msg->rsp_size < 0) {
+ 		return_hosed_msg(ssif_info, msg);
+-		pr_err(PFX
+-		       "Malformed message in deliver_recv_msg: rsp_size = %d\n",
+-		       msg->rsp_size);
++		pr_err("%s: Malformed message: rsp_size = %d\n",
++		       __func__, msg->rsp_size);
+ 	} else {
+ 		ipmi_smi_msg_received(ssif_info->intf, msg);
+ 	}
+@@ -652,7 +652,7 @@ static void msg_done_handler(struct ssif_info *ssif_info, int result,
+ 		if (len == 0) {
+ 			result = -EIO;
+ 			if (ssif_info->ssif_debug & SSIF_DEBUG_MSG)
+-				pr_info(PFX "Middle message with no data\n");
++				pr_info("Middle message with no data\n");
+ 
+ 			goto continue_op;
+ 		}
+@@ -696,8 +696,7 @@ static void msg_done_handler(struct ssif_info *ssif_info, int result,
+ 					   I2C_SMBUS_BLOCK_DATA);
+ 			if (rv < 0) {
+ 				if (ssif_info->ssif_debug & SSIF_DEBUG_MSG)
+-					pr_info(PFX
+-						"Error from ssif_i2c_send\n");
++					pr_info("Error from ssif_i2c_send\n");
+ 
+ 				result = -EIO;
+ 			} else
+@@ -715,7 +714,7 @@ static void msg_done_handler(struct ssif_info *ssif_info, int result,
+ 
+  continue_op:
+ 	if (ssif_info->ssif_debug & SSIF_DEBUG_STATE)
+-		pr_info(PFX "DONE 1: state = %d, result=%d.\n",
++		pr_info("DONE 1: state = %d, result=%d\n",
+ 			ssif_info->ssif_state, result);
+ 
+ 	flags = ipmi_ssif_lock_cond(ssif_info, &oflags);
+@@ -749,8 +748,8 @@ static void msg_done_handler(struct ssif_info *ssif_info, int result,
+ 			 */
+ 			ssif_info->ssif_state = SSIF_NORMAL;
+ 			ipmi_ssif_unlock_cond(ssif_info, flags);
+-			pr_warn(PFX "Error getting flags: %d %d, %x\n",
+-			       result, len, (len >= 3) ? data[2] : 0);
++			pr_warn("Error getting flags: %d %d, %x\n",
++				result, len, (len >= 3) ? data[2] : 0);
+ 		} else if (data[0] != (IPMI_NETFN_APP_REQUEST | 1) << 2
+ 			   || data[1] != IPMI_GET_MSG_FLAGS_CMD) {
+ 			/*
+@@ -758,7 +757,7 @@ static void msg_done_handler(struct ssif_info *ssif_info, int result,
+ 			 * response to a previous command.
+ 			 */
+ 			ipmi_ssif_unlock_cond(ssif_info, flags);
+-			pr_warn(PFX "Invalid response getting flags: %x %x\n",
++			pr_warn("Invalid response getting flags: %x %x\n",
+ 				data[0], data[1]);
+ 		} else {
+ 			ssif_inc_stat(ssif_info, flag_fetches);
+@@ -771,11 +770,11 @@ static void msg_done_handler(struct ssif_info *ssif_info, int result,
+ 		/* We cleared the flags. */
+ 		if ((result < 0) || (len < 3) || (data[2] != 0)) {
+ 			/* Error clearing flags */
+-			pr_warn(PFX "Error clearing flags: %d %d, %x\n",
+-			       result, len, (len >= 3) ? data[2] : 0);
++			pr_warn("Error clearing flags: %d %d, %x\n",
++				result, len, (len >= 3) ? data[2] : 0);
+ 		} else if (data[0] != (IPMI_NETFN_APP_REQUEST | 1) << 2
+ 			   || data[1] != IPMI_CLEAR_MSG_FLAGS_CMD) {
+-			pr_warn(PFX "Invalid response clearing flags: %x %x\n",
++			pr_warn("Invalid response clearing flags: %x %x\n",
+ 				data[0], data[1]);
+ 		}
+ 		ssif_info->ssif_state = SSIF_NORMAL;
+@@ -792,7 +791,7 @@ static void msg_done_handler(struct ssif_info *ssif_info, int result,
+ 			handle_flags(ssif_info, flags);
+ 		} else if (msg->rsp[0] != (IPMI_NETFN_APP_REQUEST | 1) << 2
+ 			   || msg->rsp[1] != IPMI_READ_EVENT_MSG_BUFFER_CMD) {
+-			pr_warn(PFX "Invalid response getting events: %x %x\n",
++			pr_warn("Invalid response getting events: %x %x\n",
+ 				msg->rsp[0], msg->rsp[1]);
+ 			msg->done(msg);
+ 			/* Take off the event flag. */
+@@ -815,7 +814,7 @@ static void msg_done_handler(struct ssif_info *ssif_info, int result,
+ 			handle_flags(ssif_info, flags);
+ 		} else if (msg->rsp[0] != (IPMI_NETFN_APP_REQUEST | 1) << 2
+ 			   || msg->rsp[1] != IPMI_GET_MSG_CMD) {
+-			pr_warn(PFX "Invalid response clearing flags: %x %x\n",
++			pr_warn("Invalid response clearing flags: %x %x\n",
+ 				msg->rsp[0], msg->rsp[1]);
+ 			msg->done(msg);
+ 
+@@ -842,7 +841,7 @@ static void msg_done_handler(struct ssif_info *ssif_info, int result,
+ 		ipmi_ssif_unlock_cond(ssif_info, flags);
+ 
+ 	if (ssif_info->ssif_debug & SSIF_DEBUG_STATE)
+-		pr_info(PFX "DONE 2: state = %d.\n", ssif_info->ssif_state);
++		pr_info("DONE 2: state = %d.\n", ssif_info->ssif_state);
+ }
+ 
+ static void msg_written_handler(struct ssif_info *ssif_info, int result,
+@@ -862,8 +861,7 @@ static void msg_written_handler(struct ssif_info *ssif_info, int result,
+ 			ssif_inc_stat(ssif_info, send_errors);
+ 
+ 			if (ssif_info->ssif_debug & SSIF_DEBUG_MSG)
+-				pr_info(PFX
+-					"Out of retries in msg_written_handler\n");
++				pr_info("%s: Out of retries\n", __func__);
+ 			msg_done_handler(ssif_info, -EIO, NULL, 0);
+ 			return;
+ 		}
+@@ -1043,8 +1041,8 @@ static void sender(void                *send_info,
+ 
+ 		ktime_get_real_ts64(&t);
+ 		pr_info("**Enqueue %02x %02x: %lld.%6.6ld\n",
+-		       msg->data[0], msg->data[1],
+-		       (long long) t.tv_sec, (long) t.tv_nsec / NSEC_PER_USEC);
++			msg->data[0], msg->data[1],
++			(long long)t.tv_sec, (long)t.tv_nsec / NSEC_PER_USEC);
+ 	}
+ }
+ 
+@@ -1435,9 +1433,9 @@ static int ssif_probe(struct i2c_client *client, const struct i2c_device_id *id)
+ 
+ 	slave_addr = find_slave_address(client, slave_addr);
+ 
+-	pr_info(PFX "Trying %s-specified SSIF interface at i2c address 0x%x, adapter %s, slave address 0x%x\n",
+-	       ipmi_addr_src_to_str(ssif_info->addr_source),
+-	       client->addr, client->adapter->name, slave_addr);
++	pr_info("Trying %s-specified SSIF interface at i2c address 0x%x, adapter %s, slave address 0x%x\n",
++		ipmi_addr_src_to_str(ssif_info->addr_source),
++		client->addr, client->adapter->name, slave_addr);
+ 
+ 	ssif_info->client = client;
+ 	i2c_set_clientdata(client, ssif_info);
+@@ -1450,7 +1448,7 @@ static int ssif_probe(struct i2c_client *client, const struct i2c_device_id *id)
+ 	if (!rv && (len >= 3) && (resp[2] == 0)) {
+ 		if (len < 7) {
+ 			if (ssif_dbg_probe)
+-				pr_info(PFX "SSIF info too short: %d\n", len);
++				pr_info("SSIF info too short: %d\n", len);
+ 			goto no_support;
+ 		}
+ 
+@@ -1506,8 +1504,8 @@ static int ssif_probe(struct i2c_client *client, const struct i2c_device_id *id)
+ 	} else {
+  no_support:
+ 		/* Assume no multi-part or PEC support */
+-		pr_info(PFX "Error fetching SSIF: %d %d %2.2x, your system probably doesn't support this command so using defaults\n",
+-		       rv, len, resp[2]);
++		pr_info("Error fetching SSIF: %d %d %2.2x, your system probably doesn't support this command so using defaults\n",
++			rv, len, resp[2]);
+ 
+ 		ssif_info->max_xmit_msg_size = 32;
+ 		ssif_info->max_recv_msg_size = 32;
+@@ -1521,7 +1519,7 @@ static int ssif_probe(struct i2c_client *client, const struct i2c_device_id *id)
+ 	msg[2] = WDT_PRE_TIMEOUT_INT;
+ 	rv = do_cmd(client, 3, msg, &len, resp);
+ 	if (rv || (len < 3) || (resp[2] != 0))
+-		pr_warn(PFX "Unable to clear message flags: %d %d %2.2x\n",
++		pr_warn("Unable to clear message flags: %d %d %2.2x\n",
+ 			rv, len, resp[2]);
+ 
+ 	/* Attempt to enable the event buffer. */
+@@ -1529,7 +1527,7 @@ static int ssif_probe(struct i2c_client *client, const struct i2c_device_id *id)
+ 	msg[1] = IPMI_GET_BMC_GLOBAL_ENABLES_CMD;
+ 	rv = do_cmd(client, 2, msg, &len, resp);
+ 	if (rv || (len < 4) || (resp[2] != 0)) {
+-		pr_warn(PFX "Error getting global enables: %d %d %2.2x\n",
++		pr_warn("Error getting global enables: %d %d %2.2x\n",
+ 			rv, len, resp[2]);
+ 		rv = 0; /* Not fatal */
+ 		goto found;
+@@ -1548,7 +1546,7 @@ static int ssif_probe(struct i2c_client *client, const struct i2c_device_id *id)
+ 	msg[2] = ssif_info->global_enables | IPMI_BMC_EVT_MSG_BUFF;
+ 	rv = do_cmd(client, 3, msg, &len, resp);
+ 	if (rv || (len < 2)) {
+-		pr_warn(PFX "Error setting global enables: %d %d %2.2x\n",
++		pr_warn("Error setting global enables: %d %d %2.2x\n",
+ 			rv, len, resp[2]);
+ 		rv = 0; /* Not fatal */
+ 		goto found;
+@@ -1569,7 +1567,7 @@ static int ssif_probe(struct i2c_client *client, const struct i2c_device_id *id)
+ 	msg[2] = ssif_info->global_enables | IPMI_BMC_RCV_MSG_INTR;
+ 	rv = do_cmd(client, 3, msg, &len, resp);
+ 	if (rv || (len < 2)) {
+-		pr_warn(PFX "Error setting global enables: %d %d %2.2x\n",
++		pr_warn("Error setting global enables: %d %d %2.2x\n",
+ 			rv, len, resp[2]);
+ 		rv = 0; /* Not fatal */
+ 		goto found;
+@@ -1637,7 +1635,7 @@ static int ssif_probe(struct i2c_client *client, const struct i2c_device_id *id)
+ 			       &ssif_info->client->dev,
+ 			       slave_addr);
+ 	 if (rv) {
+-		pr_err(PFX "Unable to register device: error %d\n", rv);
++		pr_err("Unable to register device: error %d\n", rv);
+ 		goto out_remove_attr;
+ 	}
+ 
+@@ -1790,7 +1788,7 @@ static int dmi_ipmi_probe(struct platform_device *pdev)
+ 
+ 	rv = device_property_read_u16(&pdev->dev, "i2c-addr", &i2c_addr);
+ 	if (rv) {
+-		dev_warn(&pdev->dev, PFX "No i2c-addr property\n");
++		dev_warn(&pdev->dev, "No i2c-addr property\n");
+ 		return -ENODEV;
+ 	}
+ 
+@@ -1871,8 +1869,7 @@ static int init_ipmi_ssif(void)
+ 				     dbg[i], slave_addrs[i],
+ 				     SI_HARDCODED, NULL);
+ 		if (rv)
+-			pr_err(PFX
+-			       "Couldn't add hardcoded device at addr 0x%x\n",
++			pr_err("Couldn't add hardcoded device at addr 0x%x\n",
+ 			       addr[i]);
+ 	}
+ 
+@@ -1883,7 +1880,7 @@ static int init_ipmi_ssif(void)
+ 	if (ssif_trydmi) {
+ 		rv = platform_driver_register(&ipmi_driver);
+ 		if (rv)
+-			pr_err(PFX "Unable to register driver: %d\n", rv);
++			pr_err("Unable to register driver: %d\n", rv);
+ 	}
+ 
+ 	ssif_i2c_driver.address_list = ssif_address_list();
+diff --git a/drivers/char/ipmi/ipmi_watchdog.c b/drivers/char/ipmi/ipmi_watchdog.c
+index ca1c5c5109f0..2924a4bc4a32 100644
+--- a/drivers/char/ipmi/ipmi_watchdog.c
++++ b/drivers/char/ipmi/ipmi_watchdog.c
+@@ -11,6 +11,8 @@
+  * Copyright 2002 MontaVista Software Inc.
+  */
+ 
++#define pr_fmt(fmt) "IPMI Watchdog: " fmt
++
+ #include <linux/module.h>
+ #include <linux/moduleparam.h>
+ #include <linux/ipmi.h>
+@@ -50,8 +52,6 @@
+ #define HAVE_DIE_NMI
+ #endif
+ 
+-#define	PFX "IPMI Watchdog: "
+-
+ /*
+  * The IPMI command/response information for the watchdog timer.
+  */
+@@ -407,7 +407,7 @@ static int __ipmi_set_timeout(struct ipmi_smi_msg  *smi_msg,
+ 				      recv_msg,
+ 				      1);
+ 	if (rv)
+-		pr_warn(PFX "set timeout error: %d\n", rv);
++		pr_warn("set timeout error: %d\n", rv);
+ 	else if (send_heartbeat_now)
+ 		*send_heartbeat_now = hbnow;
+ 
+@@ -530,7 +530,7 @@ static void panic_halt_ipmi_set_timeout(void)
+ 				&send_heartbeat_now);
+ 	if (rv) {
+ 		atomic_sub(1, &panic_done_count);
+-		pr_warn(PFX "Unable to extend the watchdog timeout.");
++		pr_warn("Unable to extend the watchdog timeout\n");
+ 	} else {
+ 		if (send_heartbeat_now)
+ 			panic_halt_ipmi_heartbeat();
+@@ -573,7 +573,7 @@ static int __ipmi_heartbeat(void)
+ 				      &recv_msg,
+ 				      1);
+ 	if (rv) {
+-		pr_warn(PFX "heartbeat send failure: %d\n", rv);
++		pr_warn("heartbeat send failure: %d\n", rv);
+ 		return rv;
+ 	}
+ 
+@@ -583,7 +583,7 @@ static int __ipmi_heartbeat(void)
+ 	if (recv_msg.msg.data[0] == IPMI_WDOG_TIMER_NOT_INIT_RESP)  {
+ 		timeout_retries++;
+ 		if (timeout_retries > 3) {
+-			pr_err(PFX ": Unable to restore the IPMI watchdog's settings, giving up.\n");
++			pr_err("Unable to restore the IPMI watchdog's settings, giving up\n");
+ 			rv = -EIO;
+ 			goto out;
+ 		}
+@@ -598,7 +598,7 @@ static int __ipmi_heartbeat(void)
+ 		 */
+ 		rv = _ipmi_set_timeout(IPMI_SET_TIMEOUT_NO_HB);
+ 		if (rv) {
+-			pr_err(PFX ": Unable to send the command to set the watchdog's settings, giving up.\n");
++			pr_err("Unable to send the command to set the watchdog's settings, giving up\n");
+ 			goto out;
+ 		}
+ 
+@@ -876,8 +876,7 @@ static int ipmi_close(struct inode *ino, struct file *filep)
+ 			_ipmi_set_timeout(IPMI_SET_TIMEOUT_NO_HB);
+ 			mutex_unlock(&ipmi_watchdog_mutex);
+ 		} else {
+-			pr_crit(PFX
+-				"Unexpected close, not stopping watchdog!\n");
++			pr_crit("Unexpected close, not stopping watchdog!\n");
+ 			ipmi_heartbeat();
+ 		}
+ 		clear_bit(0, &ipmi_wdog_open);
+@@ -911,9 +910,9 @@ static void ipmi_wdog_msg_handler(struct ipmi_recv_msg *msg,
+ {
+ 	if (msg->msg.cmd == IPMI_WDOG_RESET_TIMER &&
+ 			msg->msg.data[0] == IPMI_WDOG_TIMER_NOT_INIT_RESP)
+-		pr_info(PFX "response: The IPMI controller appears to have been reset, will attempt to reinitialize the watchdog timer\n");
++		pr_info("response: The IPMI controller appears to have been reset, will attempt to reinitialize the watchdog timer\n");
+ 	else if (msg->msg.data[0] != 0)
+-		pr_err(PFX "response: Error %x on cmd %x\n",
++		pr_err("response: Error %x on cmd %x\n",
+ 		       msg->msg.data[0],
+ 		       msg->msg.cmd);
+ 
+@@ -985,7 +984,7 @@ static void ipmi_register_watchdog(int ipmi_intf)
+ 
+ 	rv = ipmi_create_user(ipmi_intf, &ipmi_hndlrs, NULL, &watchdog_user);
+ 	if (rv < 0) {
+-		pr_crit(PFX "Unable to register with ipmi\n");
++		pr_crit("Unable to register with ipmi\n");
+ 		goto out;
+ 	}
+ 
+@@ -993,7 +992,7 @@ static void ipmi_register_watchdog(int ipmi_intf)
+ 			      &ipmi_version_major,
+ 			      &ipmi_version_minor);
+ 	if (rv) {
+-		pr_warn(PFX "Unable to get IPMI version, assuming 1.0\n");
++		pr_warn("Unable to get IPMI version, assuming 1.0\n");
+ 		ipmi_version_major = 1;
+ 		ipmi_version_minor = 0;
+ 	}
+@@ -1002,7 +1001,7 @@ static void ipmi_register_watchdog(int ipmi_intf)
+ 	if (rv < 0) {
+ 		ipmi_destroy_user(watchdog_user);
+ 		watchdog_user = NULL;
+-		pr_crit(PFX "Unable to register misc device\n");
++		pr_crit("Unable to register misc device\n");
+ 	}
+ 
+ #ifdef HAVE_DIE_NMI
+@@ -1024,7 +1023,7 @@ static void ipmi_register_watchdog(int ipmi_intf)
+ 
+ 		rv = ipmi_set_timeout(IPMI_SET_TIMEOUT_FORCE_HB);
+ 		if (rv) {
+-			pr_warn(PFX "Error starting timer to test NMI: 0x%x.  The NMI pretimeout will likely not work\n",
++			pr_warn("Error starting timer to test NMI: 0x%x.  The NMI pretimeout will likely not work\n",
+ 				rv);
+ 			rv = 0;
+ 			goto out_restore;
+@@ -1033,7 +1032,7 @@ static void ipmi_register_watchdog(int ipmi_intf)
+ 		msleep(1500);
+ 
+ 		if (testing_nmi != 2) {
+-			pr_warn(PFX "IPMI NMI didn't seem to occur.  The NMI pretimeout will likely not work\n");
++			pr_warn("IPMI NMI didn't seem to occur.  The NMI pretimeout will likely not work\n");
+ 		}
+  out_restore:
+ 		testing_nmi = 0;
+@@ -1049,7 +1048,7 @@ static void ipmi_register_watchdog(int ipmi_intf)
+ 		start_now = 0; /* Disable this function after first startup. */
+ 		ipmi_watchdog_state = action_val;
+ 		ipmi_set_timeout(IPMI_SET_TIMEOUT_FORCE_HB);
+-		pr_info(PFX "Starting now!\n");
++		pr_info("Starting now!\n");
+ 	} else {
+ 		/* Stop the timer now. */
+ 		ipmi_watchdog_state = WDOG_TIMEOUT_NONE;
+@@ -1086,7 +1085,7 @@ static void ipmi_unregister_watchdog(int ipmi_intf)
+ 	/* Disconnect from IPMI. */
+ 	rv = ipmi_destroy_user(loc_user);
+ 	if (rv)
+-		pr_warn(PFX "error unlinking from IPMI: %d\n",  rv);
++		pr_warn("error unlinking from IPMI: %d\n",  rv);
+ 
+ 	/* If it comes back, restart it properly. */
+ 	ipmi_start_timer_on_heartbeat = 1;
+@@ -1127,7 +1126,7 @@ ipmi_nmi(unsigned int val, struct pt_regs *regs)
+ 		   the timer.   So do so. */
+ 		atomic_set(&pretimeout_since_last_heartbeat, 1);
+ 		if (atomic_inc_and_test(&preop_panic_excl))
+-			nmi_panic(regs, PFX "pre-timeout");
++			nmi_panic(regs, "pre-timeout");
+ 	}
+ 
+ 	return NMI_HANDLED;
+@@ -1259,7 +1258,7 @@ static void check_parms(void)
+ 	if (preaction_val == WDOG_PRETIMEOUT_NMI) {
+ 		do_nmi = 1;
+ 		if (preop_val == WDOG_PREOP_GIVE_DATA) {
+-			pr_warn(PFX "Pretimeout op is to give data but NMI pretimeout is enabled, setting pretimeout op to none\n");
++			pr_warn("Pretimeout op is to give data but NMI pretimeout is enabled, setting pretimeout op to none\n");
+ 			preop_op("preop_none", NULL);
+ 			do_nmi = 0;
+ 		}
+@@ -1268,7 +1267,7 @@ static void check_parms(void)
+ 		rv = register_nmi_handler(NMI_UNKNOWN, ipmi_nmi, 0,
+ 						"ipmi");
+ 		if (rv) {
+-			pr_warn(PFX "Can't register nmi handler\n");
++			pr_warn("Can't register nmi handler\n");
+ 			return;
+ 		} else
+ 			nmi_handler_registered = 1;
+@@ -1285,19 +1284,18 @@ static int __init ipmi_wdog_init(void)
+ 
+ 	if (action_op(action, NULL)) {
+ 		action_op("reset", NULL);
+-		pr_info(PFX "Unknown action '%s', defaulting to reset\n",
+-			action);
++		pr_info("Unknown action '%s', defaulting to reset\n", action);
+ 	}
+ 
+ 	if (preaction_op(preaction, NULL)) {
+ 		preaction_op("pre_none", NULL);
+-		pr_info(PFX "Unknown preaction '%s', defaulting to none\n",
++		pr_info("Unknown preaction '%s', defaulting to none\n",
+ 			preaction);
+ 	}
+ 
+ 	if (preop_op(preop, NULL)) {
+ 		preop_op("preop_none", NULL);
+-		pr_info(PFX "Unknown preop '%s', defaulting to none\n", preop);
++		pr_info("Unknown preop '%s', defaulting to none\n", preop);
+ 	}
+ 
+ 	check_parms();
+@@ -1311,11 +1309,11 @@ static int __init ipmi_wdog_init(void)
+ 			unregister_nmi_handler(NMI_UNKNOWN, "ipmi");
+ #endif
+ 		unregister_reboot_notifier(&wdog_reboot_notifier);
+-		pr_warn(PFX "can't register smi watcher\n");
++		pr_warn("can't register smi watcher\n");
+ 		return rv;
+ 	}
+ 
+-	pr_info(PFX "driver initialized\n");
++	pr_info("driver initialized\n");
+ 
+ 	return 0;
+ }

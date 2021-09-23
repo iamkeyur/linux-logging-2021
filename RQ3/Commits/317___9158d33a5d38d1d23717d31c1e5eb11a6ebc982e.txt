@@ -1,0 +1,153 @@
+['9158d33a5d38d1d23717d31c1e5eb11a6ebc982e', '656.txt', 'Formatting']
+commit 9158d33a5d38d1d23717d31c1e5eb11a6ebc982e
+Author: Christian Gromm <christian.gromm@microchip.com>
+Date:   Thu Oct 15 13:28:51 2015 +0200
+
+    staging: most: correct coding style breaches
+    
+    This patch fixes line-over-80-characters violation and removes the
+    splitting of quoted strings.
+    
+    Signed-off-by: Christian Gromm <christian.gromm@microchip.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/most/hdm-dim2/dim2_hal.c b/drivers/staging/most/hdm-dim2/dim2_hal.c
+index 0e548301e3bc..81dd8de57e4f 100644
+--- a/drivers/staging/most/hdm-dim2/dim2_hal.c
++++ b/drivers/staging/most/hdm-dim2/dim2_hal.c
+@@ -134,7 +134,7 @@ static int alloc_dbr(u16 size)
+ 				return block_idx * DBR_BLOCK_SIZE;
+ 			}
+ 			block_idx += mask_size;
+-			/* do shift left with 2 steps for case mask_size == 32 */
++			/* do shift left with 2 steps in case mask_size == 32 */
+ 			mask <<= mask_size - 1;
+ 		} while ((mask <<= 1) != 0);
+ 	}
+@@ -639,7 +639,8 @@ static bool channel_start(struct dim_channel *ch, u32 buf_addr, u16 buf_size)
+ 	if (ch->packet_length || ch->bytes_per_frame)
+ 		dim2_start_isoc_sync(ch->addr, state->idx1, buf_addr, buf_size);
+ 	else
+-		dim2_start_ctrl_async(ch->addr, state->idx1, buf_addr, buf_size);
++		dim2_start_ctrl_async(ch->addr, state->idx1, buf_addr,
++				      buf_size);
+ 	state->idx1 ^= 1;
+ 
+ 	return true;
+@@ -855,11 +856,11 @@ void DIM_ServiceIrq(struct dim_channel *const *channels)
+ 	}
+ 
+ 	/*
+-	 * Use while-loop and a flag to make sure the age is changed back at least once,
+-	 * otherwise the interrupt may never come if CPU generates interrupt on changing age.
+-	 *
+-	 * This cycle runs not more than number of channels, because service_interrupts
+-	 * routine doesn't start the channel again.
++	 * Use while-loop and a flag to make sure the age is changed back at
++	 * least once, otherwise the interrupt may never come if CPU generates
++	 * interrupt on changing age.
++	 * This cycle runs not more than number of channels, because
++	 * channel_service_interrupt() routine doesn't start the channel again.
+ 	 */
+ 	do {
+ 		struct dim_channel *const *ch = channels;
+@@ -900,7 +901,8 @@ struct dim_ch_state_t *DIM_GetChannelState(struct dim_channel *ch,
+ bool DIM_EnqueueBuffer(struct dim_channel *ch, u32 buffer_addr, u16 buffer_size)
+ {
+ 	if (!ch)
+-		return dim_on_error(DIM_ERR_DRIVER_NOT_INITIALIZED, "Bad channel");
++		return dim_on_error(DIM_ERR_DRIVER_NOT_INITIALIZED,
++				    "Bad channel");
+ 
+ 	return channel_start(ch, buffer_addr, buffer_size);
+ }
+@@ -908,7 +910,8 @@ bool DIM_EnqueueBuffer(struct dim_channel *ch, u32 buffer_addr, u16 buffer_size)
+ bool DIM_DetachBuffers(struct dim_channel *ch, u16 buffers_number)
+ {
+ 	if (!ch)
+-		return dim_on_error(DIM_ERR_DRIVER_NOT_INITIALIZED, "Bad channel");
++		return dim_on_error(DIM_ERR_DRIVER_NOT_INITIALIZED,
++				    "Bad channel");
+ 
+ 	return channel_detach_buffers(ch, buffers_number);
+ }
+diff --git a/drivers/staging/most/hdm-dim2/dim2_hdm.c b/drivers/staging/most/hdm-dim2/dim2_hdm.c
+index 38876316d869..58a85146b429 100644
+--- a/drivers/staging/most/hdm-dim2/dim2_hdm.c
++++ b/drivers/staging/most/hdm-dim2/dim2_hdm.c
+@@ -200,8 +200,7 @@ static int startup_dim(struct platform_device *pdev)
+ 	}
+ 
+ 	if (dev->clk_speed == -1) {
+-		pr_info("Bad or missing clock speed parameter,"
+-			" using default value: 3072fs\n");
++		pr_info("Bad or missing clock speed parameter, using default value: 3072fs\n");
+ 		dev->clk_speed = CLK_3072FS;
+ 	} else
+ 		pr_info("Selected clock speed: %s\n", clock_speed);
+@@ -359,8 +358,7 @@ static void service_done_flag(struct dim2_hdm *dev, int ch_idx)
+ 		spin_lock_irqsave(&dim_lock, flags);
+ 		if (list_empty(head)) {
+ 			spin_unlock_irqrestore(&dim_lock, flags);
+-			pr_crit("hard error: started_mbo list is empty "
+-				"whereas DIM2 has sent buffers\n");
++			pr_crit("hard error: started_mbo list is empty whereas DIM2 has sent buffers\n");
+ 			break;
+ 		}
+ 
+@@ -547,7 +545,8 @@ static int configure_channel(struct most_interface *most_iface, int ch_idx,
+ 			pr_warn("%s: fixed buffer size (%d -> %d)\n",
+ 				hdm_ch->name, buf_size, new_size);
+ 		spin_lock_irqsave(&dim_lock, flags);
+-		hal_ret = DIM_InitControl(&hdm_ch->ch, is_tx, ch_addr, buf_size);
++		hal_ret = DIM_InitControl(&hdm_ch->ch, is_tx, ch_addr,
++					  buf_size);
+ 		break;
+ 	case MOST_CH_ASYNC:
+ 		new_size = DIM_NormCtrlAsyncBufferSize(buf_size);
+@@ -565,8 +564,8 @@ static int configure_channel(struct most_interface *most_iface, int ch_idx,
+ 	case MOST_CH_ISOC_AVP:
+ 		new_size = DIM_NormIsocBufferSize(buf_size, sub_size);
+ 		if (new_size == 0) {
+-			pr_err("%s: invalid sub-buffer size or "
+-			       "too small buffer size\n", hdm_ch->name);
++			pr_err("%s: invalid sub-buffer size or too small buffer size\n",
++			       hdm_ch->name);
+ 			return -EINVAL;
+ 		}
+ 		ccfg->buffer_size = new_size;
+@@ -579,8 +578,8 @@ static int configure_channel(struct most_interface *most_iface, int ch_idx,
+ 	case MOST_CH_SYNC:
+ 		new_size = DIM_NormSyncBufferSize(buf_size, sub_size);
+ 		if (new_size == 0) {
+-			pr_err("%s: invalid sub-buffer size or "
+-			       "too small buffer size\n", hdm_ch->name);
++			pr_err("%s: invalid sub-buffer size or too small buffer size\n",
++			       hdm_ch->name);
+ 			return -EINVAL;
+ 		}
+ 		ccfg->buffer_size = new_size;
+@@ -777,7 +776,8 @@ static int dim2_probe(struct platform_device *pdev)
+ 
+ 	ret = request_irq(dev->irq_ahb0, dim2_ahb_isr, 0, "mlb_ahb0", dev);
+ 	if (ret) {
+-		pr_err("failed to request IRQ: %d, err: %d\n", dev->irq_ahb0, ret);
++		pr_err("failed to request IRQ: %d, err: %d\n",
++		       dev->irq_ahb0, ret);
+ 		goto err_unmap_io;
+ 	}
+ #endif
+diff --git a/drivers/staging/most/hdm-dim2/dim2_sysfs.c b/drivers/staging/most/hdm-dim2/dim2_sysfs.c
+index 8e331a286fc3..c5b10c7d2fac 100644
+--- a/drivers/staging/most/hdm-dim2/dim2_sysfs.c
++++ b/drivers/staging/most/hdm-dim2/dim2_sysfs.c
+@@ -21,7 +21,8 @@
+ struct bus_attr {
+ 	struct attribute attr;
+ 	ssize_t (*show)(struct medialb_bus *bus, char *buf);
+-	ssize_t (*store)(struct medialb_bus *bus, const char *buf, size_t count);
++	ssize_t (*store)(struct medialb_bus *bus, const char *buf,
++			 size_t count);
+ };
+ 
+ static ssize_t state_show(struct medialb_bus *bus, char *buf)

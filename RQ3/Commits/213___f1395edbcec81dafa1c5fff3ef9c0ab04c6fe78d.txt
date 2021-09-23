@@ -1,0 +1,27 @@
+['f1395edbcec81dafa1c5fff3ef9c0ab04c6fe78d', '768.txt', 'ModernizeLog']
+commit f1395edbcec81dafa1c5fff3ef9c0ab04c6fe78d
+Author: Jiaxun Yang <jiaxun.yang@flygoat.com>
+Date:   Sat Dec 2 21:45:32 2017 +0800
+
+    platform/x86: ideapad-laptop: Use __func__ instead of write_ec_cmd in pr_err
+    
+    Address the following  checkpatch warning by using __func__ instead:
+    WARNING: Prefer using '"%s...", __func__' to using 'write_ec_cmd',
+    this function's name, in a string
+    
+    Signed-off-by: Jiaxun Yang <jiaxun.yang@flygoat.com>
+    Signed-off-by: Darren Hart (VMware) <dvhart@infradead.org>
+
+diff --git a/drivers/platform/x86/ideapad-laptop.c b/drivers/platform/x86/ideapad-laptop.c
+index 9f2a4bc58df0..37a88938bbaa 100644
+--- a/drivers/platform/x86/ideapad-laptop.c
++++ b/drivers/platform/x86/ideapad-laptop.c
+@@ -231,7 +231,7 @@ static int write_ec_cmd(acpi_handle handle, int cmd, unsigned long data)
+ 		if (val == 0)
+ 			return 0;
+ 	}
+-	pr_err("timeout in write_ec_cmd\n");
++	pr_err("timeout in %s\n", __func__);
+ 	return -1;
+ }
+ 

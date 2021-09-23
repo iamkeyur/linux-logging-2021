@@ -1,0 +1,41 @@
+['ce7afa5c56c4d0e1a5eefb1d1872d331e893c120', '921.txt', 'ModernizeLog']
+commit ce7afa5c56c4d0e1a5eefb1d1872d331e893c120
+Author: Mohan Kumar <mohankumar718@gmail.com>
+Date:   Fri Apr 19 11:36:51 2019 +0300
+
+    iio:accel:Switch hardcoded function name with a reference to __func__ making the code more maintainable
+    
+    It fixes the following checkpatch.pl warning:
+    
+    WARNING: Prefer using '"%s...", __func__' to using function's name, in a
+    string
+    
+    Signed-off-by: Mohan Kumar <mohankumar718@gmail.com>
+    Signed-off-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+
+diff --git a/drivers/iio/accel/bmc150-accel-core.c b/drivers/iio/accel/bmc150-accel-core.c
+index b4e2d9b04e1d..44d7c49fe2a1 100644
+--- a/drivers/iio/accel/bmc150-accel-core.c
++++ b/drivers/iio/accel/bmc150-accel-core.c
+@@ -394,7 +394,7 @@ static int bmc150_accel_set_power_state(struct bmc150_accel_data *data, bool on)
+ 
+ 	if (ret < 0) {
+ 		dev_err(dev,
+-			"Failed: bmc150_accel_set_power_state for %d\n", on);
++			"Failed: %s for %d\n", __func__, on);
+ 		if (on)
+ 			pm_runtime_put_noidle(dev);
+ 
+diff --git a/drivers/iio/accel/kxcjk-1013.c b/drivers/iio/accel/kxcjk-1013.c
+index 4895124bd8cf..ce1d4547df2e 100644
+--- a/drivers/iio/accel/kxcjk-1013.c
++++ b/drivers/iio/accel/kxcjk-1013.c
+@@ -451,7 +451,7 @@ static int kxcjk1013_set_power_state(struct kxcjk1013_data *data, bool on)
+ 	}
+ 	if (ret < 0) {
+ 		dev_err(&data->client->dev,
+-			"Failed: kxcjk1013_set_power_state for %d\n", on);
++			"Failed: %s for %d\n", __func__, on);
+ 		if (on)
+ 			pm_runtime_put_noidle(&data->client->dev);
+ 		return ret;

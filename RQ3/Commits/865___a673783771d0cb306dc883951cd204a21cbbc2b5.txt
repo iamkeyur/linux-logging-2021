@@ -1,0 +1,40 @@
+['a673783771d0cb306dc883951cd204a21cbbc2b5', '80.txt', 'RedundantInformation']
+commit a673783771d0cb306dc883951cd204a21cbbc2b5
+Author: Stuart Yoder <stuart.yoder@nxp.com>
+Date:   Wed Oct 26 11:20:29 2016 -0500
+
+    staging: fsl-mc: improve pr_* messages
+    
+    define pr_fmt so non dev_* messages will have an fsl-mc prefix
+    and remove "fsl-mc" from messages where it would now be redundant
+    
+    Signed-off-by: Stuart Yoder <stuart.yoder@nxp.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/fsl-mc/bus/fsl-mc-bus.c b/drivers/staging/fsl-mc/bus/fsl-mc-bus.c
+index 44f64b6f0fc9..245acbfe701b 100644
+--- a/drivers/staging/fsl-mc/bus/fsl-mc-bus.c
++++ b/drivers/staging/fsl-mc/bus/fsl-mc-bus.c
+@@ -9,6 +9,8 @@
+  * warranty of any kind, whether express or implied.
+  */
+ 
++#define pr_fmt(fmt) "fsl-mc: " fmt
++
+ #include <linux/module.h>
+ #include <linux/of_device.h>
+ #include <linux/of_address.h>
+@@ -875,11 +877,11 @@ static int __init fsl_mc_bus_driver_init(void)
+ 
+ 	error = bus_register(&fsl_mc_bus_type);
+ 	if (error < 0) {
+-		pr_err("fsl-mc bus type registration failed: %d\n", error);
++		pr_err("bus type registration failed: %d\n", error);
+ 		goto error_cleanup_cache;
+ 	}
+ 
+-	pr_info("fsl-mc bus type registered\n");
++	pr_info("bus type registered\n");
+ 
+ 	error = platform_driver_register(&fsl_mc_bus_driver);
+ 	if (error < 0) {

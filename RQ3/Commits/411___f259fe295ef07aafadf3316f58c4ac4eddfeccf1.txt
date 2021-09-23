@@ -1,0 +1,48 @@
+['f259fe295ef07aafadf3316f58c4ac4eddfeccf1', '551.txt', 'LogLevel']
+commit f259fe295ef07aafadf3316f58c4ac4eddfeccf1
+Author: Maciej W. Rozycki <macro@mips.com>
+Date:   Fri Jun 16 00:18:11 2017 +0100
+
+    MIPS: Use `pr_debug' for messages from `__compute_return_epc_for_insn'
+    
+    Reduce the log level for branch emulation error messages issued before
+    sending SIGILL by `__compute_return_epc_for_insn' as these are triggered
+    by user software and are not an event that would normally require any
+    attention.  The same signal sent from elsewhere does not actually leave
+    any trace in the kernel log at all.
+    
+    Signed-off-by: Maciej W. Rozycki <macro@imgtec.com>
+    Cc: James Hogan <james.hogan@imgtec.com>
+    Cc: linux-mips@linux-mips.org
+    Patchwork: https://patchwork.linux-mips.org/patch/16402/
+    Signed-off-by: Ralf Baechle <ralf@linux-mips.org>
+
+diff --git a/arch/mips/kernel/branch.c b/arch/mips/kernel/branch.c
+index e53379c689b2..b79ed9af9886 100644
+--- a/arch/mips/kernel/branch.c
++++ b/arch/mips/kernel/branch.c
+@@ -818,18 +818,18 @@ int __compute_return_epc_for_insn(struct pt_regs *regs,
+ 	return ret;
+ 
+ sigill_dsp:
+-	pr_info("%s: DSP branch but not DSP ASE - sending SIGILL.\n",
+-		current->comm);
++	pr_debug("%s: DSP branch but not DSP ASE - sending SIGILL.\n",
++		 current->comm);
+ 	force_sig(SIGILL, current);
+ 	return -EFAULT;
+ sigill_r2r6:
+-	pr_info("%s: R2 branch but r2-to-r6 emulator is not present - sending SIGILL.\n",
+-		current->comm);
++	pr_debug("%s: R2 branch but r2-to-r6 emulator is not present - sending SIGILL.\n",
++		 current->comm);
+ 	force_sig(SIGILL, current);
+ 	return -EFAULT;
+ sigill_r6:
+-	pr_info("%s: R6 branch but no MIPSr6 ISA support - sending SIGILL.\n",
+-		current->comm);
++	pr_debug("%s: R6 branch but no MIPSr6 ISA support - sending SIGILL.\n",
++		 current->comm);
+ 	force_sig(SIGILL, current);
+ 	return -EFAULT;
+ }

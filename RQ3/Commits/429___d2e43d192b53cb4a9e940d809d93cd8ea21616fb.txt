@@ -1,0 +1,26 @@
+['d2e43d192b53cb4a9e940d809d93cd8ea21616fb', '530.txt', 'Typo']
+commit d2e43d192b53cb4a9e940d809d93cd8ea21616fb
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Mon Jul 3 10:37:01 2017 +0100
+
+    ubi: fastmap: fix spelling mistake: "invalidiate" -> "invalidate"
+    
+    Trivial fix to spelling mistake in ubi_err error message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Reviewed-by: Boris Brezillon <boris.brezillon@free-electrons.com>
+    Signed-off-by: Richard Weinberger <richard@nod.at>
+
+diff --git a/drivers/mtd/ubi/fastmap.c b/drivers/mtd/ubi/fastmap.c
+index b44c8d348e78..5a832bc79b1b 100644
+--- a/drivers/mtd/ubi/fastmap.c
++++ b/drivers/mtd/ubi/fastmap.c
+@@ -1667,7 +1667,7 @@ int ubi_update_fastmap(struct ubi_device *ubi)
+ 
+ 	ret = invalidate_fastmap(ubi);
+ 	if (ret < 0) {
+-		ubi_err(ubi, "Unable to invalidiate current fastmap!");
++		ubi_err(ubi, "Unable to invalidate current fastmap!");
+ 		ubi_ro_mode(ubi);
+ 	} else {
+ 		return_fm_pebs(ubi, old_fm);

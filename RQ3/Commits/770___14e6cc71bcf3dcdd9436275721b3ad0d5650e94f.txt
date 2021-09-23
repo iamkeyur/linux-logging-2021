@@ -1,0 +1,40 @@
+['14e6cc71bcf3dcdd9436275721b3ad0d5650e94f', '189.txt', 'ModernizeLog']
+commit 14e6cc71bcf3dcdd9436275721b3ad0d5650e94f
+Author: Elise Lennion <elise.lennion@gmail.com>
+Date:   Mon Oct 10 00:38:20 2016 -0300
+
+    staging: wilc1000: Replace printk() with pr_info().
+    
+    Fix checkpatch warning:
+    
+    WARNING: Prefer [subsystem eg: netdev]_info([subsystem]dev, ... then dev_info(dev, ... then pr_info(...  to printk(KERN_INFO ...
+    
+    Replace printk(KERN_INFO...) by pr_info() for more uniform error reporting.
+    
+    Signed-off-by: Elise Lennion <elise.lennion@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/wilc1000/wilc_debugfs.c b/drivers/staging/wilc1000/wilc_debugfs.c
+index 802bb1d5e207..07260c497db4 100644
+--- a/drivers/staging/wilc1000/wilc_debugfs.c
++++ b/drivers/staging/wilc1000/wilc_debugfs.c
+@@ -62,16 +62,16 @@ static ssize_t wilc_debug_level_write(struct file *filp, const char __user *buf,
+ 		return ret;
+ 
+ 	if (flag > DBG_LEVEL_ALL) {
+-		printk("%s, value (0x%08x) is out of range, stay previous flag (0x%08x)\n", __func__, flag, atomic_read(&WILC_DEBUG_LEVEL));
++		pr_info("%s, value (0x%08x) is out of range, stay previous flag (0x%08x)\n", __func__, flag, atomic_read(&WILC_DEBUG_LEVEL));
+ 		return -EINVAL;
+ 	}
+ 
+ 	atomic_set(&WILC_DEBUG_LEVEL, (int)flag);
+ 
+ 	if (flag == 0)
+-		printk(KERN_INFO "Debug-level disabled\n");
++		pr_info("Debug-level disabled\n");
+ 	else
+-		printk(KERN_INFO "Debug-level enabled\n");
++		pr_info("Debug-level enabled\n");
+ 
+ 	return count;
+ }

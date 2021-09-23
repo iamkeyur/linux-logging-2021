@@ -1,0 +1,31 @@
+['18594e9bc4a27e72d7961a7afe4250a502d1538d', '775.txt', 'Formatting']
+commit 18594e9bc4a27e72d7961a7afe4250a502d1538d
+Author: Nicolas Schichan <nicolas.schichan@gmail.com>
+Date:   Thu Nov 24 13:38:04 2016 +0100
+
+    init: use pr_cont() when displaying rotator during ramdisk loading.
+    
+    Otherwise each individual rotator char would be printed in a new line:
+    
+    (...)
+    [    0.642350] -
+    [    0.644374] |
+    [    0.646367] -
+    (...)
+    
+    Signed-off-by: Nicolas Schichan <nicolas.schichan@gmail.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+diff --git a/init/do_mounts_rd.c b/init/do_mounts_rd.c
+index 8a09b32e07d6..dd4104c9aa12 100644
+--- a/init/do_mounts_rd.c
++++ b/init/do_mounts_rd.c
+@@ -272,7 +272,7 @@ int __init rd_load_image(char *from)
+ 		sys_write(out_fd, buf, BLOCK_SIZE);
+ #if !defined(CONFIG_S390)
+ 		if (!(i % 16)) {
+-			printk("%c\b", rotator[rotate & 0x3]);
++			pr_cont("%c\b", rotator[rotate & 0x3]);
+ 			rotate++;
+ 		}
+ #endif

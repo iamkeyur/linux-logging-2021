@@ -1,0 +1,34 @@
+['9ec32cc703c17b9fd1695619695b84f6ed554fab', '500.txt', 'LogLevel']
+commit 9ec32cc703c17b9fd1695619695b84f6ed554fab
+Author: Hans Verkuil <hverkuil@xs4all.nl>
+Date:   Wed Sep 9 03:40:39 2015 -0300
+
+    [media] v4l2-compat-ioctl32: replace pr_warn by pr_debug
+    
+    Every time compat32 encounters an unknown ioctl it will call pr_warn.
+    However, that's very irritating since it is perfectly normal that this
+    happens. For example, applications often try to call an ioctl to see if
+    it exists, and if that's used with an older kernel where compat32 doesn't
+    support that ioctl yet, then it starts spamming the kernel log.
+    
+    So replace pr_warn by pr_debug.
+    
+    Signed-off-by: Hans Verkuil <hans.verkuil@cisco.com>
+    Acked-by: Sakari Ailus <sakari.ailus@linux.intel.com>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@osg.samsung.com>
+
+diff --git a/drivers/media/v4l2-core/v4l2-compat-ioctl32.c b/drivers/media/v4l2-core/v4l2-compat-ioctl32.c
+index 788b31c91330..fc4326f3ae12 100644
+--- a/drivers/media/v4l2-core/v4l2-compat-ioctl32.c
++++ b/drivers/media/v4l2-core/v4l2-compat-ioctl32.c
+@@ -1034,8 +1034,8 @@ long v4l2_compat_ioctl32(struct file *file, unsigned int cmd, unsigned long arg)
+ 		ret = vdev->fops->compat_ioctl32(file, cmd, arg);
+ 
+ 	if (ret == -ENOIOCTLCMD)
+-		pr_warn("compat_ioctl32: unknown ioctl '%c', dir=%d, #%d (0x%08x)\n",
+-			_IOC_TYPE(cmd), _IOC_DIR(cmd), _IOC_NR(cmd), cmd);
++		pr_debug("compat_ioctl32: unknown ioctl '%c', dir=%d, #%d (0x%08x)\n",
++			 _IOC_TYPE(cmd), _IOC_DIR(cmd), _IOC_NR(cmd), cmd);
+ 	return ret;
+ }
+ EXPORT_SYMBOL_GPL(v4l2_compat_ioctl32);

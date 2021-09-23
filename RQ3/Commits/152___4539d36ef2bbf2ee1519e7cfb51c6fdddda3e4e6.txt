@@ -1,0 +1,29 @@
+['4539d36ef2bbf2ee1519e7cfb51c6fdddda3e4e6', '834.txt', 'NullPtr']
+commit 4539d36ef2bbf2ee1519e7cfb51c6fdddda3e4e6
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Thu Oct 22 22:53:46 2015 +0300
+
+    mmc: dw_mmc: NULL dereference in error message
+    
+    The "host->dms->ch" pointer is NULL here so we can't use it to print the
+    error message.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+    Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 63eefea9645e..57a9577bc35c 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -752,9 +752,7 @@ static int dw_mci_edmac_init(struct dw_mci *host)
+ 
+ 	host->dms->ch = dma_request_slave_channel(host->dev, "rx-tx");
+ 	if (!host->dms->ch) {
+-		dev_err(host->dev,
+-			"Failed to get external DMA channel %d\n",
+-			host->dms->ch->chan_id);
++		dev_err(host->dev, "Failed to get external DMA channel.\n");
+ 		kfree(host->dms);
+ 		host->dms = NULL;
+ 		return -ENXIO;

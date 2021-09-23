@@ -1,0 +1,34 @@
+['cf0d37aecc06801d4847fb36740da4a5690d9d45', '569.txt', 'Clarify/Reword']
+commit cf0d37aecc06801d4847fb36740da4a5690d9d45
+Author: Govind Singh <govinds@codeaurora.org>
+Date:   Mon Feb 5 09:41:34 2018 +0530
+
+    ath10k: fix log message for hif power on failure
+    
+    HIF power-on failure is applicable to each underlying
+    bus type. Fix log message for hif power on failure.
+    
+    Signed-off-by: Govind Singh <govinds@codeaurora.org>
+    Signed-off-by: Kalle Valo <kvalo@codeaurora.org>
+
+diff --git a/drivers/net/wireless/ath/ath10k/core.c b/drivers/net/wireless/ath/ath10k/core.c
+index f3ec13b80b20..830b7fe466f3 100644
+--- a/drivers/net/wireless/ath/ath10k/core.c
++++ b/drivers/net/wireless/ath/ath10k/core.c
+@@ -1,6 +1,7 @@
+ /*
+  * Copyright (c) 2005-2011 Atheros Communications Inc.
+  * Copyright (c) 2011-2017 Qualcomm Atheros, Inc.
++ * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+  *
+  * Permission to use, copy, modify, and/or distribute this software for any
+  * purpose with or without fee is hereby granted, provided that the above
+@@ -2439,7 +2440,7 @@ static int ath10k_core_probe_fw(struct ath10k *ar)
+ 
+ 	ret = ath10k_hif_power_up(ar);
+ 	if (ret) {
+-		ath10k_err(ar, "could not start pci hif (%d)\n", ret);
++		ath10k_err(ar, "could not power on hif bus (%d)\n", ret);
+ 		return ret;
+ 	}
+ 

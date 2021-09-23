@@ -1,0 +1,29 @@
+['ee8c3f6f75671c9172133636aebabf14dbc80066', '881.txt', 'LeakInformation']
+commit ee8c3f6f75671c9172133636aebabf14dbc80066
+Author: Mario Huettel <mario.huettel@gmx.net>
+Date:   Sat Apr 8 14:10:11 2017 +0200
+
+    can: m_can: Removed virtual address from print
+    
+    The virtual address of the device was printed. I removed it because it
+    leaks internal information.
+    
+    Signed-off-by: Mario Huettel <mario.huettel@gmx.net>
+    Tested-by: Quentin Schulz <quentin.schulz@free-electrons.com>
+    Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
+
+diff --git a/drivers/net/can/m_can/m_can.c b/drivers/net/can/m_can/m_can.c
+index ddcbe8bda55a..a966ed5b1946 100644
+--- a/drivers/net/can/m_can/m_can.c
++++ b/drivers/net/can/m_can/m_can.c
+@@ -1231,8 +1231,8 @@ static int m_can_plat_probe(struct platform_device *pdev)
+ 
+ 	devm_can_led_init(dev);
+ 
+-	dev_info(&pdev->dev, "%s device registered (regs=%p, irq=%d)\n",
+-		 KBUILD_MODNAME, priv->base, dev->irq);
++	dev_info(&pdev->dev, "%s device registered (irq=%d)\n",
++		 KBUILD_MODNAME, dev->irq);
+ 
+ 	return 0;
+ 

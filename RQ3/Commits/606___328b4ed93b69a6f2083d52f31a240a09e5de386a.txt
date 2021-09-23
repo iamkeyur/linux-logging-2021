@@ -1,0 +1,33 @@
+['328b4ed93b69a6f2083d52f31a240a09e5de386a', '332.txt', 'FixFormatSpecifier']
+commit 328b4ed93b69a6f2083d52f31a240a09e5de386a
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Tue Dec 5 17:59:29 2017 -0800
+
+    x86: don't hash faulting address in oops printout
+    
+    Things like this will probably keep showing up for other architectures
+    and other special cases.
+    
+    I actually thought we already used %lx for this, and that is indeed
+    _historically_ the case, but we moved to %p when merging the 32-bit and
+    64-bit cases as a convenient way to get the formatting right (ie
+    automatically picking "%08lx" vs "%016lx" based on register size).
+    
+    So just turn this %p into %px.
+    
+    Reported-by: Sergey Senozhatsky <sergey.senozhatsky.work@gmail.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+diff --git a/arch/x86/mm/fault.c b/arch/x86/mm/fault.c
+index 78ca9a8ee454..febf6980e653 100644
+--- a/arch/x86/mm/fault.c
++++ b/arch/x86/mm/fault.c
+@@ -701,7 +701,7 @@ show_fault_oops(struct pt_regs *regs, unsigned long error_code,
+ 	else
+ 		printk(KERN_CONT "paging request");
+ 
+-	printk(KERN_CONT " at %p\n", (void *) address);
++	printk(KERN_CONT " at %px\n", (void *) address);
+ 	printk(KERN_ALERT "IP: %pS\n", (void *)regs->ip);
+ 
+ 	dump_pagetable(address);

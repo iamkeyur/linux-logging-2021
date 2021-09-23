@@ -1,0 +1,29 @@
+['44208cf32e20b188e47307082fd02faff91ebf24', '714.txt', 'ModernizeLog']
+commit 44208cf32e20b188e47307082fd02faff91ebf24
+Author: Genki Sky <sky@genki.is>
+Date:   Tue Dec 5 19:09:55 2017 -0500
+
+    staging: vc04_services: Use __func__
+    
+    This was found using checkpatch.pl's EMBEDDED_FUNCTION_NAME warning.
+    It is easier to be consistent and always use __func__ instead of having
+    to remember to update any hardcoded references to the original name.
+    
+    Signed-off-by: Genki Sky <sky@genki.is>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/vc04_services/bcm2835-camera/mmal-vchiq.c b/drivers/staging/vc04_services/bcm2835-camera/mmal-vchiq.c
+index 5ddea4f54bf7..6c4d8b4c7cd9 100644
+--- a/drivers/staging/vc04_services/bcm2835-camera/mmal-vchiq.c
++++ b/drivers/staging/vc04_services/bcm2835-camera/mmal-vchiq.c
+@@ -618,8 +618,8 @@ static void buffer_to_host_cb(struct vchiq_mmal_instance *instance,
+ 	struct mmal_msg_context *msg_context;
+ 	u32 handle;
+ 
+-	pr_debug("buffer_to_host_cb: instance:%p msg:%p msg_len:%d\n",
+-		 instance, msg, msg_len);
++	pr_debug("%s: instance:%p msg:%p msg_len:%d\n",
++		 __func__, instance, msg, msg_len);
+ 
+ 	if (msg->u.buffer_from_host.drvbuf.magic == MMAL_MAGIC) {
+ 		handle = msg->u.buffer_from_host.drvbuf.client_context;

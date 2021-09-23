@@ -1,0 +1,177 @@
+['ac9ba7dc8613773b037a96af24f381ef230ef1ae', '760.txt', 'FixFormatSpecifier']
+commit ac9ba7dc8613773b037a96af24f381ef230ef1ae
+Author: Rob Herring <robh@kernel.org>
+Date:   Mon Aug 27 20:52:40 2018 -0500
+
+    phy: Convert to using %pOFn instead of device_node.name
+    
+    In preparation to remove the node name pointer from struct device_node,
+    convert printf users to use the %pOFn format specifier.
+    
+    Cc: Kishon Vijay Abraham I <kishon@ti.com>
+    Cc: linux-arm-kernel@lists.infradead.org
+    Signed-off-by: Rob Herring <robh@kernel.org>
+    Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+
+diff --git a/drivers/phy/broadcom/phy-bcm-cygnus-pcie.c b/drivers/phy/broadcom/phy-bcm-cygnus-pcie.c
+index 0f4ac5d63cff..b074682d9dd8 100644
+--- a/drivers/phy/broadcom/phy-bcm-cygnus-pcie.c
++++ b/drivers/phy/broadcom/phy-bcm-cygnus-pcie.c
+@@ -153,8 +153,8 @@ static int cygnus_pcie_phy_probe(struct platform_device *pdev)
+ 		struct cygnus_pcie_phy *p;
+ 
+ 		if (of_property_read_u32(child, "reg", &id)) {
+-			dev_err(dev, "missing reg property for %s\n",
+-				child->name);
++			dev_err(dev, "missing reg property for %pOFn\n",
++				child);
+ 			ret = -EINVAL;
+ 			goto put_child;
+ 		}
+diff --git a/drivers/phy/broadcom/phy-brcm-sata.c b/drivers/phy/broadcom/phy-brcm-sata.c
+index 8708ea3b4d6d..ac57f5a41708 100644
+--- a/drivers/phy/broadcom/phy-brcm-sata.c
++++ b/drivers/phy/broadcom/phy-brcm-sata.c
+@@ -600,8 +600,8 @@ static int brcm_sata_phy_probe(struct platform_device *pdev)
+ 		struct brcm_sata_port *port;
+ 
+ 		if (of_property_read_u32(child, "reg", &id)) {
+-			dev_err(dev, "missing reg property in node %s\n",
+-					child->name);
++			dev_err(dev, "missing reg property in node %pOFn\n",
++					child);
+ 			ret = -EINVAL;
+ 			goto put_child;
+ 		}
+diff --git a/drivers/phy/marvell/phy-berlin-sata.c b/drivers/phy/marvell/phy-berlin-sata.c
+index c1bb6725e48f..a91fc67fc4e0 100644
+--- a/drivers/phy/marvell/phy-berlin-sata.c
++++ b/drivers/phy/marvell/phy-berlin-sata.c
+@@ -231,14 +231,14 @@ static int phy_berlin_sata_probe(struct platform_device *pdev)
+ 		struct phy_berlin_desc *phy_desc;
+ 
+ 		if (of_property_read_u32(child, "reg", &phy_id)) {
+-			dev_err(dev, "missing reg property in node %s\n",
+-				child->name);
++			dev_err(dev, "missing reg property in node %pOFn\n",
++				child);
+ 			ret = -EINVAL;
+ 			goto put_child;
+ 		}
+ 
+ 		if (phy_id >= ARRAY_SIZE(phy_berlin_power_down_bits)) {
+-			dev_err(dev, "invalid reg in node %s\n", child->name);
++			dev_err(dev, "invalid reg in node %pOFn\n", child);
+ 			ret = -EINVAL;
+ 			goto put_child;
+ 		}
+diff --git a/drivers/phy/qualcomm/phy-qcom-qmp.c b/drivers/phy/qualcomm/phy-qcom-qmp.c
+index 72efc2e14ab6..7932931a3da3 100644
+--- a/drivers/phy/qualcomm/phy-qcom-qmp.c
++++ b/drivers/phy/qualcomm/phy-qcom-qmp.c
+@@ -1400,7 +1400,7 @@ static int phy_pipe_clk_register(struct qcom_qmp *qmp, struct device_node *np)
+ 
+ 	ret = of_property_read_string(np, "clock-output-names", &init.name);
+ 	if (ret) {
+-		dev_err(qmp->dev, "%s: No clock-output-names\n", np->name);
++		dev_err(qmp->dev, "%pOFn: No clock-output-names\n", np);
+ 		return ret;
+ 	}
+ 
+diff --git a/drivers/phy/rockchip/phy-rockchip-emmc.c b/drivers/phy/rockchip/phy-rockchip-emmc.c
+index b237360f95f6..19bf84f0bc67 100644
+--- a/drivers/phy/rockchip/phy-rockchip-emmc.c
++++ b/drivers/phy/rockchip/phy-rockchip-emmc.c
+@@ -337,8 +337,8 @@ static int rockchip_emmc_phy_probe(struct platform_device *pdev)
+ 		return -ENOMEM;
+ 
+ 	if (of_property_read_u32(dev->of_node, "reg", &reg_offset)) {
+-		dev_err(dev, "missing reg property in node %s\n",
+-			dev->of_node->name);
++		dev_err(dev, "missing reg property in node %pOFn\n",
++			dev->of_node);
+ 		return -EINVAL;
+ 	}
+ 
+diff --git a/drivers/phy/rockchip/phy-rockchip-inno-usb2.c b/drivers/phy/rockchip/phy-rockchip-inno-usb2.c
+index 5049dac79bd0..24bd2717abdb 100644
+--- a/drivers/phy/rockchip/phy-rockchip-inno-usb2.c
++++ b/drivers/phy/rockchip/phy-rockchip-inno-usb2.c
+@@ -1116,8 +1116,8 @@ static int rockchip_usb2phy_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	if (of_property_read_u32(np, "reg", &reg)) {
+-		dev_err(dev, "the reg property is not assigned in %s node\n",
+-			np->name);
++		dev_err(dev, "the reg property is not assigned in %pOFn node\n",
++			np);
+ 		return -EINVAL;
+ 	}
+ 
+@@ -1143,8 +1143,8 @@ static int rockchip_usb2phy_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	if (!rphy->phy_cfg) {
+-		dev_err(dev, "no phy-config can be matched with %s node\n",
+-			np->name);
++		dev_err(dev, "no phy-config can be matched with %pOFn node\n",
++			np);
+ 		return -EINVAL;
+ 	}
+ 
+diff --git a/drivers/phy/rockchip/phy-rockchip-typec.c b/drivers/phy/rockchip/phy-rockchip-typec.c
+index 76a4b58ec771..c57e496f0b0c 100644
+--- a/drivers/phy/rockchip/phy-rockchip-typec.c
++++ b/drivers/phy/rockchip/phy-rockchip-typec.c
+@@ -1145,8 +1145,8 @@ static int rockchip_typec_phy_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	if (!tcphy->port_cfgs) {
+-		dev_err(dev, "no phy-config can be matched with %s node\n",
+-			np->name);
++		dev_err(dev, "no phy-config can be matched with %pOFn node\n",
++			np);
+ 		return -EINVAL;
+ 	}
+ 
+@@ -1186,8 +1186,8 @@ static int rockchip_typec_phy_probe(struct platform_device *pdev)
+ 			continue;
+ 
+ 		if (IS_ERR(phy)) {
+-			dev_err(dev, "failed to create phy: %s\n",
+-				child_np->name);
++			dev_err(dev, "failed to create phy: %pOFn\n",
++				child_np);
+ 			pm_runtime_disable(dev);
+ 			return PTR_ERR(phy);
+ 		}
+diff --git a/drivers/phy/rockchip/phy-rockchip-usb.c b/drivers/phy/rockchip/phy-rockchip-usb.c
+index 3378eeb7a562..269c86329cb8 100644
+--- a/drivers/phy/rockchip/phy-rockchip-usb.c
++++ b/drivers/phy/rockchip/phy-rockchip-usb.c
+@@ -208,8 +208,8 @@ static int rockchip_usb_phy_init(struct rockchip_usb_phy_base *base,
+ 	rk_phy->np = child;
+ 
+ 	if (of_property_read_u32(child, "reg", &reg_offset)) {
+-		dev_err(base->dev, "missing reg property in node %s\n",
+-			child->name);
++		dev_err(base->dev, "missing reg property in node %pOFn\n",
++			child);
+ 		return -EINVAL;
+ 	}
+ 
+diff --git a/drivers/phy/tegra/xusb.c b/drivers/phy/tegra/xusb.c
+index de1b4ebe4de2..5b3b8863363e 100644
+--- a/drivers/phy/tegra/xusb.c
++++ b/drivers/phy/tegra/xusb.c
+@@ -115,8 +115,8 @@ int tegra_xusb_lane_parse_dt(struct tegra_xusb_lane *lane,
+ 
+ 	err = match_string(lane->soc->funcs, lane->soc->num_funcs, function);
+ 	if (err < 0) {
+-		dev_err(dev, "invalid function \"%s\" for lane \"%s\"\n",
+-			function, np->name);
++		dev_err(dev, "invalid function \"%s\" for lane \"%pOFn\"\n",
++			function, np);
+ 		return err;
+ 	}
+ 

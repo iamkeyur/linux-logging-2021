@@ -1,0 +1,25 @@
+['f9430b235dd46c7753a018fa39e3c31981b0a54d', '615.txt', 'Mislead/Ambiguous', 'AddInfo']
+commit f9430b235dd46c7753a018fa39e3c31981b0a54d
+Author: Anthony Koo <Anthony.Koo@amd.com>
+Date:   Tue May 8 11:24:05 2018 -0400
+
+    drm/amd/display: Prefix event prints with ==Event==
+    
+    Signed-off-by: Anthony Koo <Anthony.Koo@amd.com>
+    Reviewed-by: Tony Cheng <Tony.Cheng@amd.com>
+    Acked-by: Harry Wentland <harry.wentland@amd.com>
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+diff --git a/drivers/gpu/drm/amd/display/modules/stats/stats.c b/drivers/gpu/drm/amd/display/modules/stats/stats.c
+index 3f7d47fdc367..fa0665d09075 100644
+--- a/drivers/gpu/drm/amd/display/modules/stats/stats.c
++++ b/drivers/gpu/drm/amd/display/modules/stats/stats.c
+@@ -240,7 +240,7 @@ void mod_stats_dump(struct mod_stats *mod_stats)
+ 	for (int i = 0; i < core_stats->entry_id; i++) {
+ 		if (event_index < core_stats->event_index &&
+ 				i == events[event_index].entry_id) {
+-			DISPLAY_STATS("%s\n", events[event_index].event_string);
++			DISPLAY_STATS("==Event==%s\n", events[event_index].event_string);
+ 			event_index++;
+ 		} else if (time_index < core_stats->index &&
+ 				i == time[time_index].entry_id) {

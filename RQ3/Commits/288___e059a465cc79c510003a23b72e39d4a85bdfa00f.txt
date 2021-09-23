@@ -1,0 +1,34 @@
+['e059a465cc79c510003a23b72e39d4a85bdfa00f', '686.txt', 'Typo']
+commit e059a465cc79c510003a23b72e39d4a85bdfa00f
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Fri Feb 17 19:58:10 2017 +0000
+
+    Bluetooth: hci_qca: fix spelling mistake: "Spurrious" -> "Spurious"
+    
+    trivial fix to spelling mistake in error message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Marcel Holtmann <marcel@holtmann.org>
+
+diff --git a/drivers/bluetooth/hci_qca.c b/drivers/bluetooth/hci_qca.c
+index 05c230719a47..f242dfd0c2e2 100644
+--- a/drivers/bluetooth/hci_qca.c
++++ b/drivers/bluetooth/hci_qca.c
+@@ -335,7 +335,7 @@ static void hci_ibs_tx_idle_timeout(unsigned long arg)
+ 		/* Fall through */
+ 
+ 	default:
+-		BT_ERR("Spurrious timeout tx state %d", qca->tx_ibs_state);
++		BT_ERR("Spurious timeout tx state %d", qca->tx_ibs_state);
+ 		break;
+ 	}
+ 
+@@ -373,7 +373,7 @@ static void hci_ibs_wake_retrans_timeout(unsigned long arg)
+ 		/* Fall through */
+ 
+ 	default:
+-		BT_ERR("Spurrious timeout tx state %d", qca->tx_ibs_state);
++		BT_ERR("Spurious timeout tx state %d", qca->tx_ibs_state);
+ 		break;
+ 	}
+ 

@@ -1,0 +1,49 @@
+['c127e22f4cc1b093c9ee882ddc887b9cb08982d7', '510.txt', 'Formatting']
+commit c127e22f4cc1b093c9ee882ddc887b9cb08982d7
+Author: Sanjana Sanikommu <sanjana99reddy99@gmail.com>
+Date:   Mon Mar 18 21:48:40 2019 +0530
+
+    Staging: gasket: gasket_sysfs.c: Fix string split issue.
+    
+    Concatenate a multi-line string constant into a single
+    line.Issue found by checkpatch.pl.
+    
+    WARNING:quoted string split across line.
+    
+    Signed-off-by: Sanjana Sanikommu <sanjana99reddy99@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/gasket/gasket_sysfs.c b/drivers/staging/gasket/gasket_sysfs.c
+index fc45f0d13e87..a2d67c28f530 100644
+--- a/drivers/staging/gasket/gasket_sysfs.c
++++ b/drivers/staging/gasket/gasket_sysfs.c
+@@ -223,8 +223,7 @@ int gasket_sysfs_create_entries(struct device *device,
+ 
+ 	if (!mapping) {
+ 		dev_dbg(device,
+-			"Creating entries for device without first "
+-			"initializing mapping\n");
++			"Creating entries for device without first initializing mapping\n");
+ 		return -EINVAL;
+ 	}
+ 
+@@ -233,8 +232,7 @@ int gasket_sysfs_create_entries(struct device *device,
+ 		i++) {
+ 		if (mapping->attribute_count == GASKET_SYSFS_MAX_NODES) {
+ 			dev_err(device,
+-				"Maximum number of sysfs nodes reached for "
+-				"device\n");
++				"Maximum number of sysfs nodes reached for device\n");
+ 			mutex_unlock(&mapping->mutex);
+ 			put_mapping(mapping);
+ 			return -ENOMEM;
+@@ -264,8 +262,7 @@ void gasket_sysfs_remove_mapping(struct device *device)
+ 
+ 	if (!mapping) {
+ 		dev_err(device,
+-			"Attempted to remove non-existent sysfs mapping to "
+-			"device\n");
++			"Attempted to remove non-existent sysfs mapping to device\n");
+ 		return;
+ 	}
+ 

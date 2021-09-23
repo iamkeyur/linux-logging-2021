@@ -1,0 +1,38 @@
+['f3fb75038dd1174764521303a746fe9de67eb0e5', '668.txt', 'LogLevel']
+commit f3fb75038dd1174764521303a746fe9de67eb0e5
+Author: Hante Meuleman <meuleman@broadcom.com>
+Date:   Thu Dec 10 13:43:10 2015 +0100
+
+    brcmfmac: Change error print in debug print
+    
+    The pcie suspend and resume routines contain some error prints,
+    which should have been debug prints.
+    
+    Reviewed-by: Arend Van Spriel <arend@broadcom.com>
+    Reviewed-by: Pieter-Paul Giesberts <pieterpg@broadcom.com>
+    Signed-off-by: Hante Meuleman <meuleman@broadcom.com>
+    Signed-off-by: Arend van Spriel <arend@broadcom.com>
+    Signed-off-by: Kalle Valo <kvalo@codeaurora.org>
+
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c
+index 4ebc53c757cb..3d2d790d3ad6 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c
+@@ -1875,7 +1875,7 @@ static int brcmf_pcie_pm_enter_D3(struct device *dev)
+ 	struct brcmf_pciedev_info *devinfo;
+ 	struct brcmf_bus *bus;
+ 
+-	brcmf_err("Enter\n");
++	brcmf_dbg(PCIE, "Enter\n");
+ 
+ 	bus = dev_get_drvdata(dev);
+ 	devinfo = bus->bus_priv.pcie->devinfo;
+@@ -1906,7 +1906,7 @@ static int brcmf_pcie_pm_leave_D3(struct device *dev)
+ 	struct pci_dev *pdev;
+ 	int err;
+ 
+-	brcmf_err("Enter\n");
++	brcmf_dbg(PCIE, "Enter\n");
+ 
+ 	bus = dev_get_drvdata(dev);
+ 	devinfo = bus->bus_priv.pcie->devinfo;

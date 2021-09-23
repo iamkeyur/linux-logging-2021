@@ -1,0 +1,49 @@
+['9faef1cb33d4cc17ae4e85de67aa242eebb64102', '443.txt', 'FixFormatSpecifier']
+commit 9faef1cb33d4cc17ae4e85de67aa242eebb64102
+Author: Anton Wuerfel <anton.wuerfel@fau.de>
+Date:   Thu Jan 14 16:08:21 2016 +0100
+
+    tty: serial: 8250: Correct conversion specifiers
+    
+    This patch fixes compiler warnings about wrong conversion specifiers used
+    in a debug output in 8250_pnp.c. The precise warning is:
+    
+    drivers/tty/serial/8250/8250_pnp.c: In function ‘serial_pnp_probe’:
+    include/linux/dynamic_debug.h:64:16: warning: format ‘%x’ expects argument
+    of [...]
+    
+    drivers/tty/serial/8250/8250_pnp.c:467:2: note: in expansion of macro
+    ‘dev_dbg’
+      dev_dbg(&dev->dev,
+      ^
+    include/linux/dynamic_debug.h:64:16: warning: format ‘%lx’ expects argument
+    of [...]
+    
+    drivers/tty/serial/8250/8250_pnp.c:467:2: note: in expansion of macro
+    ‘dev_dbg’
+      dev_dbg(&dev->dev,
+      ^
+    
+    Those warnings never got triggered, because the command was nested
+    in an #ifdef, which is removed by a patch of this series.
+    
+    Signed-off-by: Anton Würfel <anton.wuerfel@fau.de>
+    Signed-off-by: Phillip Raffeck <phillip.raffeck@fau.de>
+    Cc: linux-kernel@i4.cs.fau.de
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/tty/serial/8250/8250_pnp.c b/drivers/tty/serial/8250/8250_pnp.c
+index cad40ff8d641..e6bd21967c27 100644
+--- a/drivers/tty/serial/8250/8250_pnp.c
++++ b/drivers/tty/serial/8250/8250_pnp.c
+@@ -465,8 +465,8 @@ serial_pnp_probe(struct pnp_dev *dev, const struct pnp_device_id *dev_id)
+ 		return -ENODEV;
+ 
+ 	dev_dbg(&dev->dev,
+-		 "Setup PNP port: port %x, mem 0x%lx, irq %d, type %d\n",
+-		 uart.port.iobase, uart.port.mapbase,
++		 "Setup PNP port: port %lx, mem %pa, irq %d, type %d\n",
++		 uart.port.iobase, &uart.port.mapbase,
+ 		 uart.port.irq, uart.port.iotype);
+ 
+ 	if (flags & CIR_PORT) {

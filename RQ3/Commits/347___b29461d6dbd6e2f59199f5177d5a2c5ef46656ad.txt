@@ -1,0 +1,27 @@
+['b29461d6dbd6e2f59199f5177d5a2c5ef46656ad', '623.txt', 'Typo']
+commit b29461d6dbd6e2f59199f5177d5a2c5ef46656ad
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu Feb 23 00:07:17 2017 +0000
+
+    drm: kselftest: fix spelling mistake: "misalinged" -> "misaligned"
+    
+    trivial fix to spelling mistake in pr_err message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Reviewed-by: Chris Wilson <chris@chris-wilson.co.uk>
+    Signed-off-by: Daniel Vetter <daniel.vetter@ffwll.ch>
+    Link: http://patchwork.freedesktop.org/patch/msgid/20170223000717.8898-1-colin.king@canonical.com
+
+diff --git a/drivers/gpu/drm/selftests/test-drm_mm.c b/drivers/gpu/drm/selftests/test-drm_mm.c
+index 2958f596081e..fa356f5dae27 100644
+--- a/drivers/gpu/drm/selftests/test-drm_mm.c
++++ b/drivers/gpu/drm/selftests/test-drm_mm.c
+@@ -181,7 +181,7 @@ static bool assert_node(struct drm_mm_node *node, struct drm_mm *mm,
+ 	}
+ 
+ 	if (misalignment(node, alignment)) {
+-		pr_err("node is misalinged, start %llx rem %llu, expected alignment %llu\n",
++		pr_err("node is misaligned, start %llx rem %llu, expected alignment %llu\n",
+ 		       node->start, misalignment(node, alignment), alignment);
+ 		ok = false;
+ 	}

@@ -1,0 +1,26 @@
+['62749a056ab48994956cf14abcd5622db4a4a0cb', '546.txt', 'WrongInformation']
+commit 62749a056ab48994956cf14abcd5622db4a4a0cb
+Author: Alex Elder <elder@linaro.org>
+Date:   Wed Dec 3 12:27:41 2014 -0600
+
+    greybus: fix an error message
+    
+    The error message printed by gb_operation_sync() if the operation
+    fails is wrong.  Fix it.
+    
+    Signed-off-by: Alex Elder <elder@linaro.org>
+    Signed-off-by: Greg Kroah-Hartman <greg@kroah.com>
+
+diff --git a/drivers/staging/greybus/operation.c b/drivers/staging/greybus/operation.c
+index c62f20072b3e..109b94fc26b7 100644
+--- a/drivers/staging/greybus/operation.c
++++ b/drivers/staging/greybus/operation.c
+@@ -939,7 +939,7 @@ int gb_operation_sync(struct gb_connection *connection, int type,
+ 
+ 	ret = gb_operation_request_send_sync(operation);
+ 	if (ret)
+-		pr_err("version operation failed (%d)\n", ret);
++		pr_err("synchronous operation failed (%d)\n", ret);
+ 	else
+ 		if (response_size)
+ 			memcpy(response, operation->response->payload,

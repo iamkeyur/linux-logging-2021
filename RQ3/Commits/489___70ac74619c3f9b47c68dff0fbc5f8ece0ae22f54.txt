@@ -1,0 +1,25 @@
+['70ac74619c3f9b47c68dff0fbc5f8ece0ae22f54', '466.txt', 'Typo']
+commit 70ac74619c3f9b47c68dff0fbc5f8ece0ae22f54
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Tue May 22 17:44:24 2018 +0100
+
+    staging: rtlwifi: fix spelling mistake: "Platfoem" -> "Platform"
+    
+    Trivial fix to spelling mistake in ODM_RT_TRACE message text
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/rtlwifi/phydm/phydm_rainfo.c b/drivers/staging/rtlwifi/phydm/phydm_rainfo.c
+index a89bc59cf63b..b46791a727c7 100644
+--- a/drivers/staging/rtlwifi/phydm/phydm_rainfo.c
++++ b/drivers/staging/rtlwifi/phydm/phydm_rainfo.c
+@@ -711,7 +711,7 @@ void phydm_update_hal_ra_mask(void *dm_void, u32 wireless_mode, u8 rf_type,
+ 	phydm_BW = phydm_trans_platform_bw(dm, BW);
+ 
+ 	ODM_RT_TRACE(dm, ODM_COMP_RA_MASK,
+-		     "Platfoem original RA Mask = (( 0x %x | %x ))\n",
++		     "Platform original RA Mask = (( 0x %x | %x ))\n",
+ 		     ratr_bitmap_msb, ratr_bitmap);
+ 
+ 	switch (wireless_mode) {

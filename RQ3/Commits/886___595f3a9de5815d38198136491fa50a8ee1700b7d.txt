@@ -1,0 +1,29 @@
+['595f3a9de5815d38198136491fa50a8ee1700b7d', '1514.txt', 'FixFormatSpecifier']
+commit 595f3a9de5815d38198136491fa50a8ee1700b7d
+Author: Helge Deller <deller@gmx.de>
+Date:   Mon Oct 9 09:54:14 2017 -0700
+
+    ti_sci: Use %pS printk format for direct addresses
+    
+    Use the %pS printk format for printing symbols from direct addresses.
+    This is important for the ia64, ppc64 and parisc64 architectures, while on
+    other architectures there is no difference between %pS and %pF.
+    Fix it for consistency across the kernel.
+    
+    Signed-off-by: Helge Deller <deller@gmx.de>
+    Acked-by: Nishanth Menon <nm@ti.com>
+    Signed-off-by: Santosh Shilimkar <ssantosh@kernel.org>
+
+diff --git a/drivers/firmware/ti_sci.c b/drivers/firmware/ti_sci.c
+index 00cfed3c3e1a..23b12d99ddfe 100644
+--- a/drivers/firmware/ti_sci.c
++++ b/drivers/firmware/ti_sci.c
+@@ -439,7 +439,7 @@ static inline int ti_sci_do_xfer(struct ti_sci_info *info,
+ 	/* And we wait for the response. */
+ 	timeout = msecs_to_jiffies(info->desc->max_rx_timeout_ms);
+ 	if (!wait_for_completion_timeout(&xfer->done, timeout)) {
+-		dev_err(dev, "Mbox timedout in resp(caller: %pF)\n",
++		dev_err(dev, "Mbox timedout in resp(caller: %pS)\n",
+ 			(void *)_RET_IP_);
+ 		ret = -ETIMEDOUT;
+ 	}

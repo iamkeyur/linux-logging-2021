@@ -1,0 +1,28 @@
+['8351badf349b22b47c9696f54656db65d7834e42', '351.txt', 'Formatting']
+commit 8351badf349b22b47c9696f54656db65d7834e42
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Wed Feb 8 10:20:35 2017 +0300
+
+    parisc: fix a printk
+    
+    We want to do a pr_cont() here and not a pr_warn().
+    
+    Fixes: b391667eb45a ("parisc: Report trap type as human readable string")
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: Helge Deller <deller@gmx.de>
+
+diff --git a/arch/parisc/mm/fault.c b/arch/parisc/mm/fault.c
+index 1a0b4f63f0e9..c3f8d34a11cf 100644
+--- a/arch/parisc/mm/fault.c
++++ b/arch/parisc/mm/fault.c
+@@ -238,8 +238,8 @@ show_signal_msg(struct pt_regs *regs, unsigned long code,
+ 		vma ? ',':'\n');
+ 
+ 	if (vma)
+-		pr_warn(KERN_CONT " vm_start = 0x%08lx, vm_end = 0x%08lx\n",
+-				vma->vm_start, vma->vm_end);
++		pr_cont(" vm_start = 0x%08lx, vm_end = 0x%08lx\n",
++			vma->vm_start, vma->vm_end);
+ 
+ 	show_regs(regs);
+ }

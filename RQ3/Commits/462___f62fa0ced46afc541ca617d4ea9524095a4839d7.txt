@@ -1,0 +1,36 @@
+['f62fa0ced46afc541ca617d4ea9524095a4839d7', '495.txt', 'FixFormatSpecifier']
+commit f62fa0ced46afc541ca617d4ea9524095a4839d7
+Author: Arnd Bergmann <arnd@arndb.de>
+Date:   Mon Jul 8 14:39:32 2019 +0200
+
+    habanalabs: use %pad for printing a dma_addr_t
+    
+    dma_addr_t might be different sizes depending on the configuration,
+    so we cannot print it as %llx:
+    
+    drivers/misc/habanalabs/goya/goya.c: In function 'goya_sw_init':
+    drivers/misc/habanalabs/goya/goya.c:698:21: error: format '%llx' expects argument of type 'long long unsigned int', but argument 4 has type 'dma_addr_t' {aka 'unsigned int'} [-Werror=format=]
+    
+    Use the special %pad format string. This requires passing the
+    argument by reference.
+    
+    Fixes: 2a51558c8c7f ("habanalabs: remove DMA mask hack for Goya")
+    Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+    Reviewed-by: Oded Gabbay <oded.gabbay@gmail.com>
+    Signed-off-by: Oded Gabbay <oded.gabbay@gmail.com>
+
+diff --git a/drivers/misc/habanalabs/goya/goya.c b/drivers/misc/habanalabs/goya/goya.c
+index 75294ec65257..60e509f64051 100644
+--- a/drivers/misc/habanalabs/goya/goya.c
++++ b/drivers/misc/habanalabs/goya/goya.c
+@@ -695,8 +695,8 @@ static int goya_sw_init(struct hl_device *hdev)
+ 		goto free_dma_pool;
+ 	}
+ 
+-	dev_dbg(hdev->dev, "cpu accessible memory at bus address 0x%llx\n",
+-		hdev->cpu_accessible_dma_address);
++	dev_dbg(hdev->dev, "cpu accessible memory at bus address %pad\n",
++		&hdev->cpu_accessible_dma_address);
+ 
+ 	hdev->cpu_accessible_dma_pool = gen_pool_create(ilog2(32), -1);
+ 	if (!hdev->cpu_accessible_dma_pool) {

@@ -1,0 +1,38 @@
+['d03ae4778b3b61fc329615c30972074ee3496b0a', '185.txt', 'ModernizeLog']
+commit d03ae4778b3b61fc329615c30972074ee3496b0a
+Author: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Date:   Wed Jul 3 09:16:52 2019 +0200
+
+    debugfs: provide pr_fmt() macro
+    
+    Use a common "debugfs: " prefix for all pr_* calls in a single place.
+    
+    Cc: Mark Brown <broonie@kernel.org>
+    Reviewed-by: Takashi Iwai <tiwai@suse.de>
+    Reviewed-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+    Link: https://lore.kernel.org/r/20190703071653.2799-1-gregkh@linuxfoundation.org
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/fs/debugfs/inode.c b/fs/debugfs/inode.c
+index c3638ac81cb6..7f43c8acfcbf 100644
+--- a/fs/debugfs/inode.c
++++ b/fs/debugfs/inode.c
+@@ -10,6 +10,8 @@
+  *  See ./Documentation/core-api/kernel-api.rst for more details.
+  */
+ 
++#define pr_fmt(fmt)	"debugfs: " fmt
++
+ #include <linux/module.h>
+ #include <linux/fs.h>
+ #include <linux/mount.h>
+@@ -286,7 +288,7 @@ static struct dentry *start_creating(const char *name, struct dentry *parent)
+ 	struct dentry *dentry;
+ 	int error;
+ 
+-	pr_debug("debugfs: creating file '%s'\n",name);
++	pr_debug("creating file '%s'\n", name);
+ 
+ 	if (IS_ERR(parent))
+ 		return parent;

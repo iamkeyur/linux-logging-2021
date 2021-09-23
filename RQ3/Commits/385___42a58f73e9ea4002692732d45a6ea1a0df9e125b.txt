@@ -1,0 +1,47 @@
+['42a58f73e9ea4002692732d45a6ea1a0df9e125b', '580.txt', 'FixFormatSpecifier']
+commit 42a58f73e9ea4002692732d45a6ea1a0df9e125b
+Author: Marek Vasut <marek.vasut+renesas@gmail.com>
+Date:   Mon Mar 25 12:41:00 2019 +0100
+
+    PCI: rcar: Clean up debug messages
+    
+    Drop useless casts from debug messages, they are no longer needed
+    due to the data type cleanup.
+    
+    Signed-off-by: Marek Vasut <marek.vasut+renesas@gmail.com>
+    Signed-off-by: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
+    Reviewed-by: Simon Horman <horms+renesas@verge.net.au>
+    Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+    Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+    Cc: Geert Uytterhoeven <geert+renesas@glider.be>
+    Cc: Phil Edworthy <phil.edworthy@renesas.com>
+    Cc: Simon Horman <horms+renesas@verge.net.au>
+    Cc: Wolfram Sang <wsa@the-dreams.de>
+    Cc: linux-renesas-soc@vger.kernel.org
+
+diff --git a/drivers/pci/controller/pcie-rcar.c b/drivers/pci/controller/pcie-rcar.c
+index 96210768e774..c6013f95bdb2 100644
+--- a/drivers/pci/controller/pcie-rcar.c
++++ b/drivers/pci/controller/pcie-rcar.c
+@@ -284,8 +284,8 @@ static int rcar_pcie_read_conf(struct pci_bus *bus, unsigned int devfn,
+ 	else if (size == 2)
+ 		*val = (*val >> (BITS_PER_BYTE * (where & 2))) & 0xffff;
+ 
+-	dev_dbg(&bus->dev, "pcie-config-read: bus=%3d devfn=0x%04x where=0x%04x size=%d val=0x%08lx\n",
+-		bus->number, devfn, where, size, (unsigned long)*val);
++	dev_dbg(&bus->dev, "pcie-config-read: bus=%3d devfn=0x%04x where=0x%04x size=%d val=0x%08x\n",
++		bus->number, devfn, where, size, *val);
+ 
+ 	return ret;
+ }
+@@ -304,8 +304,8 @@ static int rcar_pcie_write_conf(struct pci_bus *bus, unsigned int devfn,
+ 	if (ret != PCIBIOS_SUCCESSFUL)
+ 		return ret;
+ 
+-	dev_dbg(&bus->dev, "pcie-config-write: bus=%3d devfn=0x%04x where=0x%04x size=%d val=0x%08lx\n",
+-		bus->number, devfn, where, size, (unsigned long)val);
++	dev_dbg(&bus->dev, "pcie-config-write: bus=%3d devfn=0x%04x where=0x%04x size=%d val=0x%08x\n",
++		bus->number, devfn, where, size, val);
+ 
+ 	if (size == 1) {
+ 		shift = BITS_PER_BYTE * (where & 3);

@@ -1,0 +1,26 @@
+['cc10f8712bd688543602f3f3d052b13be4095695', '288.txt', 'Formatting']
+commit cc10f8712bd688543602f3f3d052b13be4095695
+Author: Joe Perches <joe@perches.com>
+Date:   Tue Dec 5 22:40:25 2017 -0800
+
+    xen-netback: Fix logging message with spurious period after newline
+    
+    Using a period after a newline causes bad output.
+    
+    Signed-off-by: Joe Perches <joe@perches.com>
+    Reviewed-by: Paul Durrant <paul.durrant@citrix.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/xen-netback/interface.c b/drivers/net/xen-netback/interface.c
+index d6dff347f896..78ebe494fef0 100644
+--- a/drivers/net/xen-netback/interface.c
++++ b/drivers/net/xen-netback/interface.c
+@@ -186,7 +186,7 @@ static int xenvif_start_xmit(struct sk_buff *skb, struct net_device *dev)
+ 	/* Obtain the queue to be used to transmit this packet */
+ 	index = skb_get_queue_mapping(skb);
+ 	if (index >= num_queues) {
+-		pr_warn_ratelimited("Invalid queue %hu for packet on interface %s\n.",
++		pr_warn_ratelimited("Invalid queue %hu for packet on interface %s\n",
+ 				    index, vif->dev->name);
+ 		index %= num_queues;
+ 	}

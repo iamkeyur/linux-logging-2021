@@ -1,0 +1,28 @@
+['b20eab15a1d5091e45022401e75b49948e8be33f', '432.txt', 'FixFormatSpecifier']
+commit b20eab15a1d5091e45022401e75b49948e8be33f
+Author: Gal Pressman <galp@mellanox.com>
+Date:   Tue Sep 12 17:51:12 2017 +0300
+
+    net/mlx5e: Print netdev features correctly in error message
+    
+    Use the correct formatting for netdev features.
+    
+    Fixes: 0e405443e803 ("net/mlx5e: Improve set features ndo resiliency")
+    Signed-off-by: Gal Pressman <galp@mellanox.com>
+    Signed-off-by: Saeed Mahameed <saeedm@mellanox.com>
+
+diff --git a/drivers/net/ethernet/mellanox/mlx5/core/en_main.c b/drivers/net/ethernet/mellanox/mlx5/core/en_main.c
+index dfc29720ab77..84b013dc62e9 100644
+--- a/drivers/net/ethernet/mellanox/mlx5/core/en_main.c
++++ b/drivers/net/ethernet/mellanox/mlx5/core/en_main.c
+@@ -3333,8 +3333,8 @@ static int mlx5e_handle_feature(struct net_device *netdev,
+ 
+ 	err = feature_handler(netdev, enable);
+ 	if (err) {
+-		netdev_err(netdev, "%s feature 0x%llx failed err %d\n",
+-			   enable ? "Enable" : "Disable", feature, err);
++		netdev_err(netdev, "%s feature %pNF failed, err %d\n",
++			   enable ? "Enable" : "Disable", &feature, err);
+ 		return err;
+ 	}
+ 

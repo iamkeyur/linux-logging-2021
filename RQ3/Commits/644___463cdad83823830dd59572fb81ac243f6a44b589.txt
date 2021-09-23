@@ -1,0 +1,38 @@
+['463cdad83823830dd59572fb81ac243f6a44b589', '290.txt', 'AddInfo']
+commit 463cdad83823830dd59572fb81ac243f6a44b589
+Author: Maurizio Lombardi <mlombard@redhat.com>
+Date:   Tue Jul 2 13:27:05 2019 +0200
+
+    scsi: core: use scmd_printk() to print which command timed out
+    
+    With a possibly faulty disk the following messages may appear in the logs:
+    
+    kernel: sd 0:0:9:0: timing out command, waited 180s
+    kernel: sd 0:0:9:0: timing out command, waited 20s
+    kernel: sd 0:0:9:0: timing out command, waited 20s
+    kernel: sd 0:0:9:0: timing out command, waited 60s
+    kernel: sd 0:0:9:0: timing out command, waited 20s
+    
+    This is not very informative because it's not possible to identify the
+    command that timed out.
+    
+    This patch replaces sdev_printk() with scmd_printk().
+    
+    Signed-off-by: Maurizio Lombardi <mlombard@redhat.com>
+    Reviewed-by: Ewan D. Milne <emilne@redhat.com>
+    Reviewed-by: Ming Lei <ming.lei@redhat.com>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/scsi/scsi_lib.c b/drivers/scsi/scsi_lib.c
+index 83d6dd8067d6..ae1c989ef08e 100644
+--- a/drivers/scsi/scsi_lib.c
++++ b/drivers/scsi/scsi_lib.c
+@@ -1452,7 +1452,7 @@ static void scsi_softirq_done(struct request *rq)
+ 	disposition = scsi_decide_disposition(cmd);
+ 	if (disposition != SUCCESS &&
+ 	    time_before(cmd->jiffies_at_alloc + wait_for, jiffies)) {
+-		sdev_printk(KERN_ERR, cmd->device,
++		scmd_printk(KERN_ERR, cmd,
+ 			    "timing out command, waited %lus\n",
+ 			    wait_for/HZ);
+ 		disposition = SUCCESS;

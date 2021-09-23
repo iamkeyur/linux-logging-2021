@@ -1,0 +1,26 @@
+['e4f857f739fbd15fd36f10e7caab95779c1dc1e4', '816.txt', 'ModernizeLog']
+commit e4f857f739fbd15fd36f10e7caab95779c1dc1e4
+Author: Bryan Garza <bry@riseup.net>
+Date:   Wed Aug 23 22:37:00 2017 +0000
+
+    Staging: comedi: comedi_fops: fix dev_err() warning style
+    
+    Changed dev_err() call to use function name constant instead of hardcoded
+    string. Issue found by checkpatch.
+    
+    Signed-off-by: Bryan Garza <bry@riseup.net>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/comedi/comedi_fops.c b/drivers/staging/comedi/comedi_fops.c
+index 34ca7823255d..e19e395b0e44 100644
+--- a/drivers/staging/comedi/comedi_fops.c
++++ b/drivers/staging/comedi/comedi_fops.c
+@@ -745,7 +745,7 @@ static void do_become_nonbusy(struct comedi_device *dev,
+ 		wake_up_interruptible_all(&async->wait_head);
+ 	} else {
+ 		dev_err(dev->class_dev,
+-			"BUG: (?) do_become_nonbusy called with async=NULL\n");
++			"BUG: (?) %s called with async=NULL\n", __func__);
+ 		s->busy = NULL;
+ 	}
+ }

@@ -1,0 +1,34 @@
+['3c8496e5d0595cec6e463b35b7ad87eefabc531f', '459.txt', 'Typo']
+commit 3c8496e5d0595cec6e463b35b7ad87eefabc531f
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Fri Aug 3 10:36:00 2018 -0400
+
+    media: dvb-usb-v2: fix spelling mistake: "completition" -> "completion"
+    
+    Trivial fix to spelling mistake in dev_dbg and dev_err messages
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+
+diff --git a/drivers/media/usb/dvb-usb-v2/usb_urb.c b/drivers/media/usb/dvb-usb-v2/usb_urb.c
+index b0499f95ec45..024c751eb165 100644
+--- a/drivers/media/usb/dvb-usb-v2/usb_urb.c
++++ b/drivers/media/usb/dvb-usb-v2/usb_urb.c
+@@ -40,7 +40,7 @@ static void usb_urb_complete(struct urb *urb)
+ 		return;
+ 	default:        /* error */
+ 		dev_dbg_ratelimited(&stream->udev->dev,
+-				"%s: urb completition failed=%d\n",
++				"%s: urb completion failed=%d\n",
+ 				__func__, urb->status);
+ 		break;
+ 	}
+@@ -69,7 +69,7 @@ static void usb_urb_complete(struct urb *urb)
+ 		break;
+ 	default:
+ 		dev_err(&stream->udev->dev,
+-				"%s: unknown endpoint type in completition handler\n",
++				"%s: unknown endpoint type in completion handler\n",
+ 				KBUILD_MODNAME);
+ 		return;
+ 	}

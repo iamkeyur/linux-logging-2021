@@ -1,0 +1,49 @@
+['f26f5c8b8b182c38074d942e9124679238aa04ef', '651.txt', 'ModernizeLog']
+commit f26f5c8b8b182c38074d942e9124679238aa04ef
+Author: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+Date:   Thu Jun 16 17:23:09 2016 +0200
+
+    ACPI / bus: Use acpi_handle_debug() in acpi_print_osc_error()
+    
+    acpi_print_osc_error() basically duplicates the functionalit of
+    acpi_handle_debug(), so use that one in there.
+    
+    While at it, convert the explicit KERN_DEBUG prints to pr_debug()
+    (and apply it to continuation messages too).
+    
+    Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+
+diff --git a/drivers/acpi/bus.c b/drivers/acpi/bus.c
+index 262ca31b86d9..a6bb8aef2573 100644
+--- a/drivers/acpi/bus.c
++++ b/drivers/acpi/bus.c
+@@ -174,22 +174,17 @@ void acpi_bus_detach_private_data(acpi_handle handle)
+ EXPORT_SYMBOL_GPL(acpi_bus_detach_private_data);
+ 
+ static void acpi_print_osc_error(acpi_handle handle,
+-	struct acpi_osc_context *context, char *error)
++				 struct acpi_osc_context *context, char *error)
+ {
+-	struct acpi_buffer buffer = {ACPI_ALLOCATE_BUFFER};
+ 	int i;
+ 
+-	if (ACPI_FAILURE(acpi_get_name(handle, ACPI_FULL_PATHNAME, &buffer)))
+-		printk(KERN_DEBUG "%s: %s\n", context->uuid_str, error);
+-	else {
+-		printk(KERN_DEBUG "%s (%s): %s\n",
+-		       (char *)buffer.pointer, context->uuid_str, error);
+-		kfree(buffer.pointer);
+-	}
+-	printk(KERN_DEBUG "_OSC request data:");
++	acpi_handle_debug(handle, "(%s): %s\n", context->uuid_str, error);
++
++	pr_debug("_OSC request data:");
+ 	for (i = 0; i < context->cap.length; i += sizeof(u32))
+-		printk(" %x", *((u32 *)(context->cap.pointer + i)));
+-	printk("\n");
++		pr_debug(" %x", *((u32 *)(context->cap.pointer + i)));
++
++	pr_debug("\n");
+ }
+ 
+ acpi_status acpi_str_to_uuid(char *str, u8 *uuid)

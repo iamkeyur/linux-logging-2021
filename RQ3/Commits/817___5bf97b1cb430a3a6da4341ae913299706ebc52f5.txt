@@ -1,0 +1,60 @@
+['5bf97b1cb430a3a6da4341ae913299706ebc52f5', '239.txt', 'AddInfo']
+commit 5bf97b1cb430a3a6da4341ae913299706ebc52f5
+Author: Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>
+Date:   Mon Oct 12 15:41:29 2015 +1100
+
+    xfs: Print name and pid when memory allocation loops
+    
+    This patch adds comm name and pid to warning messages printed by
+    kmem_alloc(), kmem_zone_alloc() and xfs_buf_allocate_memory().
+    This will help telling which memory allocations (e.g. kernel worker
+    threads, OOM victim tasks, neither) are stalling because these functions
+    are passing __GFP_NOWARN which suppresses not only backtrace but comm name
+    and pid.
+    
+    Signed-off-by: Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>
+    Reviewed-by: Dave Chinner <dchinner@redhat.com>
+    Signed-off-by: Dave Chinner <david@fromorbit.com>
+
+diff --git a/fs/xfs/kmem.c b/fs/xfs/kmem.c
+index a7a3a63bb360..535c13677e7a 100644
+--- a/fs/xfs/kmem.c
++++ b/fs/xfs/kmem.c
+@@ -55,8 +55,9 @@ kmem_alloc(size_t size, xfs_km_flags_t flags)
+ 			return ptr;
+ 		if (!(++retries % 100))
+ 			xfs_err(NULL,
+-		"possible memory allocation deadlock in %s (mode:0x%x)",
+-					__func__, lflags);
++		"%s(%u) possible memory allocation deadlock in %s (mode:0x%x)",
++				current->comm, current->pid,
++				__func__, lflags);
+ 		congestion_wait(BLK_RW_ASYNC, HZ/50);
+ 	} while (1);
+ }
+@@ -120,8 +121,9 @@ kmem_zone_alloc(kmem_zone_t *zone, xfs_km_flags_t flags)
+ 			return ptr;
+ 		if (!(++retries % 100))
+ 			xfs_err(NULL,
+-		"possible memory allocation deadlock in %s (mode:0x%x)",
+-					__func__, lflags);
++		"%s(%u) possible memory allocation deadlock in %s (mode:0x%x)",
++				current->comm, current->pid,
++				__func__, lflags);
+ 		congestion_wait(BLK_RW_ASYNC, HZ/50);
+ 	} while (1);
+ }
+diff --git a/fs/xfs/xfs_buf.c b/fs/xfs/xfs_buf.c
+index 8ecffb35935b..cac62e14d73a 100644
+--- a/fs/xfs/xfs_buf.c
++++ b/fs/xfs/xfs_buf.c
+@@ -354,7 +354,8 @@ xfs_buf_allocate_memory(
+ 			 */
+ 			if (!(++retries % 100))
+ 				xfs_err(NULL,
+-		"possible memory allocation deadlock in %s (mode:0x%x)",
++		"%s(%u) possible memory allocation deadlock in %s (mode:0x%x)",
++					current->comm, current->pid,
+ 					__func__, gfp_mask);
+ 
+ 			XFS_STATS_INC(xb_page_retries);

@@ -1,0 +1,25 @@
+['c09a21d8ddaf82adc41adc55442bed1852db6249', '426.txt', 'Typo']
+commit c09a21d8ddaf82adc41adc55442bed1852db6249
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu May 3 11:18:07 2018 +0100
+
+    scsi: mptsas: fix spelling mistake: "matchs" -> "matches"
+    
+    Trivial fix to spelling mistake in warning message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/message/fusion/mptsas.c b/drivers/message/fusion/mptsas.c
+index 231f3a1e27bf..cb7e328c7951 100644
+--- a/drivers/message/fusion/mptsas.c
++++ b/drivers/message/fusion/mptsas.c
+@@ -4319,7 +4319,7 @@ mptsas_hotplug_work(MPT_ADAPTER *ioc, struct fw_event_work *fw_event,
+ 			if (ioc->raid_data.pIocPg2->RaidVolume[i].VolumeID ==
+ 			    hot_plug_info->id) {
+ 				printk(MYIOC_s_WARN_FMT "firmware bug: unable "
+-				    "to add hidden disk - target_id matchs "
++				    "to add hidden disk - target_id matches "
+ 				    "volume_id\n", ioc->name);
+ 				mptsas_free_fw_event(ioc, fw_event);
+ 				return;

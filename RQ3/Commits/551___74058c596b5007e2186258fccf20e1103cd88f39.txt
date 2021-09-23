@@ -1,0 +1,45 @@
+['74058c596b5007e2186258fccf20e1103cd88f39', '394.txt', 'ModernizeLog']
+commit 74058c596b5007e2186258fccf20e1103cd88f39
+Author: Christoph Fanelsa <eddi1983@gmx.net>
+Date:   Tue May 16 17:07:40 2017 -0300
+
+    [media] staging: media: cxd2099: Fix checkpatch issues
+    
+    Fix checkpatch warnings of prefered using '%s..", __func__' as function
+    name in a string
+    
+    Signed-off-by: Christoph Fanelsa <eddi1983@gmx.net>
+    Signed-off-by: Hans Verkuil <hans.verkuil@cisco.com>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+
+diff --git a/drivers/staging/media/cxd2099/cxd2099.c b/drivers/staging/media/cxd2099/cxd2099.c
+index 18186d0fa1a6..370ecb959543 100644
+--- a/drivers/staging/media/cxd2099/cxd2099.c
++++ b/drivers/staging/media/cxd2099/cxd2099.c
+@@ -473,7 +473,7 @@ static int slot_shutdown(struct dvb_ca_en50221 *ca, int slot)
+ {
+ 	struct cxd *ci = ca->data;
+ 
+-	dev_info(&ci->i2c->dev, "slot_shutdown\n");
++	dev_info(&ci->i2c->dev, "%s\n", __func__);
+ 	mutex_lock(&ci->lock);
+ 	write_regm(ci, 0x09, 0x08, 0x08);
+ 	write_regm(ci, 0x20, 0x80, 0x80); /* Reset CAM Mode */
+@@ -564,7 +564,7 @@ static int read_data(struct dvb_ca_en50221 *ca, int slot, u8 *ebuf, int ecount)
+ 	campoll(ci);
+ 	mutex_unlock(&ci->lock);
+ 
+-	dev_info(&ci->i2c->dev, "read_data\n");
++	dev_info(&ci->i2c->dev, "%s\n", __func__);
+ 	if (!ci->dr)
+ 		return 0;
+ 
+@@ -584,7 +584,7 @@ static int write_data(struct dvb_ca_en50221 *ca, int slot, u8 *ebuf, int ecount)
+ 	struct cxd *ci = ca->data;
+ 
+ 	mutex_lock(&ci->lock);
+-	dev_info(&ci->i2c->dev, "write_data %d\n", ecount);
++	dev_info(&ci->i2c->dev, "%s %d\n", __func__, ecount);
+ 	write_reg(ci, 0x0d, ecount >> 8);
+ 	write_reg(ci, 0x0e, ecount & 0xff);
+ 	write_block(ci, 0x11, ebuf, ecount);

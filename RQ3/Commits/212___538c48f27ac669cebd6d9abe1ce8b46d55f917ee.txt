@@ -1,0 +1,22 @@
+['538c48f27ac669cebd6d9abe1ce8b46d55f917ee', '769.txt', 'Clarify/Reword']
+commit 538c48f27ac669cebd6d9abe1ce8b46d55f917ee
+Author: Len Brown <len.brown@intel.com>
+Date:   Fri Jul 27 12:55:08 2018 -0400
+
+    tools/power turbostat: version 18.07.27
+    
+    Signed-off-by: Len Brown <len.brown@intel.com>
+
+diff --git a/tools/power/x86/turbostat/turbostat.c b/tools/power/x86/turbostat/turbostat.c
+index 6c8effebf7c5..980bd9d20646 100644
+--- a/tools/power/x86/turbostat/turbostat.c
++++ b/tools/power/x86/turbostat/turbostat.c
+@@ -5096,7 +5096,7 @@ int get_and_dump_counters(void)
+ }
+ 
+ void print_version() {
+-	fprintf(outf, "turbostat version 18.06.20"
++	fprintf(outf, "turbostat version 18.07.27"
+ 		" - Len Brown <lenb@kernel.org>\n");
+ }
+ 

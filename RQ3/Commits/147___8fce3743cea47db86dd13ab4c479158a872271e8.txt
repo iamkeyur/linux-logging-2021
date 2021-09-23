@@ -1,0 +1,26 @@
+['8fce3743cea47db86dd13ab4c479158a872271e8', '840.txt', 'RedundantInformation']
+commit 8fce3743cea47db86dd13ab4c479158a872271e8
+Author: Sihyeon Jang <uneedsihyeon@gmail.com>
+Date:   Sun Nov 12 10:10:47 2017 +0900
+
+    perf top: Remove a duplicate word
+    
+    Signed-off-by: Sihyeon Jang <uneedsihyeon@gmail.com>
+    Cc: Jiri Olsa <jolsa@kernel.org>
+    Cc: Namhyung Kim <namhyung@kernel.org>
+    Link: http://lkml.kernel.org/r/1510449047-12941-3-git-send-email-uneedsihyeon@gmail.com
+    Signed-off-by: Arnaldo Carvalho de Melo <acme@redhat.com>
+
+diff --git a/tools/perf/builtin-top.c b/tools/perf/builtin-top.c
+index 0789f95ca2f3..68320ac5e9b0 100644
+--- a/tools/perf/builtin-top.c
++++ b/tools/perf/builtin-top.c
+@@ -412,7 +412,7 @@ static void perf_top__print_mapped_keys(struct perf_top *top)
+ 	fprintf(stdout, "\t[S]     stop annotation.\n");
+ 
+ 	fprintf(stdout,
+-		"\t[K]     hide kernel_symbols symbols.     \t(%s)\n",
++		"\t[K]     hide kernel symbols.             \t(%s)\n",
+ 		top->hide_kernel_symbols ? "yes" : "no");
+ 	fprintf(stdout,
+ 		"\t[U]     hide user symbols.               \t(%s)\n",

@@ -1,0 +1,45 @@
+['299c776cebb01c121f5deb77f2d02a8340f072e4', '153.txt', 'LogLevel']
+commit 299c776cebb01c121f5deb77f2d02a8340f072e4
+Author: Michel Dänzer <michel.daenzer@amd.com>
+Date:   Wed Nov 15 11:37:23 2017 +0100
+
+    amdgpu: Don't use DRM_ERROR when failing to allocate a BO
+    
+    This can be triggered by userspace, e.g. trying to allocate too large a
+    BO, so it shouldn't log anything by default.
+    
+    Callers need to handle failure anyway.
+    
+    Reviewed-by: Alex Deucher <alexander.deucher@amd.com>
+    Reviewed-by: Christian König <christian.koenig@amd.com>
+    Signed-off-by: Michel Dänzer <michel.daenzer@amd.com>
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+index e87eedcc0da9..3ad4cf0f22f8 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+@@ -72,7 +72,7 @@ int amdgpu_gem_object_create(struct amdgpu_device *adev, unsigned long size,
+ 				initial_domain |= AMDGPU_GEM_DOMAIN_GTT;
+ 				goto retry;
+ 			}
+-			DRM_ERROR("Failed to allocate GEM object (%ld, %d, %u, %d)\n",
++			DRM_DEBUG("Failed to allocate GEM object (%ld, %d, %u, %d)\n",
+ 				  size, initial_domain, alignment, r);
+ 		}
+ 		return r;
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_object.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_object.c
+index 5acf20cfb1d0..3233d5988f66 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_object.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_object.c
+@@ -314,8 +314,8 @@ static bool amdgpu_bo_validate_size(struct amdgpu_device *adev,
+ 	return true;
+ 
+ fail:
+-	DRM_ERROR("BO size %lu > total memory in domain: %llu\n", size,
+-					      man->size << PAGE_SHIFT);
++	DRM_DEBUG("BO size %lu > total memory in domain: %llu\n", size,
++		  man->size << PAGE_SHIFT);
+ 	return false;
+ }
+ 

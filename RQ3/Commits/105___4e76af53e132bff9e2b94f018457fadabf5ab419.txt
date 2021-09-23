@@ -1,0 +1,28 @@
+['4e76af53e132bff9e2b94f018457fadabf5ab419', '886.txt', 'Clarify/Reword']
+commit 4e76af53e132bff9e2b94f018457fadabf5ab419
+Author: Rakesh Pandit <rakesh@tuxera.com>
+Date:   Fri Oct 13 14:45:57 2017 +0200
+
+    lightnvm: pblk: fix message if L2P MAP is in device
+    
+    This usually happens if we are developing with qemu and ll2pmode has
+    default value. Improve description.
+    
+    Signed-off-by: Rakesh Pandit <rakesh@tuxera.com>
+    Reviewed-by: Javier González <javier@cnexlabs.com>
+    Signed-off-by: Matias Bjørling <m@bjorling.me>
+    Signed-off-by: Jens Axboe <axboe@kernel.dk>
+
+diff --git a/drivers/lightnvm/pblk-init.c b/drivers/lightnvm/pblk-init.c
+index 05665a7e648c..8c85779e9635 100644
+--- a/drivers/lightnvm/pblk-init.c
++++ b/drivers/lightnvm/pblk-init.c
+@@ -914,7 +914,7 @@ static void *pblk_init(struct nvm_tgt_dev *dev, struct gendisk *tdisk,
+ 	int ret;
+ 
+ 	if (dev->identity.dom & NVM_RSP_L2P) {
+-		pr_err("pblk: device-side L2P table not supported. (%x)\n",
++		pr_err("pblk: host-side L2P table not supported. (%x)\n",
+ 							dev->identity.dom);
+ 		return ERR_PTR(-EINVAL);
+ 	}

@@ -1,0 +1,46 @@
+['c5f6d578956a4304b6bb5393423768fecafff385', '24.txt', 'FixFormatSpecifier']
+commit c5f6d578956a4304b6bb5393423768fecafff385
+Author: Tvrtko Ursulin <tvrtko.ursulin@intel.com>
+Date:   Wed Sep 26 15:50:33 2018 +0100
+
+    drm/i915: Log HWS seqno consistently
+    
+    We mix hexa- and decimal which is confusing when reading the logs. So make
+    the single odd one out instance decimal for consistency.
+    
+    v2:
+     * Do the intel_ringbuffer.c as well. (Chris Wilson)
+    
+    Signed-off-by: Tvrtko Ursulin <tvrtko.ursulin@intel.com>
+    Cc: Chris Wilson <chris@chris-wilson.co.uk>
+    Reviewed-by: Chris Wilson <chris@chris-wilson.co.uk>
+    Link: https://patchwork.freedesktop.org/patch/msgid/20180926145033.16318-1-tvrtko.ursulin@linux.intel.com
+
+diff --git a/drivers/gpu/drm/i915/intel_lrc.c b/drivers/gpu/drm/i915/intel_lrc.c
+index 4b28225320ff..ad93aa4b0a6e 100644
+--- a/drivers/gpu/drm/i915/intel_lrc.c
++++ b/drivers/gpu/drm/i915/intel_lrc.c
+@@ -1904,7 +1904,7 @@ static void execlists_reset(struct intel_engine_cs *engine,
+ 	unsigned long flags;
+ 	u32 *regs;
+ 
+-	GEM_TRACE("%s request global=%x, current=%d\n",
++	GEM_TRACE("%s request global=%d, current=%d\n",
+ 		  engine->name, request ? request->global_seqno : 0,
+ 		  intel_engine_get_seqno(engine));
+ 
+diff --git a/drivers/gpu/drm/i915/intel_ringbuffer.c b/drivers/gpu/drm/i915/intel_ringbuffer.c
+index d0ef50bf930a..c092d5099ebf 100644
+--- a/drivers/gpu/drm/i915/intel_ringbuffer.c
++++ b/drivers/gpu/drm/i915/intel_ringbuffer.c
+@@ -574,7 +574,9 @@ static void skip_request(struct i915_request *rq)
+ 
+ static void reset_ring(struct intel_engine_cs *engine, struct i915_request *rq)
+ {
+-	GEM_TRACE("%s seqno=%x\n", engine->name, rq ? rq->global_seqno : 0);
++	GEM_TRACE("%s request global=%d, current=%d\n",
++		  engine->name, rq ? rq->global_seqno : 0,
++		  intel_engine_get_seqno(engine));
+ 
+ 	/*
+ 	 * Try to restore the logical GPU state to match the continuation

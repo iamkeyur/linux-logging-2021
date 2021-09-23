@@ -1,0 +1,33 @@
+['423a8a6eac2432a50e7ca4e4342a41ad3cf951e7', '695.txt', 'ModernizeLog']
+commit 423a8a6eac2432a50e7ca4e4342a41ad3cf951e7
+Author: Simo Koskinen <koskisoft@gmail.com>
+Date:   Mon Aug 28 15:01:32 2017 +0200
+
+    staging: comedi: coding style fixes found by checkpatch.pl
+    
+    The patch removes "WARNING: Prefer using '"%s...", __func__'
+    to using 'xxxxxxxx', this function's name, in a string" warnings
+    reported by checkpatch.pl script.
+    
+    Signed-off-by: Simo Koskinen <koskisoft@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/comedi/drivers.c b/drivers/staging/comedi/drivers.c
+index a5bf2cc165c0..0b43db6371c6 100644
+--- a/drivers/staging/comedi/drivers.c
++++ b/drivers/staging/comedi/drivers.c
+@@ -995,12 +995,12 @@ int comedi_auto_config(struct device *hardware_device,
+ 	int ret;
+ 
+ 	if (!hardware_device) {
+-		pr_warn("BUG! comedi_auto_config called with NULL hardware_device\n");
++		pr_warn("BUG! %s called with NULL hardware_device\n", __func__);
+ 		return -EINVAL;
+ 	}
+ 	if (!driver) {
+ 		dev_warn(hardware_device,
+-			 "BUG! comedi_auto_config called with NULL comedi driver\n");
++			 "BUG! %s called with NULL comedi driver\n", __func__);
+ 		return -EINVAL;
+ 	}
+ 

@@ -1,0 +1,25 @@
+['766cc4965a3a2a8a62e70e9d98e1d946a71368d5', '629.txt', 'Typo']
+commit 766cc4965a3a2a8a62e70e9d98e1d946a71368d5
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Mon Feb 4 15:31:05 2019 +0000
+
+    ASoC: mediatek: btcvsd: fix spelling mistake "offest" -> "offset"
+    
+    There is a spelling mistake in a dev_warn message. Fix this.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/sound/soc/mediatek/common/mtk-btcvsd.c b/sound/soc/mediatek/common/mtk-btcvsd.c
+index 349a9120a0dd..e408c1b270ab 100644
+--- a/sound/soc/mediatek/common/mtk-btcvsd.c
++++ b/sound/soc/mediatek/common/mtk-btcvsd.c
+@@ -1309,7 +1309,7 @@ static int mtk_btcvsd_snd_probe(struct platform_device *pdev)
+ 					 offset,
+ 					 ARRAY_SIZE(offset));
+ 	if (ret) {
+-		dev_warn(dev, "%s(), get offest fail, ret %d\n", __func__, ret);
++		dev_warn(dev, "%s(), get offset fail, ret %d\n", __func__, ret);
+ 		return ret;
+ 	}
+ 	btcvsd->infra_misc_offset = offset[0];

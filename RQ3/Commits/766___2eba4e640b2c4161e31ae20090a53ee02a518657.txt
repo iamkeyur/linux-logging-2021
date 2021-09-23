@@ -1,0 +1,28 @@
+['2eba4e640b2c4161e31ae20090a53ee02a518657', '184.txt', 'LogLevel']
+commit 2eba4e640b2c4161e31ae20090a53ee02a518657
+Author: Milan Broz <gmazyland@gmail.com>
+Date:   Thu Jun 20 13:00:19 2019 +0200
+
+    dm verity: use message limit for data block corruption message
+    
+    DM verity should also use DMERR_LIMIT to limit repeat data block
+    corruption messages.
+    
+    Signed-off-by: Milan Broz <gmazyland@gmail.com>
+    Signed-off-by: Mike Snitzer <snitzer@redhat.com>
+
+diff --git a/drivers/md/dm-verity-target.c b/drivers/md/dm-verity-target.c
+index 720d06531aa3..ea24ff0612e3 100644
+--- a/drivers/md/dm-verity-target.c
++++ b/drivers/md/dm-verity-target.c
+@@ -235,8 +235,8 @@ static int verity_handle_err(struct dm_verity *v, enum verity_block_type type,
+ 		BUG();
+ 	}
+ 
+-	DMERR("%s: %s block %llu is corrupted", v->data_dev->name, type_str,
+-		block);
++	DMERR_LIMIT("%s: %s block %llu is corrupted", v->data_dev->name,
++		    type_str, block);
+ 
+ 	if (v->corrupted_errs == DM_VERITY_MAX_CORRUPTED_ERRS)
+ 		DMERR("%s: reached maximum errors", v->data_dev->name);

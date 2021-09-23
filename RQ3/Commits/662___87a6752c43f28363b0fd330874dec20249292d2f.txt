@@ -1,0 +1,28 @@
+['87a6752c43f28363b0fd330874dec20249292d2f', '270.txt', 'ModernizeLog']
+commit 87a6752c43f28363b0fd330874dec20249292d2f
+Author: Tvrtko Ursulin <tvrtko.ursulin@intel.com>
+Date:   Tue Dec 6 19:04:13 2016 +0000
+
+    drm/i915: Use DRM_DEV_ERROR in i915_driver_load
+    
+    Now that it is available we don't have to open code a similar
+    error message ourselves.
+    
+    Signed-off-by: Tvrtko Ursulin <tvrtko.ursulin@intel.com>
+    Reviewed-by: Chris Wilson <chris@chris-wilson.co.uk>
+    Link: http://patchwork.freedesktop.org/patch/msgid/1481051053-29783-1-git-send-email-tvrtko.ursulin@linux.intel.com
+
+diff --git a/drivers/gpu/drm/i915/i915_drv.c b/drivers/gpu/drm/i915/i915_drv.c
+index d2cc28f6953d..6428588518aa 100644
+--- a/drivers/gpu/drm/i915/i915_drv.c
++++ b/drivers/gpu/drm/i915/i915_drv.c
+@@ -1190,8 +1190,7 @@ int i915_driver_load(struct pci_dev *pdev, const struct pci_device_id *ent)
+ 	if (dev_priv)
+ 		ret = drm_dev_init(&dev_priv->drm, &driver, &pdev->dev);
+ 	if (ret) {
+-		dev_printk(KERN_ERR, &pdev->dev,
+-			   "[" DRM_NAME ":%s] allocation failed\n", __func__);
++		DRM_DEV_ERROR(&pdev->dev, "allocation failed\n");
+ 		kfree(dev_priv);
+ 		return ret;
+ 	}

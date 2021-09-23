@@ -1,0 +1,96 @@
+['c0872323746e11fc79344e3738b283a8cda86654', '792.txt', 'AddInfo']
+commit c0872323746e11fc79344e3738b283a8cda86654
+Author: Qu Wenruo <wqu@suse.com>
+Date:   Wed Apr 11 17:08:12 2018 +0800
+
+    btrfs: print-tree: debugging output enhancement
+    
+    This patch enhances the following things:
+    
+    - tree block header
+      * add generation and owner output for node and leaf
+    - node pointer generation output
+    - allow btrfs_print_tree() to not follow nodes
+      * just like btrfs-progs
+    
+    Please note that, although function btrfs_print_tree() is not called by
+    anyone right now, it's still a pretty useful function to debug kernel.
+    So that function is still kept for later use.
+    
+    Signed-off-by: Qu Wenruo <wqu@suse.com>
+    Reviewed-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+    Signed-off-by: David Sterba <dsterba@suse.com>
+
+diff --git a/fs/btrfs/print-tree.c b/fs/btrfs/print-tree.c
+index 124276bba8cf..21a831d3d087 100644
+--- a/fs/btrfs/print-tree.c
++++ b/fs/btrfs/print-tree.c
+@@ -189,9 +189,10 @@ void btrfs_print_leaf(struct extent_buffer *l)
+ 	fs_info = l->fs_info;
+ 	nr = btrfs_header_nritems(l);
+ 
+-	btrfs_info(fs_info, "leaf %llu total ptrs %d free space %d",
+-		   btrfs_header_bytenr(l), nr,
+-		   btrfs_leaf_free_space(fs_info, l));
++	btrfs_info(fs_info,
++		   "leaf %llu gen %llu total ptrs %d free space %d owner %llu",
++		   btrfs_header_bytenr(l), btrfs_header_generation(l), nr,
++		   btrfs_leaf_free_space(fs_info, l), btrfs_header_owner(l));
+ 	for (i = 0 ; i < nr ; i++) {
+ 		item = btrfs_item_nr(i);
+ 		btrfs_item_key_to_cpu(l, &key, i);
+@@ -325,7 +326,7 @@ void btrfs_print_leaf(struct extent_buffer *l)
+ 	}
+ }
+ 
+-void btrfs_print_tree(struct extent_buffer *c)
++void btrfs_print_tree(struct extent_buffer *c, bool follow)
+ {
+ 	struct btrfs_fs_info *fs_info;
+ 	int i; u32 nr;
+@@ -342,15 +343,19 @@ void btrfs_print_tree(struct extent_buffer *c)
+ 		return;
+ 	}
+ 	btrfs_info(fs_info,
+-		   "node %llu level %d total ptrs %d free spc %u",
+-		   btrfs_header_bytenr(c), level, nr,
+-		   (u32)BTRFS_NODEPTRS_PER_BLOCK(fs_info) - nr);
++		   "node %llu level %d gen %llu total ptrs %d free spc %u owner %llu",
++		   btrfs_header_bytenr(c), level, btrfs_header_generation(c),
++		   nr, (u32)BTRFS_NODEPTRS_PER_BLOCK(fs_info) - nr,
++		   btrfs_header_owner(c));
+ 	for (i = 0; i < nr; i++) {
+ 		btrfs_node_key_to_cpu(c, &key, i);
+-		pr_info("\tkey %d (%llu %u %llu) block %llu\n",
++		pr_info("\tkey %d (%llu %u %llu) block %llu gen %llu\n",
+ 		       i, key.objectid, key.type, key.offset,
+-		       btrfs_node_blockptr(c, i));
++		       btrfs_node_blockptr(c, i),
++		       btrfs_node_ptr_generation(c, i));
+ 	}
++	if (!follow)
++		return;
+ 	for (i = 0; i < nr; i++) {
+ 		struct btrfs_key first_key;
+ 		struct extent_buffer *next;
+@@ -372,7 +377,7 @@ void btrfs_print_tree(struct extent_buffer *c)
+ 		if (btrfs_header_level(next) !=
+ 		       level - 1)
+ 			BUG();
+-		btrfs_print_tree(next);
++		btrfs_print_tree(next, follow);
+ 		free_extent_buffer(next);
+ 	}
+ }
+diff --git a/fs/btrfs/print-tree.h b/fs/btrfs/print-tree.h
+index 4a98481688f4..e6bb38fd75ad 100644
+--- a/fs/btrfs/print-tree.h
++++ b/fs/btrfs/print-tree.h
+@@ -7,6 +7,6 @@
+ #define BTRFS_PRINT_TREE_H
+ 
+ void btrfs_print_leaf(struct extent_buffer *l);
+-void btrfs_print_tree(struct extent_buffer *c);
++void btrfs_print_tree(struct extent_buffer *c, bool follow);
+ 
+ #endif

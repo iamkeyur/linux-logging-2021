@@ -1,0 +1,25 @@
+['3b17d4175414baefaaf59948b5e0bc030cc3d943', '247.txt', 'Typo']
+commit 3b17d4175414baefaaf59948b5e0bc030cc3d943
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Mon Jul 30 14:40:37 2018 +0100
+
+    can: ucan: fix spelling mistake: "resumbmitting" -> "resubmitting"
+    
+    Trivial fix to spelling mistake in netdev_dbg error message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
+
+diff --git a/drivers/net/can/usb/ucan.c b/drivers/net/can/usb/ucan.c
+index f3d5bda012a1..04aac3bb54ef 100644
+--- a/drivers/net/can/usb/ucan.c
++++ b/drivers/net/can/usb/ucan.c
+@@ -715,7 +715,7 @@ static void ucan_read_bulk_callback(struct urb *urb)
+ 				  up->in_ep_size,
+ 				  urb->transfer_buffer,
+ 				  urb->transfer_dma);
+-		netdev_dbg(up->netdev, "not resumbmitting urb; status: %d\n",
++		netdev_dbg(up->netdev, "not resubmitting urb; status: %d\n",
+ 			   urb->status);
+ 		return;
+ 	default:

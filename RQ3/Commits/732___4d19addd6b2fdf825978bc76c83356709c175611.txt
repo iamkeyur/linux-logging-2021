@@ -1,0 +1,27 @@
+['4d19addd6b2fdf825978bc76c83356709c175611', '148.txt', 'RedundantInformation']
+commit 4d19addd6b2fdf825978bc76c83356709c175611
+Author: Enrico Weigelt <info@metux.net>
+Date:   Wed Jul 3 11:42:24 2019 +0200
+
+    gpio: pl061: drop duplicate printing of device name
+    
+    The dev_info() call already prints the device name, so there's
+    no need to explicitly include it in the message for second time.
+    
+    Signed-off-by: Enrico Weigelt <info@metux.net>
+    Link: https://lore.kernel.org/r/1562146944-4162-1-git-send-email-info@metux.net
+    Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+
+diff --git a/drivers/gpio/gpio-pl061.c b/drivers/gpio/gpio-pl061.c
+index 84af248f5172..83a44dd183b8 100644
+--- a/drivers/gpio/gpio-pl061.c
++++ b/drivers/gpio/gpio-pl061.c
+@@ -349,7 +349,7 @@ static int pl061_probe(struct amba_device *adev, const struct amba_id *id)
+ 		return ret;
+ 
+ 	amba_set_drvdata(adev, pl061);
+-	dev_info(dev, "PL061 GPIO chip %s registered\n", dev_name(dev));
++	dev_info(dev, "PL061 GPIO chip registered\n");
+ 
+ 	return 0;
+ }

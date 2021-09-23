@@ -1,0 +1,34 @@
+['d618651b0f112d9715d0ca6f9dbea87761be15d7', '998.txt', 'LogLevel']
+commit d618651b0f112d9715d0ca6f9dbea87761be15d7
+Author: David Herrmann <dh.herrmann@gmail.com>
+Date:   Wed Oct 21 12:46:10 2015 +0200
+
+    thinkpad_acpi: Don't yell on unsupported brightness interfaces
+    
+    The thinkpad_acpi driver currently emits error messages on unsupported
+    brightness interfaces, giving the impression that someone will implement
+    those. However, this error is spit out on nearly every thinkpad in
+    production since 2 years now. Furthermore, the backlight interfaces on
+    those devices are supported by the i915 driver just fine.
+    
+    Downgrade the error message to a normal pr_info() and stop telling people
+    to report it to IBM.
+    
+    Signed-off-by: David Herrmann <dh.herrmann@gmail.com>
+    Acked-by: Henrique de Moraes Holschuh <hmh@hmh.eng.br>
+    Signed-off-by: Darren Hart <dvhart@linux.intel.com>
+
+diff --git a/drivers/platform/x86/thinkpad_acpi.c b/drivers/platform/x86/thinkpad_acpi.c
+index 131dd7464183..0bed4733c4f0 100644
+--- a/drivers/platform/x86/thinkpad_acpi.c
++++ b/drivers/platform/x86/thinkpad_acpi.c
+@@ -6459,8 +6459,7 @@ static void __init tpacpi_detect_brightness_capabilities(void)
+ 		pr_info("detected a 8-level brightness capable ThinkPad\n");
+ 		break;
+ 	default:
+-		pr_err("Unsupported brightness interface, "
+-		       "please contact %s\n", TPACPI_MAIL);
++		pr_info("Unsupported brightness interface\n");
+ 		tp_features.bright_unkfw = 1;
+ 		bright_maxlvl = b - 1;
+ 	}

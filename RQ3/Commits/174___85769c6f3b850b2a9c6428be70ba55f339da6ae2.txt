@@ -1,0 +1,28 @@
+['85769c6f3b850b2a9c6428be70ba55f339da6ae2', '808.txt', 'AddInfo']
+commit 85769c6f3b850b2a9c6428be70ba55f339da6ae2
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Tue Jan 16 10:39:43 2018 -0800
+
+    IB/srp: Improve path record query error message
+    
+    Show all path record query parameters if a path record query fails.
+    
+    Signed-off-by: Bart Van Assche <bart.vanassche@wdc.com>
+    Signed-off-by: Doug Ledford <dledford@redhat.com>
+
+diff --git a/drivers/infiniband/ulp/srp/ib_srp.c b/drivers/infiniband/ulp/srp/ib_srp.c
+index 39b3e43efbbe..fec6e800adf4 100644
+--- a/drivers/infiniband/ulp/srp/ib_srp.c
++++ b/drivers/infiniband/ulp/srp/ib_srp.c
+@@ -702,7 +702,10 @@ static int srp_lookup_path(struct srp_rdma_ch *ch)
+ 	ret = ch->status;
+ 	if (ret < 0)
+ 		shost_printk(KERN_WARNING, target->scsi_host,
+-			     PFX "Path record query failed\n");
++			     PFX "Path record query failed: sgid %pI6, dgid %pI6, pkey %#04x, service_id %#16llx\n",
++			     ch->path.sgid.raw, ch->path.dgid.raw,
++			     be16_to_cpu(target->pkey),
++			     be64_to_cpu(target->service_id));
+ 
+ put:
+ 	scsi_host_put(target->scsi_host);

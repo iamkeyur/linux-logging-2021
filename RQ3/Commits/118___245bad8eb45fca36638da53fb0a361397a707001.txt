@@ -1,0 +1,33 @@
+['245bad8eb45fca36638da53fb0a361397a707001', '872.txt', 'LogLevel']
+commit 245bad8eb45fca36638da53fb0a361397a707001
+Author: Andi Kleen <ak@linux.intel.com>
+Date:   Tue Sep 1 15:52:46 2015 -0700
+
+    perf stat: Quieten failed to read counter message
+    
+    Since 3b3eb0445 running perf stat on a system without
+    backend-stalled-cycles spits out ugly warnings by default.
+    
+    Since that is quite common, make the message a debug message only.
+    
+    We know anyways that the counter wasn't read by the normal <unsupported>
+    output.
+    
+    Signed-off-by: Andi Kleen <ak@linux.intel.com>
+    Acked-by: Jiri Olsa <jolsa@kernel.org>
+    Link: http://lkml.kernel.org/r/1441147966-14917-1-git-send-email-andi@firstfloor.org
+    Signed-off-by: Arnaldo Carvalho de Melo <acme@redhat.com>
+
+diff --git a/tools/perf/builtin-stat.c b/tools/perf/builtin-stat.c
+index d46dbb1bc65d..a96fb5c3bedb 100644
+--- a/tools/perf/builtin-stat.c
++++ b/tools/perf/builtin-stat.c
+@@ -215,7 +215,7 @@ static void read_counters(bool close_counters)
+ 
+ 	evlist__for_each(evsel_list, counter) {
+ 		if (read_counter(counter))
+-			pr_warning("failed to read counter %s\n", counter->name);
++			pr_debug("failed to read counter %s\n", counter->name);
+ 
+ 		if (perf_stat_process_counter(&stat_config, counter))
+ 			pr_warning("failed to process counter %s\n", counter->name);

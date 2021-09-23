@@ -1,0 +1,35 @@
+['135e53514ef2cb200b616bf3fa4272cfa6c39291', '433.txt', 'Clarify/Reword']
+commit 135e53514ef2cb200b616bf3fa4272cfa6c39291
+Author: Jane Chu <jane.chu@oracle.com>
+Date:   Thu Jul 11 21:00:17 2019 -0700
+
+    mm/memory-failure.c: clarify error message
+    
+    Some user who install SIGBUS handler that does longjmp out therefore
+    keeping the process alive is confused by the error message
+    
+      "[188988.765862] Memory failure: 0x1840200: Killing cellsrv:33395 due to hardware memory corruption"
+    
+    Slightly modify the error message to improve clarity.
+    
+    Link: http://lkml.kernel.org/r/1558403523-22079-1-git-send-email-jane.chu@oracle.com
+    Signed-off-by: Jane Chu <jane.chu@oracle.com>
+    Acked-by: Naoya Horiguchi <n-horiguchi@ah.jp.nec.com>
+    Acked-by: Pankaj Gupta <pagupta@redhat.com>
+    Reviewed-by: Anshuman Khandual <anshuman.khandual@arm.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+diff --git a/mm/memory-failure.c b/mm/memory-failure.c
+index f045514d8d20..7e08cbf3ba49 100644
+--- a/mm/memory-failure.c
++++ b/mm/memory-failure.c
+@@ -213,7 +213,7 @@ static int kill_proc(struct to_kill *tk, unsigned long pfn, int flags)
+ 	short addr_lsb = tk->size_shift;
+ 	int ret;
+ 
+-	pr_err("Memory failure: %#lx: Killing %s:%d due to hardware memory corruption\n",
++	pr_err("Memory failure: %#lx: Sending SIGBUS to %s:%d due to hardware memory corruption\n",
+ 		pfn, t->comm, t->pid);
+ 
+ 	if ((flags & MF_ACTION_REQUIRED) && t->mm == current->mm) {

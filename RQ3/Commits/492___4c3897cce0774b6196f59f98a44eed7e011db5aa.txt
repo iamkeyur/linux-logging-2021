@@ -1,0 +1,79 @@
+['4c3897cce0774b6196f59f98a44eed7e011db5aa', '463.txt', 'LogLevel']
+commit 4c3897cce0774b6196f59f98a44eed7e011db5aa
+Author: Luis de Bethencourt <luisbg@osg.samsung.com>
+Date:   Sun Jul 3 16:29:44 2016 +0100
+
+    befs: make consistent use of befs_error()
+    
+    befs_error() is used in potential errors that could happen in befs to
+    provide informational log messages. befs_debug() is silent when
+    CONFIG_BEFS_DEBUG=no, and very verbose when switched on, which is why it is
+    used for general debugging but not for errors.
+    
+    Fix a few cases where the befs debug utility usage isn't following the
+    expected pattern. To make sure we have consistent information in the logs.
+    
+    Signed-off-by: Luis de Bethencourt <luisbg@osg.samsung.com>
+
+diff --git a/fs/befs/btree.c b/fs/befs/btree.c
+index 307645f9e284..679f69df3817 100644
+--- a/fs/befs/btree.c
++++ b/fs/befs/btree.c
+@@ -301,7 +301,8 @@ befs_btree_find(struct super_block *sb, const befs_data_stream *ds,
+ 	kfree(this_node);
+ 
+ 	if (res != BEFS_BT_MATCH) {
+-		befs_debug(sb, "<--- %s Key %s not found", __func__, key);
++		befs_error(sb, "<--- %s Key %s not found", __func__, key);
++		befs_debug(sb, "<--- %s ERROR", __func__);
+ 		*value = 0;
+ 		return BEFS_BT_NOT_FOUND;
+ 	}
+@@ -358,7 +359,8 @@ befs_find_key(struct super_block *sb, struct befs_btree_node *node,
+ 
+ 	eq = befs_compare_strings(thiskey, keylen, findkey, findkey_len);
+ 	if (eq < 0) {
+-		befs_debug(sb, "<--- %s %s not found", __func__, findkey);
++		befs_error(sb, "<--- %s %s not found", __func__, findkey);
++		befs_debug(sb, "<--- %s ERROR", __func__);
+ 		return BEFS_BT_NOT_FOUND;
+ 	}
+ 
+diff --git a/fs/befs/datastream.c b/fs/befs/datastream.c
+index 26cc417cbdce..740fabcd57c0 100644
+--- a/fs/befs/datastream.c
++++ b/fs/befs/datastream.c
+@@ -275,6 +275,8 @@ befs_find_brun_direct(struct super_block *sb, const befs_data_stream *data,
+ 		}
+ 	}
+ 
++	befs_error(sb, "%s failed to find file block %lu", __func__,
++		   (unsigned long)blockno);
+ 	befs_debug(sb, "---> %s ERROR", __func__);
+ 	return BEFS_ERR;
+ }
+@@ -328,9 +330,10 @@ befs_find_brun_indirect(struct super_block *sb,
+ 	for (i = 0; i < indirect.len; i++) {
+ 		indirblock = sb_bread(sb, indirblockno + i);
+ 		if (indirblock == NULL) {
+-			befs_debug(sb, "---> %s failed to read "
++			befs_error(sb, "---> %s failed to read "
+ 				   "disk block %lu from the indirect brun",
+ 				   __func__, (unsigned long)indirblockno + i);
++			befs_debug(sb, "<--- %s ERROR", __func__);
+ 			return BEFS_ERR;
+ 		}
+ 
+diff --git a/fs/befs/linuxvfs.c b/fs/befs/linuxvfs.c
+index e0979a471e84..67669a81cfd1 100644
+--- a/fs/befs/linuxvfs.c
++++ b/fs/befs/linuxvfs.c
+@@ -187,7 +187,7 @@ befs_lookup(struct inode *dir, struct dentry *dentry, unsigned int flags)
+ 		return ERR_PTR(-ENOENT);
+ 
+ 	} else if (ret != BEFS_OK || offset == 0) {
+-		befs_warning(sb, "<--- %s Error", __func__);
++		befs_error(sb, "<--- %s Error", __func__);
+ 		return ERR_PTR(-ENODATA);
+ 	}
+ 

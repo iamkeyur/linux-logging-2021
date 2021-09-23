@@ -1,0 +1,61 @@
+['f8b69a5f00ee0a8e71555fdbd77f79db9c0769f0', '767.txt', 'ModernizeLog']
+commit f8b69a5f00ee0a8e71555fdbd77f79db9c0769f0
+Author: peter enderborg <peter.enderborg@sony.com>
+Date:   Tue Jun 12 10:09:06 2018 +0200
+
+    selinux: Cleanup printk logging in selinuxfs
+    
+    Replace printk with pr_* to avoid checkpatch warnings.
+    
+    Signed-off-by: Peter Enderborg <peter.enderborg@sony.com>
+    Signed-off-by: Paul Moore <paul@paul-moore.com>
+
+diff --git a/security/selinux/selinuxfs.c b/security/selinux/selinuxfs.c
+index f3d374d2ca04..d64a06e84eec 100644
+--- a/security/selinux/selinuxfs.c
++++ b/security/selinux/selinuxfs.c
+@@ -620,7 +620,7 @@ static ssize_t sel_write_context(struct file *file, char *buf, size_t size)
+ 
+ 	length = -ERANGE;
+ 	if (len > SIMPLE_TRANSACTION_LIMIT) {
+-		printk(KERN_ERR "SELinux: %s:  context size (%u) exceeds "
++		pr_err("SELinux: %s:  context size (%u) exceeds "
+ 			"payload max\n", __func__, len);
+ 		goto out;
+ 	}
+@@ -956,7 +956,7 @@ static ssize_t sel_write_create(struct file *file, char *buf, size_t size)
+ 
+ 	length = -ERANGE;
+ 	if (len > SIMPLE_TRANSACTION_LIMIT) {
+-		printk(KERN_ERR "SELinux: %s:  context size (%u) exceeds "
++		pr_err("SELinux: %s:  context size (%u) exceeds "
+ 			"payload max\n", __func__, len);
+ 		goto out;
+ 	}
+@@ -1147,7 +1147,7 @@ static ssize_t sel_write_member(struct file *file, char *buf, size_t size)
+ 
+ 	length = -ERANGE;
+ 	if (len > SIMPLE_TRANSACTION_LIMIT) {
+-		printk(KERN_ERR "SELinux: %s:  context size (%u) exceeds "
++		pr_err("SELinux: %s:  context size (%u) exceeds "
+ 			"payload max\n", __func__, len);
+ 		goto out;
+ 	}
+@@ -1996,7 +1996,7 @@ static int sel_fill_super(struct super_block *sb, void *data, int silent)
+ 		goto err;
+ 	return 0;
+ err:
+-	printk(KERN_ERR "SELinux: %s:  failed while creating inodes\n",
++	pr_err("SELinux: %s:  failed while creating inodes\n",
+ 		__func__);
+ 
+ 	selinux_fs_info_free(sb);
+@@ -2046,7 +2046,7 @@ static int __init init_sel_fs(void)
+ 
+ 	selinux_null.mnt = selinuxfs_mount = kern_mount(&sel_fs_type);
+ 	if (IS_ERR(selinuxfs_mount)) {
+-		printk(KERN_ERR "selinuxfs:  could not mount!\n");
++		pr_err("selinuxfs:  could not mount!\n");
+ 		err = PTR_ERR(selinuxfs_mount);
+ 		selinuxfs_mount = NULL;
+ 	}

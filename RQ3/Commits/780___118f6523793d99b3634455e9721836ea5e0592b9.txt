@@ -1,0 +1,27 @@
+['118f6523793d99b3634455e9721836ea5e0592b9', '199.txt', 'LogLevel']
+commit 118f6523793d99b3634455e9721836ea5e0592b9
+Author: Borislav Petkov <bp@suse.de>
+Date:   Thu Feb 2 21:59:35 2017 +0100
+
+    mfd: rtsx: Convert forgotten dev_info() statement to pcr_dbg()
+    
+    It is a debugging statement so make it be issued only then.
+    
+    No functionality change.
+    
+    Signed-off-by: Borislav Petkov <bp@suse.de>
+    Signed-off-by: Lee Jones <lee.jones@linaro.org>
+
+diff --git a/drivers/mfd/rtsx_pcr.c b/drivers/mfd/rtsx_pcr.c
+index 98029ee0959e..850590aac008 100644
+--- a/drivers/mfd/rtsx_pcr.c
++++ b/drivers/mfd/rtsx_pcr.c
+@@ -927,7 +927,7 @@ static irqreturn_t rtsx_pci_isr(int irq, void *dev_id)
+ 
+ static int rtsx_pci_acquire_irq(struct rtsx_pcr *pcr)
+ {
+-	dev_info(&(pcr->pci->dev), "%s: pcr->msi_en = %d, pci->irq = %d\n",
++	pcr_dbg(pcr, "%s: pcr->msi_en = %d, pci->irq = %d\n",
+ 			__func__, pcr->msi_en, pcr->pci->irq);
+ 
+ 	if (request_irq(pcr->pci->irq, rtsx_pci_isr,

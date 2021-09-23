@@ -1,0 +1,41 @@
+['567df5e9770f7b5203010fd8a5e7c34b387b90a3', '92.txt', 'FixFormatSpecifier']
+commit 567df5e9770f7b5203010fd8a5e7c34b387b90a3
+Author: Vinod Koul <vkoul@kernel.org>
+Date:   Wed Sep 14 15:39:56 2016 +0530
+
+    dmaengine: ep93xx: use correct print specifiers for size_t
+    
+    This driver warns:
+    
+    drivers/dma/ep93xx_dma.c: In function 'ep93xx_dma_prep_slave_sg':
+    drivers/dma/ep93xx_dma.c:1054:6: warning: format '%d' expects argument of type 'int', but argument 3 has type 'size_t' [-Wformat=]
+    
+    drivers/dma/ep93xx_dma.c: In function 'ep93xx_dma_prep_dma_cyclic':
+    drivers/dma/ep93xx_dma.c:1129:5: warning: format '%d' expects argument of type 'int', but argument 3 has type 'size_t' [-Wformat=]
+    
+    We should use %zu to print 'size_t' values.
+    
+    Signed-off-by: Vinod Koul <vinod.koul@intel.com>
+
+diff --git a/drivers/dma/ep93xx_dma.c b/drivers/dma/ep93xx_dma.c
+index 21f08cc3352b..28945cb2e62f 100644
+--- a/drivers/dma/ep93xx_dma.c
++++ b/drivers/dma/ep93xx_dma.c
+@@ -1050,7 +1050,7 @@ ep93xx_dma_prep_slave_sg(struct dma_chan *chan, struct scatterlist *sgl,
+ 		size_t sg_len = sg_dma_len(sg);
+ 
+ 		if (sg_len > DMA_MAX_CHAN_BYTES) {
+-			dev_warn(chan2dev(edmac), "too big transfer size %d\n",
++			dev_warn(chan2dev(edmac), "too big transfer size %zu\n",
+ 				 sg_len);
+ 			goto fail;
+ 		}
+@@ -1125,7 +1125,7 @@ ep93xx_dma_prep_dma_cyclic(struct dma_chan *chan, dma_addr_t dma_addr,
+ 	}
+ 
+ 	if (period_len > DMA_MAX_CHAN_BYTES) {
+-		dev_warn(chan2dev(edmac), "too big period length %d\n",
++		dev_warn(chan2dev(edmac), "too big period length %zu\n",
+ 			 period_len);
+ 		return NULL;
+ 	}

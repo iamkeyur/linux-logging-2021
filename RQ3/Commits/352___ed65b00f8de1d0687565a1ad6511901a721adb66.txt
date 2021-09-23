@@ -1,0 +1,29 @@
+['ed65b00f8de1d0687565a1ad6511901a721adb66', '617.txt', 'Mislead/Ambiguous']
+commit ed65b00f8de1d0687565a1ad6511901a721adb66
+Author: Theodore Ts'o <tytso@mit.edu>
+Date:   Sun Feb 18 21:33:13 2018 -0500
+
+    jbd2: clarify bad journal block checksum message
+    
+    There were two error messages emitted by jbd2, one for a bad checksum
+    for a jbd2 descriptor block, and one for a bad checksum for a jbd2
+    data block.  Change the data block checksum error so that the two can
+    be disambiguated.
+    
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+
+diff --git a/fs/jbd2/recovery.c b/fs/jbd2/recovery.c
+index f99910b69c78..a4967b27ffb6 100644
+--- a/fs/jbd2/recovery.c
++++ b/fs/jbd2/recovery.c
+@@ -600,8 +600,8 @@ static int do_one_pass(journal_t *journal,
+ 						success = -EFSBADCRC;
+ 						printk(KERN_ERR "JBD2: Invalid "
+ 						       "checksum recovering "
+-						       "block %llu in log\n",
+-						       blocknr);
++						       "data block %llu in "
++						       "log\n", blocknr);
+ 						block_error = 1;
+ 						goto skip_write;
+ 					}

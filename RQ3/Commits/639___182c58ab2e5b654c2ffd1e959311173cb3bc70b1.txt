@@ -1,0 +1,40 @@
+['182c58ab2e5b654c2ffd1e959311173cb3bc70b1', '295.txt', 'FixFormatSpecifier']
+commit 182c58ab2e5b654c2ffd1e959311173cb3bc70b1
+Author: Sam Ravnborg <sam@ravnborg.org>
+Date:   Sun May 26 13:36:24 2019 +0200
+
+    drm/mcde: Fix compile problems
+    
+    Some further compile problems appeared while merging the
+    patch, fix them up.
+    
+    Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+    Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+    Link: https://patchwork.freedesktop.org/patch/msgid/20190526113624.6702-1-linus.walleij@linaro.org
+
+diff --git a/drivers/gpu/drm/mcde/mcde_display.c b/drivers/gpu/drm/mcde/mcde_display.c
+index 17dc46d554b0..f3ef108a41d9 100644
+--- a/drivers/gpu/drm/mcde/mcde_display.c
++++ b/drivers/gpu/drm/mcde/mcde_display.c
+@@ -823,7 +823,7 @@ static void mcde_display_enable(struct drm_simple_display_pipe *pipe,
+ 	u32 formatter_ppl = mode->hdisplay; /* pixels per line */
+ 	u32 formatter_lpf = mode->vdisplay; /* lines per frame */
+ 	int pkt_size, fifo_wtrmrk;
+-	int cpp = drm_format_plane_cpp(format, 0);
++	int cpp = fb->format->cpp[0];
+ 	int formatter_cpp;
+ 	struct drm_format_name_buf tmp;
+ 	u32 formatter_frame;
+diff --git a/drivers/gpu/drm/mcde/mcde_dsi.c b/drivers/gpu/drm/mcde/mcde_dsi.c
+index 456b43482448..07f7090d08b3 100644
+--- a/drivers/gpu/drm/mcde/mcde_dsi.c
++++ b/drivers/gpu/drm/mcde/mcde_dsi.c
+@@ -191,7 +191,7 @@ static ssize_t mcde_dsi_host_transfer(struct mipi_dsi_host *host,
+ 	}
+ 
+ 	dev_dbg(d->dev,
+-		"message to channel %d, %u bytes",
++		"message to channel %d, %zd bytes",
+ 		msg->channel,
+ 		txlen);
+ 

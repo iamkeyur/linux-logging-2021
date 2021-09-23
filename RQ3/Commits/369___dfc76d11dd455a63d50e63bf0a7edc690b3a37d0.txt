@@ -1,0 +1,40 @@
+['dfc76d11dd455a63d50e63bf0a7edc690b3a37d0', '597.txt', 'ModernizeLog']
+commit dfc76d11dd455a63d50e63bf0a7edc690b3a37d0
+Author: Keyur Patel <iamkeyur96@gmail.com>
+Date:   Sun Feb 17 10:21:56 2019 -0500
+
+    block: Replace function name in string with __func__
+    
+    Replace hard coded function name register_blkdev with __func__, to
+    improve robustness and to conform to the Linux kernel coding
+    style. Issue found using checkpatch.
+    
+    Signed-off-by: Keyur Patel <iamkeyur96@gmail.com>
+    Signed-off-by: Jens Axboe <axboe@kernel.dk>
+
+diff --git a/block/genhd.c b/block/genhd.c
+index 78b82d26aa9c..703267865f14 100644
+--- a/block/genhd.c
++++ b/block/genhd.c
+@@ -365,8 +365,8 @@ int register_blkdev(unsigned int major, const char *name)
+ 		}
+ 
+ 		if (index == 0) {
+-			printk("register_blkdev: failed to get major for %s\n",
+-			       name);
++			printk("%s: failed to get major for %s\n",
++			       __func__, name);
+ 			ret = -EBUSY;
+ 			goto out;
+ 		}
+@@ -375,8 +375,8 @@ int register_blkdev(unsigned int major, const char *name)
+ 	}
+ 
+ 	if (major >= BLKDEV_MAJOR_MAX) {
+-		pr_err("register_blkdev: major requested (%u) is greater than the maximum (%u) for %s\n",
+-		       major, BLKDEV_MAJOR_MAX-1, name);
++		pr_err("%s: major requested (%u) is greater than the maximum (%u) for %s\n",
++		       __func__, major, BLKDEV_MAJOR_MAX-1, name);
+ 
+ 		ret = -EINVAL;
+ 		goto out;

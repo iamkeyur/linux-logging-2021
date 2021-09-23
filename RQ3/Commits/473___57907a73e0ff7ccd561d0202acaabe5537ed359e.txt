@@ -1,0 +1,39 @@
+['57907a73e0ff7ccd561d0202acaabe5537ed359e', '484.txt', 'Typo']
+commit 57907a73e0ff7ccd561d0202acaabe5537ed359e
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Sat Nov 12 17:01:30 2016 +0000
+
+    soc/fsl: fix spelling mistakes in critical error messages
+    
+    Trivial fix to spelling mistake "uncommited" to "uncommitted" in
+    critical error messages.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Scott Wood <oss@buserror.net>
+
+diff --git a/drivers/soc/fsl/qbman/bman.c b/drivers/soc/fsl/qbman/bman.c
+index ffa48fdbb1a9..48b7eb698689 100644
+--- a/drivers/soc/fsl/qbman/bman.c
++++ b/drivers/soc/fsl/qbman/bman.c
+@@ -391,7 +391,7 @@ static void bm_rcr_finish(struct bm_portal *portal)
+ 
+ 	i = bm_in(portal, BM_REG_RCR_PI_CINH) & (BM_RCR_SIZE - 1);
+ 	if (i != rcr_ptr2idx(rcr->cursor))
+-		pr_crit("losing uncommited RCR entries\n");
++		pr_crit("losing uncommitted RCR entries\n");
+ 
+ 	i = bm_in(portal, BM_REG_RCR_CI_CINH) & (BM_RCR_SIZE - 1);
+ 	if (i != rcr->ci)
+diff --git a/drivers/soc/fsl/qbman/qman.c b/drivers/soc/fsl/qbman/qman.c
+index 119054bc922b..deeacd5d123e 100644
+--- a/drivers/soc/fsl/qbman/qman.c
++++ b/drivers/soc/fsl/qbman/qman.c
+@@ -443,7 +443,7 @@ static inline void qm_eqcr_finish(struct qm_portal *portal)
+ 
+ 	DPAA_ASSERT(!eqcr->busy);
+ 	if (pi != eqcr_ptr2idx(eqcr->cursor))
+-		pr_crit("losing uncommited EQCR entries\n");
++		pr_crit("losing uncommitted EQCR entries\n");
+ 	if (ci != eqcr->ci)
+ 		pr_crit("missing existing EQCR completions\n");
+ 	if (eqcr->ci != eqcr_ptr2idx(eqcr->cursor))

@@ -1,0 +1,168 @@
+['a613b26a50136ae90ab13943afe90bcbd34adb44', '493.txt', 'FixFormatSpecifier']
+commit a613b26a50136ae90ab13943afe90bcbd34adb44
+Author: Rob Herring <robh@kernel.org>
+Date:   Mon Aug 27 20:00:19 2018 -0500
+
+    of: Convert to using %pOFn instead of device_node.name
+    
+    In preparation to remove the node name pointer from struct device_node,
+    convert printf users to use the %pOFn format specifier.
+    
+    Reviewed-by: Frank Rowand <frank.rowand@sony.com>
+    Cc: Andrew Lunn <andrew@lunn.ch>
+    Cc: Florian Fainelli <f.fainelli@gmail.com>
+    Cc: netdev@vger.kernel.org
+    Signed-off-by: Rob Herring <robh@kernel.org>
+
+diff --git a/drivers/of/device.c b/drivers/of/device.c
+index 5957cd4fa262..84e810421418 100644
+--- a/drivers/of/device.c
++++ b/drivers/of/device.c
+@@ -219,7 +219,8 @@ static ssize_t of_device_get_modalias(struct device *dev, char *str, ssize_t len
+ 		return -ENODEV;
+ 
+ 	/* Name & Type */
+-	csize = snprintf(str, len, "of:N%sT%s", dev->of_node->name,
++	/* %p eats all alphanum characters, so %c must be used here */
++	csize = snprintf(str, len, "of:N%pOFn%c%s", dev->of_node, 'T',
+ 			 dev->of_node->type);
+ 	tsize = csize;
+ 	len -= csize;
+@@ -298,7 +299,7 @@ void of_device_uevent(struct device *dev, struct kobj_uevent_env *env)
+ 	if ((!dev) || (!dev->of_node))
+ 		return;
+ 
+-	add_uevent_var(env, "OF_NAME=%s", dev->of_node->name);
++	add_uevent_var(env, "OF_NAME=%pOFn", dev->of_node);
+ 	add_uevent_var(env, "OF_FULLNAME=%pOF", dev->of_node);
+ 	if (dev->of_node->type && strcmp("<NULL>", dev->of_node->type) != 0)
+ 		add_uevent_var(env, "OF_TYPE=%s", dev->of_node->type);
+diff --git a/drivers/of/of_mdio.c b/drivers/of/of_mdio.c
+index e92391d6d1bd..5ad1342f5682 100644
+--- a/drivers/of/of_mdio.c
++++ b/drivers/of/of_mdio.c
+@@ -97,8 +97,8 @@ static int of_mdiobus_register_phy(struct mii_bus *mdio,
+ 		return rc;
+ 	}
+ 
+-	dev_dbg(&mdio->dev, "registered phy %s at address %i\n",
+-		child->name, addr);
++	dev_dbg(&mdio->dev, "registered phy %pOFn at address %i\n",
++		child, addr);
+ 	return 0;
+ }
+ 
+@@ -127,8 +127,8 @@ static int of_mdiobus_register_device(struct mii_bus *mdio,
+ 		return rc;
+ 	}
+ 
+-	dev_dbg(&mdio->dev, "registered mdio device %s at address %i\n",
+-		child->name, addr);
++	dev_dbg(&mdio->dev, "registered mdio device %pOFn at address %i\n",
++		child, addr);
+ 	return 0;
+ }
+ 
+@@ -263,8 +263,8 @@ int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
+ 				continue;
+ 
+ 			/* be noisy to encourage people to set reg property */
+-			dev_info(&mdio->dev, "scan phy %s at address %i\n",
+-				 child->name, addr);
++			dev_info(&mdio->dev, "scan phy %pOFn at address %i\n",
++				 child, addr);
+ 
+ 			if (of_mdiobus_child_is_phy(child)) {
+ 				rc = of_mdiobus_register_phy(mdio, child, addr);
+diff --git a/drivers/of/of_numa.c b/drivers/of/of_numa.c
+index 27d9b4bba535..67d3386195bf 100644
+--- a/drivers/of/of_numa.c
++++ b/drivers/of/of_numa.c
+@@ -163,8 +163,8 @@ int of_node_to_nid(struct device_node *device)
+ 		np = of_get_next_parent(np);
+ 	}
+ 	if (np && r)
+-		pr_warn("Invalid \"numa-node-id\" property in node %s\n",
+-			np->name);
++		pr_warn("Invalid \"numa-node-id\" property in node %pOFn\n",
++			np);
+ 	of_node_put(np);
+ 
+ 	/*
+diff --git a/drivers/of/overlay.c b/drivers/of/overlay.c
+index eda57ef12fd0..42b1f73ac5f6 100644
+--- a/drivers/of/overlay.c
++++ b/drivers/of/overlay.c
+@@ -425,8 +425,8 @@ static int build_changeset_next_level(struct overlay_changeset *ovcs,
+ 	for_each_child_of_node(overlay_node, child) {
+ 		ret = add_changeset_node(ovcs, target_node, child);
+ 		if (ret) {
+-			pr_debug("Failed to apply node @%pOF/%s, err=%d\n",
+-				 target_node, child->name, ret);
++			pr_debug("Failed to apply node @%pOF/%pOFn, err=%d\n",
++				 target_node, child, ret);
+ 			of_node_put(child);
+ 			return ret;
+ 		}
+diff --git a/drivers/of/platform.c b/drivers/of/platform.c
+index 7ba90c290a42..868905f2d638 100644
+--- a/drivers/of/platform.c
++++ b/drivers/of/platform.c
+@@ -91,8 +91,8 @@ static void of_device_make_bus_id(struct device *dev)
+ 		 */
+ 		reg = of_get_property(node, "reg", NULL);
+ 		if (reg && (addr = of_translate_address(node, reg)) != OF_BAD_ADDR) {
+-			dev_set_name(dev, dev_name(dev) ? "%llx.%s:%s" : "%llx.%s",
+-				     (unsigned long long)addr, node->name,
++			dev_set_name(dev, dev_name(dev) ? "%llx.%pOFn:%s" : "%llx.%pOFn",
++				     (unsigned long long)addr, node,
+ 				     dev_name(dev));
+ 			return;
+ 		}
+@@ -142,8 +142,8 @@ struct platform_device *of_device_alloc(struct device_node *np,
+ 			WARN_ON(rc);
+ 		}
+ 		if (of_irq_to_resource_table(np, res, num_irq) != num_irq)
+-			pr_debug("not all legacy IRQ resources mapped for %s\n",
+-				 np->name);
++			pr_debug("not all legacy IRQ resources mapped for %pOFn\n",
++				 np);
+ 	}
+ 
+ 	dev->dev.of_node = of_node_get(np);
+diff --git a/drivers/of/unittest.c b/drivers/of/unittest.c
+index 204432bf791c..35b7886e9592 100644
+--- a/drivers/of/unittest.c
++++ b/drivers/of/unittest.c
+@@ -212,8 +212,8 @@ static int __init of_unittest_check_node_linkage(struct device_node *np)
+ 
+ 	for_each_child_of_node(np, child) {
+ 		if (child->parent != np) {
+-			pr_err("Child node %s links to wrong parent %s\n",
+-				 child->name, np->name);
++			pr_err("Child node %pOFn links to wrong parent %pOFn\n",
++				 child, np);
+ 			rc = -EINVAL;
+ 			goto put_child;
+ 		}
+@@ -1040,16 +1040,16 @@ static void __init of_unittest_platform_populate(void)
+ 	for_each_child_of_node(np, child) {
+ 		for_each_child_of_node(child, grandchild)
+ 			unittest(of_find_device_by_node(grandchild),
+-				 "Could not create device for node '%s'\n",
+-				 grandchild->name);
++				 "Could not create device for node '%pOFn'\n",
++				 grandchild);
+ 	}
+ 
+ 	of_platform_depopulate(&test_bus->dev);
+ 	for_each_child_of_node(np, child) {
+ 		for_each_child_of_node(child, grandchild)
+ 			unittest(!of_find_device_by_node(grandchild),
+-				 "device didn't get destroyed '%s'\n",
+-				 grandchild->name);
++				 "device didn't get destroyed '%pOFn'\n",
++				 grandchild);
+ 	}
+ 
+ 	platform_device_unregister(test_bus);

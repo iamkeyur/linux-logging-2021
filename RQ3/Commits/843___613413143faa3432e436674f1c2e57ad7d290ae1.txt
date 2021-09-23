@@ -1,0 +1,62 @@
+['613413143faa3432e436674f1c2e57ad7d290ae1', '51.txt', 'ModernizeLog']
+commit 613413143faa3432e436674f1c2e57ad7d290ae1
+Author: Huang Shijie <shijie.huang@arm.com>
+Date:   Wed Aug 3 13:46:09 2016 -0700
+
+    samples/kretprobe: convert the printk to pr_info/pr_err
+    
+    We prefer to use the pr_* to print out the log now, this patch converts
+    the printk to pr_info.  In the error path, use the pr_err to replace the
+    printk.
+    
+    Link: http://lkml.kernel.org/r/1464143083-3877-3-git-send-email-shijie.huang@arm.com
+    Signed-off-by: Huang Shijie <shijie.huang@arm.com>
+    Cc: Petr Mladek <pmladek@suse.com>
+    Cc: Steve Capper <steve.capper@arm.com>
+    Cc: Ananth N Mavinakayanahalli <ananth@linux.vnet.ibm.com>
+    Cc: Anil S Keshavamurthy <anil.s.keshavamurthy@intel.com>
+    Cc: Masami Hiramatsu <mhiramat@kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+diff --git a/samples/kprobes/kretprobe_example.c b/samples/kprobes/kretprobe_example.c
+index ebb1d1aed547..adc83e9f59d0 100644
+--- a/samples/kprobes/kretprobe_example.c
++++ b/samples/kprobes/kretprobe_example.c
+@@ -62,7 +62,7 @@ static int ret_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
+ 
+ 	now = ktime_get();
+ 	delta = ktime_to_ns(ktime_sub(now, data->entry_stamp));
+-	printk(KERN_INFO "%s returned %d and took %lld ns to execute\n",
++	pr_info("%s returned %d and took %lld ns to execute\n",
+ 			func_name, retval, (long long)delta);
+ 	return 0;
+ }
+@@ -82,11 +82,10 @@ static int __init kretprobe_init(void)
+ 	my_kretprobe.kp.symbol_name = func_name;
+ 	ret = register_kretprobe(&my_kretprobe);
+ 	if (ret < 0) {
+-		printk(KERN_INFO "register_kretprobe failed, returned %d\n",
+-				ret);
++		pr_err("register_kretprobe failed, returned %d\n", ret);
+ 		return -1;
+ 	}
+-	printk(KERN_INFO "Planted return probe at %s: %p\n",
++	pr_info("Planted return probe at %s: %p\n",
+ 			my_kretprobe.kp.symbol_name, my_kretprobe.kp.addr);
+ 	return 0;
+ }
+@@ -94,11 +93,10 @@ static int __init kretprobe_init(void)
+ static void __exit kretprobe_exit(void)
+ {
+ 	unregister_kretprobe(&my_kretprobe);
+-	printk(KERN_INFO "kretprobe at %p unregistered\n",
+-			my_kretprobe.kp.addr);
++	pr_info("kretprobe at %p unregistered\n", my_kretprobe.kp.addr);
+ 
+ 	/* nmissed > 0 suggests that maxactive was set too low. */
+-	printk(KERN_INFO "Missed probing %d instances of %s\n",
++	pr_info("Missed probing %d instances of %s\n",
+ 		my_kretprobe.nmissed, my_kretprobe.kp.symbol_name);
+ }
+ 

@@ -1,0 +1,32 @@
+['5b621779c2365216dcbf6f9166c2e791e304767a', '209.txt', 'LogLevel']
+commit 5b621779c2365216dcbf6f9166c2e791e304767a
+Author: Mike Rapoport <mike.rapoport@gmail.com>
+Date:   Wed Feb 10 18:34:07 2016 +0200
+
+    staging: sm750fb: hw_sm750_setBLANK: reduce printk verbosity
+    
+    pr_debug would be enough
+    
+    Signed-off-by: Mike Rapoport <mike.rapoport@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/sm750fb/sm750_hw.c b/drivers/staging/sm750fb/sm750_hw.c
+index c0c2f1c4de82..52fd250d7afe 100644
+--- a/drivers/staging/sm750fb/sm750_hw.c
++++ b/drivers/staging/sm750fb/sm750_hw.c
+@@ -414,13 +414,13 @@ int hw_sm750_setBLANK(struct lynxfb_output *output, int blank)
+ 
+ 	switch (blank) {
+ 	case FB_BLANK_UNBLANK:
+-		pr_info("flag = FB_BLANK_UNBLANK\n");
++		pr_debug("flag = FB_BLANK_UNBLANK\n");
+ 		dpms = SYSTEM_CTRL_DPMS_VPHP;
+ 		pps = PANEL_DISPLAY_CTRL_DATA_ENABLE;
+ 		crtdb = CRT_DISPLAY_CTRL_BLANK_OFF;
+ 		break;
+ 	case FB_BLANK_NORMAL:
+-		pr_info("flag = FB_BLANK_NORMAL\n");
++		pr_debug("flag = FB_BLANK_NORMAL\n");
+ 		dpms = SYSTEM_CTRL_DPMS_VPHP;
+ 		pps = PANEL_DISPLAY_CTRL_DATA_DISABLE;
+ 		crtdb = CRT_DISPLAY_CTRL_BLANK_ON;

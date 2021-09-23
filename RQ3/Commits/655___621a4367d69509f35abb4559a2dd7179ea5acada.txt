@@ -1,0 +1,23 @@
+['621a4367d69509f35abb4559a2dd7179ea5acada', '277.txt', 'Typo']
+commit 621a4367d69509f35abb4559a2dd7179ea5acada
+Author: Leo Zhang <nguzcf@gmail.com>
+Date:   Mon Dec 24 00:18:27 2018 +0800
+
+    scsi: target/iscsi: fix error msg typo when create lio_qr_cache failed
+    
+    Signed-off-by: Leo Zhang <nguzcf@gmail.com>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/target/iscsi/iscsi_target.c b/drivers/target/iscsi/iscsi_target.c
+index 984941e036c8..bd15a564fe24 100644
+--- a/drivers/target/iscsi/iscsi_target.c
++++ b/drivers/target/iscsi/iscsi_target.c
+@@ -714,7 +714,7 @@ static int __init iscsi_target_init_module(void)
+ 			sizeof(struct iscsi_queue_req),
+ 			__alignof__(struct iscsi_queue_req), 0, NULL);
+ 	if (!lio_qr_cache) {
+-		pr_err("nable to kmem_cache_create() for"
++		pr_err("Unable to kmem_cache_create() for"
+ 				" lio_qr_cache\n");
+ 		goto bitmap_out;
+ 	}

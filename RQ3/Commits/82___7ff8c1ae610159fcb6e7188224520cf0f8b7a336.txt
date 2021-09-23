@@ -1,0 +1,25 @@
+['7ff8c1ae610159fcb6e7188224520cf0f8b7a336', '912.txt', 'FixFormatSpecifier']
+commit 7ff8c1ae610159fcb6e7188224520cf0f8b7a336
+Author: Jes Sorensen <Jes.Sorensen@redhat.com>
+Date:   Mon Feb 29 17:04:32 2016 -0500
+
+    rtl8xxxu: Use correct formatting type to print sizeof()
+    
+    Usual gcc i386 issue reported by kbuildbot
+    
+    Signed-off-by: Jes Sorensen <Jes.Sorensen@redhat.com>
+    Signed-off-by: Kalle Valo <kvalo@codeaurora.org>
+
+diff --git a/drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu.c b/drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu.c
+index cfea68b7eb4d..171e0388d5ec 100644
+--- a/drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu.c
++++ b/drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu.c
+@@ -5129,7 +5129,7 @@ static void rtl8xxxu_update_rate_mask(struct rtl8xxxu_priv *priv,
+ 	if (sgi)
+ 		h2c.ramask.arg |= 0x20;
+ 
+-	dev_dbg(&priv->udev->dev, "%s: rate mask %08x, arg %02x, size %li\n",
++	dev_dbg(&priv->udev->dev, "%s: rate mask %08x, arg %02x, size %zi\n",
+ 		__func__, ramask, h2c.ramask.arg, sizeof(h2c.ramask));
+ 	rtl8723a_h2c_cmd(priv, &h2c, sizeof(h2c.ramask));
+ }

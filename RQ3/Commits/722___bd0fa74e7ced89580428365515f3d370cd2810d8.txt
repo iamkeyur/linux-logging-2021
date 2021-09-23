@@ -1,0 +1,34 @@
+['bd0fa74e7ced89580428365515f3d370cd2810d8', '136.txt', 'FixFormatSpecifier']
+commit bd0fa74e7ced89580428365515f3d370cd2810d8
+Author: Nishanth Menon <nm@ti.com>
+Date:   Sat Dec 16 14:41:33 2017 -0800
+
+    firmware: ti_sci: Use %zu for size_t print format
+    
+    mbox_msg->len is of type size_t and %d is incorrect format. Instead
+    use %zu for handling size_t correctly.
+    
+    Reviewed-by: Lokesh Vutla <lokeshvutla@ti.com>
+    Signed-off-by: Nishanth Menon <nm@ti.com>
+    Signed-off-by: Santosh Shilimkar <santosh.shilimkar@oracle.com>
+
+diff --git a/drivers/firmware/ti_sci.c b/drivers/firmware/ti_sci.c
+index 23b12d99ddfe..5229036dcfbf 100644
+--- a/drivers/firmware/ti_sci.c
++++ b/drivers/firmware/ti_sci.c
+@@ -287,13 +287,13 @@ static void ti_sci_rx_callback(struct mbox_client *cl, void *m)
+ 
+ 	/* Is the message of valid length? */
+ 	if (mbox_msg->len > info->desc->max_msg_size) {
+-		dev_err(dev, "Unable to handle %d xfer(max %d)\n",
++		dev_err(dev, "Unable to handle %zu xfer(max %d)\n",
+ 			mbox_msg->len, info->desc->max_msg_size);
+ 		ti_sci_dump_header_dbg(dev, hdr);
+ 		return;
+ 	}
+ 	if (mbox_msg->len < xfer->rx_len) {
+-		dev_err(dev, "Recv xfer %d < expected %d length\n",
++		dev_err(dev, "Recv xfer %zu < expected %d length\n",
+ 			mbox_msg->len, xfer->rx_len);
+ 		ti_sci_dump_header_dbg(dev, hdr);
+ 		return;

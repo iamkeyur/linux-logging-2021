@@ -1,0 +1,62 @@
+['ac5db1fc89bf84d7479761e0de855e6376fdab1e', '846.txt', 'FixFormatSpecifier']
+commit ac5db1fc89bf84d7479761e0de855e6376fdab1e
+Author: nixiaoming <nixiaoming@huawei.com>
+Date:   Thu May 24 11:16:12 2018 +0800
+
+    scripts: Fixed printf format mismatch
+    
+    scripts/kallsyms.c: function write_src:
+    "printf", the #1 format specifier "d" need arg type "int",
+    but the according arg "table_cnt" has type "unsigned int"
+    
+    scripts/recordmcount.c: function do_file:
+    "fprintf", the #1 format specifier "d" need arg type "int",
+    but the according arg "(*w2)(ehdr->e_machine)" has type "unsigned int"
+    
+    scripts/recordmcount.h: function find_secsym_ndx:
+    "fprintf", the #1 format specifier "d" need arg type "int",
+    but the according arg "txtndx" has type "unsigned int"
+    
+    Signed-off-by: nixiaoming <nixiaoming@huawei.com>
+    Acked-by: Steven Rostedt (VMware) <rostedt@goodmis.org>
+    Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+
+diff --git a/scripts/kallsyms.c b/scripts/kallsyms.c
+index 80417629b246..a9186a98a37d 100644
+--- a/scripts/kallsyms.c
++++ b/scripts/kallsyms.c
+@@ -405,7 +405,7 @@ static void write_src(void)
+ 	}
+ 
+ 	output_label("kallsyms_num_syms");
+-	printf("\tPTR\t%d\n", table_cnt);
++	printf("\tPTR\t%u\n", table_cnt);
+ 	printf("\n");
+ 
+ 	/* table of offset markers, that give the offset in the compressed stream
+diff --git a/scripts/recordmcount.c b/scripts/recordmcount.c
+index 8c9691c3329e..895c40e8679f 100644
+--- a/scripts/recordmcount.c
++++ b/scripts/recordmcount.c
+@@ -500,7 +500,7 @@ do_file(char const *const fname)
+ 	gpfx = 0;
+ 	switch (w2(ehdr->e_machine)) {
+ 	default:
+-		fprintf(stderr, "unrecognized e_machine %d %s\n",
++		fprintf(stderr, "unrecognized e_machine %u %s\n",
+ 			w2(ehdr->e_machine), fname);
+ 		fail_file();
+ 		break;
+diff --git a/scripts/recordmcount.h b/scripts/recordmcount.h
+index b9897e2be404..2e7793735e14 100644
+--- a/scripts/recordmcount.h
++++ b/scripts/recordmcount.h
+@@ -441,7 +441,7 @@ static unsigned find_secsym_ndx(unsigned const txtndx,
+ 			return symp - sym0;
+ 		}
+ 	}
+-	fprintf(stderr, "Cannot find symbol for section %d: %s.\n",
++	fprintf(stderr, "Cannot find symbol for section %u: %s.\n",
+ 		txtndx, txtname);
+ 	fail_file();
+ }

@@ -1,0 +1,22 @@
+['fcc5a652a51332d5e6582697bd847b082a6b4e40', '586.txt', 'FixFormatSpecifier']
+commit fcc5a652a51332d5e6582697bd847b082a6b4e40
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Sun Jul 16 23:54:30 2017 -0400
+
+    debugging printk in sg_poll() uses %x to print POLL... bitmap
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+diff --git a/drivers/scsi/sg.c b/drivers/scsi/sg.c
+index c746c6936ee4..0c434453aab3 100644
+--- a/drivers/scsi/sg.c
++++ b/drivers/scsi/sg.c
+@@ -1174,7 +1174,7 @@ sg_poll(struct file *filp, poll_table * wait)
+ 	} else if (count < SG_MAX_QUEUE)
+ 		res |= POLLOUT | POLLWRNORM;
+ 	SCSI_LOG_TIMEOUT(3, sg_printk(KERN_INFO, sdp,
+-				      "sg_poll: res=0x%x\n", (int) res));
++				      "sg_poll: res=0x%x\n", (__force u32) res));
+ 	return res;
+ }
+ 

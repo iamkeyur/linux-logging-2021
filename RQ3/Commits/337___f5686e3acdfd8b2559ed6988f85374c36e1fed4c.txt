@@ -1,0 +1,25 @@
+['f5686e3acdfd8b2559ed6988f85374c36e1fed4c', '635.txt', 'Typo']
+commit f5686e3acdfd8b2559ed6988f85374c36e1fed4c
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Fri May 4 12:11:12 2018 +0100
+
+    btrfs: send: fix spelling mistake: "send_in_progres" -> "send_in_progress"
+    
+    Trivial fix to spelling mistake of function name in btrfs_err message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: David Sterba <dsterba@suse.com>
+
+diff --git a/fs/btrfs/send.c b/fs/btrfs/send.c
+index c0074d2d7d6d..6e8184f239e0 100644
+--- a/fs/btrfs/send.c
++++ b/fs/btrfs/send.c
+@@ -6454,7 +6454,7 @@ static void btrfs_root_dec_send_in_progress(struct btrfs_root* root)
+ 	 */
+ 	if (root->send_in_progress < 0)
+ 		btrfs_err(root->fs_info,
+-			  "send_in_progres unbalanced %d root %llu",
++			  "send_in_progress unbalanced %d root %llu",
+ 			  root->send_in_progress, root->root_key.objectid);
+ 	spin_unlock(&root->root_item_lock);
+ }

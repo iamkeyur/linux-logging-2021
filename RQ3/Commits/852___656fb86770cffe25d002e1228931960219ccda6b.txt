@@ -1,0 +1,31 @@
+['656fb86770cffe25d002e1228931960219ccda6b', '64.txt', 'ModernizeLog']
+commit 656fb86770cffe25d002e1228931960219ccda6b
+Author: Peter Hurley <peter@hurleysoftware.com>
+Date:   Sun Nov 8 13:01:15 2015 -0500
+
+    tty: core: Add driver name to invalid device registration message
+    
+    Include the driver name in the tty_register_device_attr() error
+    message for invalid index.
+    
+    Note that tty_err() cannot be used here because there is no tty;
+    use pr_err().
+    
+    Signed-off-by: Peter Hurley <peter@hurleysoftware.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/tty/tty_io.c b/drivers/tty/tty_io.c
+index b64cd64a0563..86e379a38219 100644
+--- a/drivers/tty/tty_io.c
++++ b/drivers/tty/tty_io.c
+@@ -3249,8 +3249,8 @@ struct device *tty_register_device_attr(struct tty_driver *driver,
+ 	bool cdev = false;
+ 
+ 	if (index >= driver->num) {
+-		printk(KERN_ERR "Attempt to register invalid tty line number "
+-		       " (%d).\n", index);
++		pr_err("%s: Attempt to register invalid tty line number (%d)\n",
++		       driver->name, index);
+ 		return ERR_PTR(-EINVAL);
+ 	}
+ 

@@ -1,0 +1,35 @@
+['c7c7806700e15ca9c48d880f8c65071f041cd890', '913.txt', 'Clarify/Reword']
+commit c7c7806700e15ca9c48d880f8c65071f041cd890
+Author: Peter Chen <peter.chen@freescale.com>
+Date:   Wed Nov 18 17:40:23 2015 +0800
+
+    usb: misc: usbtest: improve the description for error message
+    
+    Now the function of complicated_callback is not only used for iso
+    transfer, improve the error message to reflect it.
+    
+    Signed-off-by: Peter Chen <peter.chen@freescale.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/usb/misc/usbtest.c b/drivers/usb/misc/usbtest.c
+index 637f3f7cfce8..c1bd1eb548bb 100644
+--- a/drivers/usb/misc/usbtest.c
++++ b/drivers/usb/misc/usbtest.c
+@@ -1849,7 +1849,7 @@ static void complicated_callback(struct urb *urb)
+ 			goto done;
+ 		default:
+ 			dev_err(&ctx->dev->intf->dev,
+-					"iso resubmit err %d\n",
++					"resubmit err %d\n",
+ 					status);
+ 			/* FALLTHROUGH */
+ 		case -ENODEV:			/* disconnected */
+@@ -1863,7 +1863,7 @@ static void complicated_callback(struct urb *urb)
+ 	if (ctx->pending == 0) {
+ 		if (ctx->errors)
+ 			dev_err(&ctx->dev->intf->dev,
+-				"iso test, %lu errors out of %lu\n",
++				"during the test, %lu errors out of %lu\n",
+ 				ctx->errors, ctx->packet_count);
+ 		complete(&ctx->done);
+ 	}

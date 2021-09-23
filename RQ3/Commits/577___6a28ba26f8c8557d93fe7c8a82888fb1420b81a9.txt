@@ -1,0 +1,25 @@
+['6a28ba26f8c8557d93fe7c8a82888fb1420b81a9', '363.txt', 'Typo']
+commit 6a28ba26f8c8557d93fe7c8a82888fb1420b81a9
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Wed Mar 21 10:24:13 2018 +0000
+
+    dmaengine: dw-axi-dmac: fix spelling mistake: "catched" -> "caught"
+    
+    Trivial fix to spelling mistake in dev_err error message text
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Vinod Koul <vinod.koul@intel.com>
+
+diff --git a/drivers/dma/dw-axi-dmac/dw-axi-dmac-platform.c b/drivers/dma/dw-axi-dmac/dw-axi-dmac-platform.c
+index dbe7312c15c6..c4eb55e3011c 100644
+--- a/drivers/dma/dw-axi-dmac/dw-axi-dmac-platform.c
++++ b/drivers/dma/dw-axi-dmac/dw-axi-dmac-platform.c
+@@ -574,7 +574,7 @@ static void axi_chan_block_xfer_complete(struct axi_dma_chan *chan)
+ 
+ 	spin_lock_irqsave(&chan->vc.lock, flags);
+ 	if (unlikely(axi_chan_is_hw_enable(chan))) {
+-		dev_err(chan2dev(chan), "BUG: %s catched DWAXIDMAC_IRQ_DMA_TRF, but channel not idle!\n",
++		dev_err(chan2dev(chan), "BUG: %s caught DWAXIDMAC_IRQ_DMA_TRF, but channel not idle!\n",
+ 			axi_chan_name(chan));
+ 		axi_chan_disable(chan);
+ 	}

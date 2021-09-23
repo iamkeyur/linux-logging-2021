@@ -1,0 +1,193 @@
+['b436e26e484d259e0b658d558eb99b7ab004e997', '817.txt', 'Typo']
+commit b436e26e484d259e0b658d558eb99b7ab004e997
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu Nov 2 06:11:53 2017 -0400
+
+    media: usb: fix spelling mistake: "synchronuously" -> "synchronously"
+    
+    Trivial fix to spelling mistake in error message text
+    
+    [mchehab@s-opensource.org: folded all similar patches into one]
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+
+diff --git a/drivers/media/usb/au0828/au0828-video.c b/drivers/media/usb/au0828/au0828-video.c
+index 9342402b92f7..654f67c25863 100644
+--- a/drivers/media/usb/au0828/au0828-video.c
++++ b/drivers/media/usb/au0828/au0828-video.c
+@@ -67,10 +67,10 @@ static inline void print_err_status(struct au0828_dev *dev,
+ 
+ 	switch (status) {
+ 	case -ENOENT:
+-		errmsg = "unlinked synchronuously";
++		errmsg = "unlinked synchronously";
+ 		break;
+ 	case -ECONNRESET:
+-		errmsg = "unlinked asynchronuously";
++		errmsg = "unlinked asynchronously";
+ 		break;
+ 	case -ENOSR:
+ 		errmsg = "Buffer error (overrun)";
+diff --git a/drivers/media/usb/cx231xx/cx231xx-dvb.c b/drivers/media/usb/cx231xx/cx231xx-dvb.c
+index c18bb33e060e..54abc1a7c8e1 100644
+--- a/drivers/media/usb/cx231xx/cx231xx-dvb.c
++++ b/drivers/media/usb/cx231xx/cx231xx-dvb.c
+@@ -179,10 +179,10 @@ static inline void print_err_status(struct cx231xx *dev, int packet, int status)
+ 
+ 	switch (status) {
+ 	case -ENOENT:
+-		errmsg = "unlinked synchronuously";
++		errmsg = "unlinked synchronously";
+ 		break;
+ 	case -ECONNRESET:
+-		errmsg = "unlinked asynchronuously";
++		errmsg = "unlinked asynchronously";
+ 		break;
+ 	case -ENOSR:
+ 		errmsg = "Buffer error (overrun)";
+diff --git a/drivers/media/usb/cx231xx/cx231xx-vbi.c b/drivers/media/usb/cx231xx/cx231xx-vbi.c
+index 330b86e4e38f..d3bfe8e23b1f 100644
+--- a/drivers/media/usb/cx231xx/cx231xx-vbi.c
++++ b/drivers/media/usb/cx231xx/cx231xx-vbi.c
+@@ -43,10 +43,10 @@ static inline void print_err_status(struct cx231xx *dev, int packet, int status)
+ 
+ 	switch (status) {
+ 	case -ENOENT:
+-		errmsg = "unlinked synchronuously";
++		errmsg = "unlinked synchronously";
+ 		break;
+ 	case -ECONNRESET:
+-		errmsg = "unlinked asynchronuously";
++		errmsg = "unlinked asynchronously";
+ 		break;
+ 	case -ENOSR:
+ 		errmsg = "Buffer error (overrun)";
+diff --git a/drivers/media/usb/cx231xx/cx231xx-video.c b/drivers/media/usb/cx231xx/cx231xx-video.c
+index 179b8481a870..226059fc672b 100644
+--- a/drivers/media/usb/cx231xx/cx231xx-video.c
++++ b/drivers/media/usb/cx231xx/cx231xx-video.c
+@@ -199,10 +199,10 @@ static inline void print_err_status(struct cx231xx *dev, int packet, int status)
+ 
+ 	switch (status) {
+ 	case -ENOENT:
+-		errmsg = "unlinked synchronuously";
++		errmsg = "unlinked synchronously";
+ 		break;
+ 	case -ECONNRESET:
+-		errmsg = "unlinked asynchronuously";
++		errmsg = "unlinked asynchronously";
+ 		break;
+ 	case -ENOSR:
+ 		errmsg = "Buffer error (overrun)";
+diff --git a/drivers/media/usb/em28xx/em28xx-dvb.c b/drivers/media/usb/em28xx/em28xx-dvb.c
+index 4a7db623fe29..9950a740e04e 100644
+--- a/drivers/media/usb/em28xx/em28xx-dvb.c
++++ b/drivers/media/usb/em28xx/em28xx-dvb.c
+@@ -112,10 +112,10 @@ static inline void print_err_status(struct em28xx *dev,
+ 
+ 	switch (status) {
+ 	case -ENOENT:
+-		errmsg = "unlinked synchronuously";
++		errmsg = "unlinked synchronously";
+ 		break;
+ 	case -ECONNRESET:
+-		errmsg = "unlinked asynchronuously";
++		errmsg = "unlinked asynchronously";
+ 		break;
+ 	case -ENOSR:
+ 		errmsg = "Buffer error (overrun)";
+diff --git a/drivers/media/usb/em28xx/em28xx-video.c b/drivers/media/usb/em28xx/em28xx-video.c
+index 8d253a5df0a9..a2ba2d905952 100644
+--- a/drivers/media/usb/em28xx/em28xx-video.c
++++ b/drivers/media/usb/em28xx/em28xx-video.c
+@@ -557,10 +557,10 @@ static inline void print_err_status(struct em28xx *dev,
+ 
+ 	switch (status) {
+ 	case -ENOENT:
+-		errmsg = "unlinked synchronuously";
++		errmsg = "unlinked synchronously";
+ 		break;
+ 	case -ECONNRESET:
+-		errmsg = "unlinked asynchronuously";
++		errmsg = "unlinked asynchronously";
+ 		break;
+ 	case -ENOSR:
+ 		errmsg = "Buffer error (overrun)";
+diff --git a/drivers/media/usb/msi2500/msi2500.c b/drivers/media/usb/msi2500/msi2500.c
+index a097d3dbc141..65ef755adfdc 100644
+--- a/drivers/media/usb/msi2500/msi2500.c
++++ b/drivers/media/usb/msi2500/msi2500.c
+@@ -386,7 +386,7 @@ static void msi2500_isoc_handler(struct urb *urb)
+ 	if (unlikely(urb->status == -ENOENT ||
+ 		     urb->status == -ECONNRESET ||
+ 		     urb->status == -ESHUTDOWN)) {
+-		dev_dbg(dev->dev, "URB (%p) unlinked %ssynchronuously\n",
++		dev_dbg(dev->dev, "URB (%p) unlinked %ssynchronously\n",
+ 			urb, urb->status == -ENOENT ? "" : "a");
+ 		return;
+ 	}
+diff --git a/drivers/media/usb/pwc/pwc-if.c b/drivers/media/usb/pwc/pwc-if.c
+index eb6921d2743e..54b036d39c5b 100644
+--- a/drivers/media/usb/pwc/pwc-if.c
++++ b/drivers/media/usb/pwc/pwc-if.c
+@@ -262,7 +262,8 @@ static void pwc_isoc_handler(struct urb *urb)
+ 
+ 	if (urb->status == -ENOENT || urb->status == -ECONNRESET ||
+ 	    urb->status == -ESHUTDOWN) {
+-		PWC_DEBUG_OPEN("URB (%p) unlinked %ssynchronuously.\n", urb, urb->status == -ENOENT ? "" : "a");
++		PWC_DEBUG_OPEN("URB (%p) unlinked %ssynchronously.\n",
++			       urb, urb->status == -ENOENT ? "" : "a");
+ 		return;
+ 	}
+ 
+diff --git a/drivers/media/usb/stk1160/stk1160-video.c b/drivers/media/usb/stk1160/stk1160-video.c
+index ce8ebbe395a6..423c03a0638d 100644
+--- a/drivers/media/usb/stk1160/stk1160-video.c
++++ b/drivers/media/usb/stk1160/stk1160-video.c
+@@ -38,10 +38,10 @@ static inline void print_err_status(struct stk1160 *dev,
+ 
+ 	switch (status) {
+ 	case -ENOENT:
+-		errmsg = "unlinked synchronuously";
++		errmsg = "unlinked synchronously";
+ 		break;
+ 	case -ECONNRESET:
+-		errmsg = "unlinked asynchronuously";
++		errmsg = "unlinked asynchronously";
+ 		break;
+ 	case -ENOSR:
+ 		errmsg = "Buffer error (overrun)";
+diff --git a/drivers/media/usb/tm6000/tm6000-dvb.c b/drivers/media/usb/tm6000/tm6000-dvb.c
+index 2bc584f75f87..c811fc6cf48a 100644
+--- a/drivers/media/usb/tm6000/tm6000-dvb.c
++++ b/drivers/media/usb/tm6000/tm6000-dvb.c
+@@ -45,10 +45,10 @@ static inline void print_err_status(struct tm6000_core *dev,
+ 
+ 	switch (status) {
+ 	case -ENOENT:
+-		errmsg = "unlinked synchronuously";
++		errmsg = "unlinked synchronously";
+ 		break;
+ 	case -ECONNRESET:
+-		errmsg = "unlinked asynchronuously";
++		errmsg = "unlinked asynchronously";
+ 		break;
+ 	case -ENOSR:
+ 		errmsg = "Buffer error (overrun)";
+diff --git a/drivers/media/usb/tm6000/tm6000-video.c b/drivers/media/usb/tm6000/tm6000-video.c
+index 0d45f35e1697..9fa25de6b5a9 100644
+--- a/drivers/media/usb/tm6000/tm6000-video.c
++++ b/drivers/media/usb/tm6000/tm6000-video.c
+@@ -342,10 +342,10 @@ static inline void print_err_status(struct tm6000_core *dev,
+ 
+ 	switch (status) {
+ 	case -ENOENT:
+-		errmsg = "unlinked synchronuously";
++		errmsg = "unlinked synchronously";
+ 		break;
+ 	case -ECONNRESET:
+-		errmsg = "unlinked asynchronuously";
++		errmsg = "unlinked asynchronously";
+ 		break;
+ 	case -ENOSR:
+ 		errmsg = "Buffer error (overrun)";

@@ -1,0 +1,25 @@
+['1d80d1bd176ac7e9414d49096bfb3da2c929ee8a', '398.txt', 'Typo']
+commit 1d80d1bd176ac7e9414d49096bfb3da2c929ee8a
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Sun Jun 4 00:31:42 2017 +0100
+
+    staging: ccree: fix spelling mistake: "chanined" -> "chained"
+    
+    Trivial fix to spelling mistake in SSI_LOG_ERR message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/ccree/ssi_buffer_mgr.c b/drivers/staging/ccree/ssi_buffer_mgr.c
+index 3252114740d0..1ff603f8f8f5 100644
+--- a/drivers/staging/ccree/ssi_buffer_mgr.c
++++ b/drivers/staging/ccree/ssi_buffer_mgr.c
+@@ -82,7 +82,7 @@ static unsigned int ssi_buffer_mgr_get_sgl_nents(
+ 	unsigned int nents = 0;
+ 	while (nbytes != 0) {
+ 		if (sg_is_chain(sg_list)) {
+-			SSI_LOG_ERR("Unexpected chanined entry "
++			SSI_LOG_ERR("Unexpected chained entry "
+ 				   "in sg (entry =0x%X) \n", nents);
+ 			BUG();
+ 		}

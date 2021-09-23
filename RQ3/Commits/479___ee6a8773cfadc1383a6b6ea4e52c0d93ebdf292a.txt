@@ -1,0 +1,44 @@
+['ee6a8773cfadc1383a6b6ea4e52c0d93ebdf292a', '477.txt', 'Typo']
+commit ee6a8773cfadc1383a6b6ea4e52c0d93ebdf292a
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Sun Aug 28 12:24:48 2016 +0100
+
+    scsi: qla2xxx: fix spelling mistake "retyring" -> "retrying"
+    
+    Trivial fix to spelling mistakes in ql_dbg messages.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Acked-by: Himanshu Madhani <himanshu.madhani@qlogic.com>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/scsi/qla2xxx/qla_os.c b/drivers/scsi/qla2xxx/qla_os.c
+index 1dd865028edd..ace65db1d2a2 100644
+--- a/drivers/scsi/qla2xxx/qla_os.c
++++ b/drivers/scsi/qla2xxx/qla_os.c
+@@ -4694,7 +4694,7 @@ qla83xx_idc_unlock(scsi_qla_host_t *base_vha, uint16_t requester_id)
+ 			qla83xx_wait_logic();
+ 			retry++;
+ 			ql_dbg(ql_dbg_p3p, base_vha, 0xb064,
+-			    "Failed to release IDC lock, retyring=%d\n", retry);
++			    "Failed to release IDC lock, retrying=%d\n", retry);
+ 			goto retry_unlock;
+ 		}
+ 	} else if (retry < 10) {
+@@ -4702,7 +4702,7 @@ qla83xx_idc_unlock(scsi_qla_host_t *base_vha, uint16_t requester_id)
+ 		qla83xx_wait_logic();
+ 		retry++;
+ 		ql_dbg(ql_dbg_p3p, base_vha, 0xb065,
+-		    "Failed to read drv-lockid, retyring=%d\n", retry);
++		    "Failed to read drv-lockid, retrying=%d\n", retry);
+ 		goto retry_unlock;
+ 	}
+ 
+@@ -4718,7 +4718,7 @@ qla83xx_idc_unlock(scsi_qla_host_t *base_vha, uint16_t requester_id)
+ 			qla83xx_wait_logic();
+ 			retry++;
+ 			ql_dbg(ql_dbg_p3p, base_vha, 0xb066,
+-			    "Failed to release IDC lock, retyring=%d\n", retry);
++			    "Failed to release IDC lock, retrying=%d\n", retry);
+ 			goto retry_unlock2;
+ 		}
+ 	}

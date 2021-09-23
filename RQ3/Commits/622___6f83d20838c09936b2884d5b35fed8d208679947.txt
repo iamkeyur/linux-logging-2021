@@ -1,0 +1,1111 @@
+['6f83d20838c09936b2884d5b35fed8d208679947', '315.txt', 'ModernizeLog']
+commit 6f83d20838c09936b2884d5b35fed8d208679947
+Author: Inki Dae <inki.dae@samsung.com>
+Date:   Mon Apr 15 14:24:36 2019 +0900
+
+    drm/exynos: use DRM_DEV_ERROR to print out error message
+    
+    This patch just cleans up the use of error log macro, which changes
+    the log macro to DRM_DEV_ERROR.
+    
+    Signed-off-by: Inki Dae <inki.dae@samsung.com>
+
+diff --git a/drivers/gpu/drm/exynos/exynos5433_drm_decon.c b/drivers/gpu/drm/exynos/exynos5433_drm_decon.c
+index ba5218022402..c2715e54db90 100644
+--- a/drivers/gpu/drm/exynos/exynos5433_drm_decon.c
++++ b/drivers/gpu/drm/exynos/exynos5433_drm_decon.c
+@@ -188,7 +188,7 @@ static void decon_setup_trigger(struct decon_context *ctx)
+ 
+ 	if (regmap_update_bits(ctx->sysreg, DSD_CFG_MUX,
+ 			       DSD_CFG_MUX_TE_UNMASK_GLOBAL, ~0))
+-		DRM_ERROR("Cannot update sysreg.\n");
++		DRM_DEV_ERROR(ctx->dev, "Cannot update sysreg.\n");
+ }
+ 
+ static void decon_commit(struct exynos_drm_crtc *crtc)
+diff --git a/drivers/gpu/drm/exynos/exynos7_drm_decon.c b/drivers/gpu/drm/exynos/exynos7_drm_decon.c
+index a6bb411e4bd3..bc76f2772e44 100644
+--- a/drivers/gpu/drm/exynos/exynos7_drm_decon.c
++++ b/drivers/gpu/drm/exynos/exynos7_drm_decon.c
+@@ -620,7 +620,7 @@ static int decon_bind(struct device *dev, struct device *master, void *data)
+ 
+ 	ret = decon_ctx_initialize(ctx, drm_dev);
+ 	if (ret) {
+-		DRM_ERROR("decon_ctx_initialize failed.\n");
++		DRM_DEV_ERROR(dev, "decon_ctx_initialize failed.\n");
+ 		return ret;
+ 	}
+ 
+@@ -800,25 +800,29 @@ static int exynos7_decon_resume(struct device *dev)
+ 
+ 	ret = clk_prepare_enable(ctx->pclk);
+ 	if (ret < 0) {
+-		DRM_ERROR("Failed to prepare_enable the pclk [%d]\n", ret);
++		DRM_DEV_ERROR(dev, "Failed to prepare_enable the pclk [%d]\n",
++			      ret);
+ 		return ret;
+ 	}
+ 
+ 	ret = clk_prepare_enable(ctx->aclk);
+ 	if (ret < 0) {
+-		DRM_ERROR("Failed to prepare_enable the aclk [%d]\n", ret);
++		DRM_DEV_ERROR(dev, "Failed to prepare_enable the aclk [%d]\n",
++			      ret);
+ 		return ret;
+ 	}
+ 
+ 	ret = clk_prepare_enable(ctx->eclk);
+ 	if  (ret < 0) {
+-		DRM_ERROR("Failed to prepare_enable the eclk [%d]\n", ret);
++		DRM_DEV_ERROR(dev, "Failed to prepare_enable the eclk [%d]\n",
++			      ret);
+ 		return ret;
+ 	}
+ 
+ 	ret = clk_prepare_enable(ctx->vclk);
+ 	if  (ret < 0) {
+-		DRM_ERROR("Failed to prepare_enable the vclk [%d]\n", ret);
++		DRM_DEV_ERROR(dev, "Failed to prepare_enable the vclk [%d]\n",
++			      ret);
+ 		return ret;
+ 	}
+ 
+diff --git a/drivers/gpu/drm/exynos/exynos_dp.c b/drivers/gpu/drm/exynos/exynos_dp.c
+index 471242a5e580..b0288cf85701 100644
+--- a/drivers/gpu/drm/exynos/exynos_dp.c
++++ b/drivers/gpu/drm/exynos/exynos_dp.c
+@@ -83,7 +83,8 @@ static int exynos_dp_get_modes(struct analogix_dp_plat_data *plat_data,
+ 
+ 	mode = drm_mode_create(connector->dev);
+ 	if (!mode) {
+-		DRM_ERROR("failed to create a new display mode.\n");
++		DRM_DEV_ERROR(dp->dev,
++			      "failed to create a new display mode.\n");
+ 		return num_modes;
+ 	}
+ 
+@@ -111,7 +112,8 @@ static int exynos_dp_bridge_attach(struct analogix_dp_plat_data *plat_data,
+ 	if (dp->ptn_bridge) {
+ 		ret = drm_bridge_attach(&dp->encoder, dp->ptn_bridge, bridge);
+ 		if (ret) {
+-			DRM_ERROR("Failed to attach bridge to drm\n");
++			DRM_DEV_ERROR(dp->dev,
++				      "Failed to attach bridge to drm\n");
+ 			bridge->next = NULL;
+ 			return ret;
+ 		}
+@@ -147,7 +149,8 @@ static int exynos_dp_dt_parse_panel(struct exynos_dp_device *dp)
+ 
+ 	ret = of_get_videomode(dp->dev->of_node, &dp->vm, OF_USE_NATIVE_MODE);
+ 	if (ret) {
+-		DRM_ERROR("failed: of_get_videomode() : %d\n", ret);
++		DRM_DEV_ERROR(dp->dev,
++			      "failed: of_get_videomode() : %d\n", ret);
+ 		return ret;
+ 	}
+ 	return 0;
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_dma.c b/drivers/gpu/drm/exynos/exynos_drm_dma.c
+index 3432c5ee9f0c..bef8bc3c8e00 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_dma.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_dma.c
+@@ -62,7 +62,7 @@ static int drm_iommu_attach_device(struct drm_device *drm_dev,
+ 	int ret;
+ 
+ 	if (get_dma_ops(priv->dma_dev) != get_dma_ops(subdrv_dev)) {
+-		DRM_ERROR("Device %s lacks support for IOMMU\n",
++		DRM_DEV_ERROR(subdrv_dev, "Device %s lacks support for IOMMU\n",
+ 			  dev_name(subdrv_dev));
+ 		return -EINVAL;
+ 	}
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_dpi.c b/drivers/gpu/drm/exynos/exynos_drm_dpi.c
+index ae425c9a3f7b..6ea92173db9f 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_dpi.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_dpi.c
+@@ -77,7 +77,8 @@ static int exynos_dpi_get_modes(struct drm_connector *connector)
+ 
+ 		mode = drm_mode_create(connector->dev);
+ 		if (!mode) {
+-			DRM_ERROR("failed to create a new display mode\n");
++			DRM_DEV_ERROR(ctx->dev,
++				      "failed to create a new display mode\n");
+ 			return 0;
+ 		}
+ 		drm_display_mode_from_videomode(ctx->vm, mode);
+@@ -108,7 +109,8 @@ static int exynos_dpi_create_connector(struct drm_encoder *encoder)
+ 				 &exynos_dpi_connector_funcs,
+ 				 DRM_MODE_CONNECTOR_VGA);
+ 	if (ret) {
+-		DRM_ERROR("failed to initialize connector with drm\n");
++		DRM_DEV_ERROR(ctx->dev,
++			      "failed to initialize connector with drm\n");
+ 		return ret;
+ 	}
+ 
+@@ -213,7 +215,8 @@ int exynos_dpi_bind(struct drm_device *dev, struct drm_encoder *encoder)
+ 
+ 	ret = exynos_dpi_create_connector(encoder);
+ 	if (ret) {
+-		DRM_ERROR("failed to create connector ret = %d\n", ret);
++		DRM_DEV_ERROR(encoder_to_dpi(encoder)->dev,
++			      "failed to create connector ret = %d\n", ret);
+ 		drm_encoder_cleanup(encoder);
+ 		return ret;
+ 	}
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_dsi.c b/drivers/gpu/drm/exynos/exynos_drm_dsi.c
+index a4253dd55f86..63a4b5074a99 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_dsi.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_dsi.c
+@@ -1483,7 +1483,8 @@ static int exynos_dsi_create_connector(struct drm_encoder *encoder)
+ 	ret = drm_connector_init(drm, connector, &exynos_dsi_connector_funcs,
+ 				 DRM_MODE_CONNECTOR_DSI);
+ 	if (ret) {
+-		DRM_ERROR("Failed to initialize connector with drm\n");
++		DRM_DEV_ERROR(dsi->dev,
++			      "Failed to initialize connector with drm\n");
+ 		return ret;
+ 	}
+ 
+@@ -1527,7 +1528,9 @@ static int exynos_dsi_host_attach(struct mipi_dsi_host *host,
+ 		int ret = exynos_dsi_create_connector(encoder);
+ 
+ 		if (ret) {
+-			DRM_ERROR("failed to create connector ret = %d\n", ret);
++			DRM_DEV_ERROR(dsi->dev,
++				      "failed to create connector ret = %d\n",
++				      ret);
+ 			drm_encoder_cleanup(encoder);
+ 			return ret;
+ 		}
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_fb.c b/drivers/gpu/drm/exynos/exynos_drm_fb.c
+index 1f11ab0f8e9d..832d22f57b4b 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_fb.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_fb.c
+@@ -45,7 +45,8 @@ static int check_fb_gem_memory_type(struct drm_device *drm_dev,
+ 	 * supported without IOMMU.
+ 	 */
+ 	if (IS_NONCONTIG_BUFFER(flags)) {
+-		DRM_ERROR("Non-contiguous GEM memory is not supported.\n");
++		DRM_DEV_ERROR(drm_dev->dev,
++			      "Non-contiguous GEM memory is not supported.\n");
+ 		return -EINVAL;
+ 	}
+ 
+@@ -83,7 +84,8 @@ exynos_drm_framebuffer_init(struct drm_device *dev,
+ 
+ 	ret = drm_framebuffer_init(dev, fb, &exynos_drm_fb_funcs);
+ 	if (ret < 0) {
+-		DRM_ERROR("failed to initialize framebuffer\n");
++		DRM_DEV_ERROR(dev->dev,
++			      "failed to initialize framebuffer\n");
+ 		goto err;
+ 	}
+ 
+@@ -113,7 +115,8 @@ exynos_user_fb_create(struct drm_device *dev, struct drm_file *file_priv,
+ 		exynos_gem[i] = exynos_drm_gem_get(file_priv,
+ 						   mode_cmd->handles[i]);
+ 		if (!exynos_gem[i]) {
+-			DRM_ERROR("failed to lookup gem object\n");
++			DRM_DEV_ERROR(dev->dev,
++				      "failed to lookup gem object\n");
+ 			ret = -ENOENT;
+ 			goto err;
+ 		}
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_fbdev.c b/drivers/gpu/drm/exynos/exynos_drm_fbdev.c
+index 581a6a207995..ca3f6cda1fda 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_fbdev.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_fbdev.c
+@@ -55,7 +55,7 @@ static int exynos_drm_fb_mmap(struct fb_info *info,
+ 			     exynos_gem->dma_addr, exynos_gem->size,
+ 			     exynos_gem->dma_attrs);
+ 	if (ret < 0) {
+-		DRM_ERROR("failed to mmap.\n");
++		DRM_DEV_ERROR(to_dma_dev(helper->dev), "failed to mmap.\n");
+ 		return ret;
+ 	}
+ 
+@@ -83,7 +83,8 @@ static int exynos_drm_fbdev_update(struct drm_fb_helper *helper,
+ 
+ 	fbi = drm_fb_helper_alloc_fbi(helper);
+ 	if (IS_ERR(fbi)) {
+-		DRM_ERROR("failed to allocate fb info.\n");
++		DRM_DEV_ERROR(to_dma_dev(helper->dev),
++			      "failed to allocate fb info.\n");
+ 		return PTR_ERR(fbi);
+ 	}
+ 
+@@ -96,7 +97,8 @@ static int exynos_drm_fbdev_update(struct drm_fb_helper *helper,
+ 	exynos_gem->kvaddr = (void __iomem *) vmap(exynos_gem->pages, nr_pages,
+ 				VM_MAP, pgprot_writecombine(PAGE_KERNEL));
+ 	if (!exynos_gem->kvaddr) {
+-		DRM_ERROR("failed to map pages to kernel space.\n");
++		DRM_DEV_ERROR(to_dma_dev(helper->dev),
++			      "failed to map pages to kernel space.\n");
+ 		return -EIO;
+ 	}
+ 
+@@ -152,7 +154,7 @@ static int exynos_drm_fbdev_create(struct drm_fb_helper *helper,
+ 	helper->fb =
+ 		exynos_drm_framebuffer_init(dev, &mode_cmd, &exynos_gem, 1);
+ 	if (IS_ERR(helper->fb)) {
+-		DRM_ERROR("failed to create drm framebuffer.\n");
++		DRM_DEV_ERROR(dev->dev, "failed to create drm framebuffer.\n");
+ 		ret = PTR_ERR(helper->fb);
+ 		goto err_destroy_gem;
+ 	}
+@@ -201,20 +203,23 @@ int exynos_drm_fbdev_init(struct drm_device *dev)
+ 
+ 	ret = drm_fb_helper_init(dev, helper, MAX_CONNECTOR);
+ 	if (ret < 0) {
+-		DRM_ERROR("failed to initialize drm fb helper.\n");
++		DRM_DEV_ERROR(dev->dev,
++			      "failed to initialize drm fb helper.\n");
+ 		goto err_init;
+ 	}
+ 
+ 	ret = drm_fb_helper_single_add_all_connectors(helper);
+ 	if (ret < 0) {
+-		DRM_ERROR("failed to register drm_fb_helper_connector.\n");
++		DRM_DEV_ERROR(dev->dev,
++			      "failed to register drm_fb_helper_connector.\n");
+ 		goto err_setup;
+ 
+ 	}
+ 
+ 	ret = drm_fb_helper_initial_config(helper, PREFERRED_BPP);
+ 	if (ret < 0) {
+-		DRM_ERROR("failed to set up hw configuration.\n");
++		DRM_DEV_ERROR(dev->dev,
++			      "failed to set up hw configuration.\n");
+ 		goto err_setup;
+ 	}
+ 
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_fimc.c b/drivers/gpu/drm/exynos/exynos_drm_fimc.c
+index 90dfea0aec4d..5a5641b43c6a 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_fimc.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_fimc.c
+@@ -232,8 +232,9 @@ static bool fimc_check_ovf(struct fimc_context *ctx)
+ 			EXYNOS_CIWDOFST_CLROVFIY | EXYNOS_CIWDOFST_CLROVFICB |
+ 			EXYNOS_CIWDOFST_CLROVFICR);
+ 
+-		dev_err(ctx->dev, "occurred overflow at %d, status 0x%x.\n",
+-			ctx->id, status);
++		DRM_DEV_ERROR(ctx->dev,
++			      "occurred overflow at %d, status 0x%x.\n",
++			      ctx->id, status);
+ 		return true;
+ 	}
+ 
+@@ -273,7 +274,7 @@ static int fimc_get_buf_id(struct fimc_context *ctx)
+ 		EXYNOS_CISTATUS2_GET_FRAMECOUNT_BEFORE(cfg));
+ 
+ 	if (frame_cnt == 0) {
+-		DRM_ERROR("failed to get frame count.\n");
++		DRM_DEV_ERROR(ctx->dev, "failed to get frame count.\n");
+ 		return -EIO;
+ 	}
+ 
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_fimd.c b/drivers/gpu/drm/exynos/exynos_drm_fimd.c
+index ffb686af287e..5b109ae1b390 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_fimd.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_fimd.c
+@@ -398,7 +398,7 @@ static int fimd_atomic_check(struct exynos_drm_crtc *crtc,
+ 	u32 clkdiv;
+ 
+ 	if (mode->clock == 0) {
+-		DRM_ERROR("Mode has zero clock value.\n");
++		DRM_DEV_ERROR(ctx->dev, "Mode has zero clock value.\n");
+ 		return -EINVAL;
+ 	}
+ 
+@@ -414,15 +414,17 @@ static int fimd_atomic_check(struct exynos_drm_crtc *crtc,
+ 
+ 	lcd_rate = clk_get_rate(ctx->lcd_clk);
+ 	if (2 * lcd_rate < ideal_clk) {
+-		DRM_ERROR("sclk_fimd clock too low(%lu) for requested pixel clock(%lu)\n",
+-			 lcd_rate, ideal_clk);
++		DRM_DEV_ERROR(ctx->dev,
++			      "sclk_fimd clock too low(%lu) for requested pixel clock(%lu)\n",
++			      lcd_rate, ideal_clk);
+ 		return -EINVAL;
+ 	}
+ 
+ 	/* Find the clock divider value that gets us closest to ideal_clk */
+ 	clkdiv = DIV_ROUND_CLOSEST(lcd_rate, ideal_clk);
+ 	if (clkdiv >= 0x200) {
+-		DRM_ERROR("requested pixel clock(%lu) too low\n", ideal_clk);
++		DRM_DEV_ERROR(ctx->dev, "requested pixel clock(%lu) too low\n",
++			      ideal_clk);
+ 		return -EINVAL;
+ 	}
+ 
+@@ -479,7 +481,8 @@ static void fimd_commit(struct exynos_drm_crtc *crtc)
+ 					driver_data->lcdblk_offset,
+ 					0x3 << driver_data->lcdblk_vt_shift,
+ 					0x1 << driver_data->lcdblk_vt_shift)) {
+-			DRM_ERROR("Failed to update sysreg for I80 i/f.\n");
++			DRM_DEV_ERROR(ctx->dev,
++				      "Failed to update sysreg for I80 i/f.\n");
+ 			return;
+ 		}
+ 	} else {
+@@ -523,7 +526,8 @@ static void fimd_commit(struct exynos_drm_crtc *crtc)
+ 				driver_data->lcdblk_offset,
+ 				0x1 << driver_data->lcdblk_bypass_shift,
+ 				0x1 << driver_data->lcdblk_bypass_shift)) {
+-		DRM_ERROR("Failed to update sysreg for bypass setting.\n");
++		DRM_DEV_ERROR(ctx->dev,
++			      "Failed to update sysreg for bypass setting.\n");
+ 		return;
+ 	}
+ 
+@@ -535,7 +539,8 @@ static void fimd_commit(struct exynos_drm_crtc *crtc)
+ 				driver_data->lcdblk_offset,
+ 				0x1 << driver_data->lcdblk_mic_bypass_shift,
+ 				0x1 << driver_data->lcdblk_mic_bypass_shift)) {
+-		DRM_ERROR("Failed to update sysreg for bypass mic.\n");
++		DRM_DEV_ERROR(ctx->dev,
++			      "Failed to update sysreg for bypass mic.\n");
+ 		return;
+ 	}
+ 
+@@ -1250,13 +1255,17 @@ static int exynos_fimd_resume(struct device *dev)
+ 
+ 	ret = clk_prepare_enable(ctx->bus_clk);
+ 	if (ret < 0) {
+-		DRM_ERROR("Failed to prepare_enable the bus clk [%d]\n", ret);
++		DRM_DEV_ERROR(dev,
++			      "Failed to prepare_enable the bus clk [%d]\n",
++			      ret);
+ 		return ret;
+ 	}
+ 
+ 	ret = clk_prepare_enable(ctx->lcd_clk);
+ 	if  (ret < 0) {
+-		DRM_ERROR("Failed to prepare_enable the lcd clk [%d]\n", ret);
++		DRM_DEV_ERROR(dev,
++			      "Failed to prepare_enable the lcd clk [%d]\n",
++			      ret);
+ 		return ret;
+ 	}
+ 
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_g2d.c b/drivers/gpu/drm/exynos/exynos_drm_g2d.c
+index a9c26b32e814..c20b3a759370 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_g2d.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_g2d.c
+@@ -429,7 +429,7 @@ static dma_addr_t *g2d_userptr_get_dma_addr(struct g2d_data *g2d,
+ 	int ret;
+ 
+ 	if (!size) {
+-		DRM_ERROR("invalid userptr size.\n");
++		DRM_DEV_ERROR(g2d->dev, "invalid userptr size.\n");
+ 		return ERR_PTR(-EINVAL);
+ 	}
+ 
+@@ -482,7 +482,8 @@ static dma_addr_t *g2d_userptr_get_dma_addr(struct g2d_data *g2d,
+ 	ret = get_vaddr_frames(start, npages, FOLL_FORCE | FOLL_WRITE,
+ 		g2d_userptr->vec);
+ 	if (ret != npages) {
+-		DRM_ERROR("failed to get user pages from userptr.\n");
++		DRM_DEV_ERROR(g2d->dev,
++			      "failed to get user pages from userptr.\n");
+ 		if (ret < 0)
+ 			goto err_destroy_framevec;
+ 		ret = -EFAULT;
+@@ -503,7 +504,7 @@ static dma_addr_t *g2d_userptr_get_dma_addr(struct g2d_data *g2d,
+ 					frame_vector_pages(g2d_userptr->vec),
+ 					npages, offset, size, GFP_KERNEL);
+ 	if (ret < 0) {
+-		DRM_ERROR("failed to get sgt from pages.\n");
++		DRM_DEV_ERROR(g2d->dev, "failed to get sgt from pages.\n");
+ 		goto err_free_sgt;
+ 	}
+ 
+@@ -511,7 +512,7 @@ static dma_addr_t *g2d_userptr_get_dma_addr(struct g2d_data *g2d,
+ 
+ 	if (!dma_map_sg(to_dma_dev(g2d->drm_dev), sgt->sgl, sgt->nents,
+ 				DMA_BIDIRECTIONAL)) {
+-		DRM_ERROR("failed to map sgt with dma region.\n");
++		DRM_DEV_ERROR(g2d->dev, "failed to map sgt with dma region.\n");
+ 		ret = -ENOMEM;
+ 		goto err_sg_free_table;
+ 	}
+@@ -560,7 +561,7 @@ static void g2d_userptr_free_all(struct g2d_data *g2d, struct drm_file *filp)
+ 	g2d->current_pool = 0;
+ }
+ 
+-static enum g2d_reg_type g2d_get_reg_type(int reg_offset)
++static enum g2d_reg_type g2d_get_reg_type(struct g2d_data *g2d, int reg_offset)
+ {
+ 	enum g2d_reg_type reg_type;
+ 
+@@ -593,7 +594,8 @@ static enum g2d_reg_type g2d_get_reg_type(int reg_offset)
+ 		break;
+ 	default:
+ 		reg_type = REG_TYPE_NONE;
+-		DRM_ERROR("Unknown register offset![%d]\n", reg_offset);
++		DRM_DEV_ERROR(g2d->dev, "Unknown register offset![%d]\n",
++			      reg_offset);
+ 		break;
+ 	}
+ 
+@@ -627,9 +629,10 @@ static unsigned long g2d_get_buf_bpp(unsigned int format)
+ 	return bpp;
+ }
+ 
+-static bool g2d_check_buf_desc_is_valid(struct g2d_buf_desc *buf_desc,
+-						enum g2d_reg_type reg_type,
+-						unsigned long size)
++static bool g2d_check_buf_desc_is_valid(struct g2d_data *g2d,
++					struct g2d_buf_desc *buf_desc,
++					enum g2d_reg_type reg_type,
++					unsigned long size)
+ {
+ 	int width, height;
+ 	unsigned long bpp, last_pos;
+@@ -644,14 +647,15 @@ static bool g2d_check_buf_desc_is_valid(struct g2d_buf_desc *buf_desc,
+ 	/* This check also makes sure that right_x > left_x. */
+ 	width = (int)buf_desc->right_x - (int)buf_desc->left_x;
+ 	if (width < G2D_LEN_MIN || width > G2D_LEN_MAX) {
+-		DRM_ERROR("width[%d] is out of range!\n", width);
++		DRM_DEV_ERROR(g2d->dev, "width[%d] is out of range!\n", width);
+ 		return false;
+ 	}
+ 
+ 	/* This check also makes sure that bottom_y > top_y. */
+ 	height = (int)buf_desc->bottom_y - (int)buf_desc->top_y;
+ 	if (height < G2D_LEN_MIN || height > G2D_LEN_MAX) {
+-		DRM_ERROR("height[%d] is out of range!\n", height);
++		DRM_DEV_ERROR(g2d->dev,
++			      "height[%d] is out of range!\n", height);
+ 		return false;
+ 	}
+ 
+@@ -670,8 +674,8 @@ static bool g2d_check_buf_desc_is_valid(struct g2d_buf_desc *buf_desc,
+ 	 */
+ 
+ 	if (last_pos >= size) {
+-		DRM_ERROR("last engine access position [%lu] "
+-			"is out of range [%lu]!\n", last_pos, size);
++		DRM_DEV_ERROR(g2d->dev, "last engine access position [%lu] "
++			      "is out of range [%lu]!\n", last_pos, size);
+ 		return false;
+ 	}
+ 
+@@ -701,7 +705,7 @@ static int g2d_map_cmdlist_gem(struct g2d_data *g2d,
+ 		offset = cmdlist->data[reg_pos];
+ 		handle = cmdlist->data[reg_pos + 1];
+ 
+-		reg_type = g2d_get_reg_type(offset);
++		reg_type = g2d_get_reg_type(g2d, offset);
+ 		if (reg_type == REG_TYPE_NONE) {
+ 			ret = -EFAULT;
+ 			goto err;
+@@ -718,7 +722,7 @@ static int g2d_map_cmdlist_gem(struct g2d_data *g2d,
+ 				goto err;
+ 			}
+ 
+-			if (!g2d_check_buf_desc_is_valid(buf_desc,
++			if (!g2d_check_buf_desc_is_valid(g2d, buf_desc,
+ 							 reg_type, exynos_gem->size)) {
+ 				exynos_drm_gem_put(exynos_gem);
+ 				ret = -EFAULT;
+@@ -736,8 +740,9 @@ static int g2d_map_cmdlist_gem(struct g2d_data *g2d,
+ 				goto err;
+ 			}
+ 
+-			if (!g2d_check_buf_desc_is_valid(buf_desc, reg_type,
+-							g2d_userptr.size)) {
++			if (!g2d_check_buf_desc_is_valid(g2d, buf_desc,
++							 reg_type,
++							 g2d_userptr.size)) {
+ 				ret = -EFAULT;
+ 				goto err;
+ 			}
+@@ -1044,7 +1049,7 @@ static int g2d_check_reg_offset(struct g2d_data *g2d,
+ 			if (!for_addr)
+ 				goto err;
+ 
+-			reg_type = g2d_get_reg_type(reg_offset);
++			reg_type = g2d_get_reg_type(g2d, reg_offset);
+ 
+ 			/* check userptr buffer type. */
+ 			if ((cmdlist->data[index] & ~0x7fffffff) >> 31) {
+@@ -1058,7 +1063,7 @@ static int g2d_check_reg_offset(struct g2d_data *g2d,
+ 			if (for_addr)
+ 				goto err;
+ 
+-			reg_type = g2d_get_reg_type(reg_offset);
++			reg_type = g2d_get_reg_type(g2d, reg_offset);
+ 
+ 			buf_desc = &buf_info->descs[reg_type];
+ 			buf_desc->stride = cmdlist->data[index + 1];
+@@ -1068,7 +1073,7 @@ static int g2d_check_reg_offset(struct g2d_data *g2d,
+ 			if (for_addr)
+ 				goto err;
+ 
+-			reg_type = g2d_get_reg_type(reg_offset);
++			reg_type = g2d_get_reg_type(g2d, reg_offset);
+ 
+ 			buf_desc = &buf_info->descs[reg_type];
+ 			value = cmdlist->data[index + 1];
+@@ -1080,7 +1085,7 @@ static int g2d_check_reg_offset(struct g2d_data *g2d,
+ 			if (for_addr)
+ 				goto err;
+ 
+-			reg_type = g2d_get_reg_type(reg_offset);
++			reg_type = g2d_get_reg_type(g2d, reg_offset);
+ 
+ 			buf_desc = &buf_info->descs[reg_type];
+ 			value = cmdlist->data[index + 1];
+@@ -1093,7 +1098,7 @@ static int g2d_check_reg_offset(struct g2d_data *g2d,
+ 			if (for_addr)
+ 				goto err;
+ 
+-			reg_type = g2d_get_reg_type(reg_offset);
++			reg_type = g2d_get_reg_type(g2d, reg_offset);
+ 
+ 			buf_desc = &buf_info->descs[reg_type];
+ 			value = cmdlist->data[index + 1];
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_gem.c b/drivers/gpu/drm/exynos/exynos_drm_gem.c
+index df66c383a877..7b4883b1e29c 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_gem.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_gem.c
+@@ -61,7 +61,7 @@ static int exynos_drm_alloc_buf(struct exynos_drm_gem *exynos_gem)
+ 	exynos_gem->pages = kvmalloc_array(nr_pages, sizeof(struct page *),
+ 			GFP_KERNEL | __GFP_ZERO);
+ 	if (!exynos_gem->pages) {
+-		DRM_ERROR("failed to allocate pages.\n");
++		DRM_DEV_ERROR(to_dma_dev(dev), "failed to allocate pages.\n");
+ 		return -ENOMEM;
+ 	}
+ 
+@@ -69,7 +69,7 @@ static int exynos_drm_alloc_buf(struct exynos_drm_gem *exynos_gem)
+ 					     &exynos_gem->dma_addr, GFP_KERNEL,
+ 					     exynos_gem->dma_attrs);
+ 	if (!exynos_gem->cookie) {
+-		DRM_ERROR("failed to allocate buffer.\n");
++		DRM_DEV_ERROR(to_dma_dev(dev), "failed to allocate buffer.\n");
+ 		goto err_free;
+ 	}
+ 
+@@ -77,13 +77,13 @@ static int exynos_drm_alloc_buf(struct exynos_drm_gem *exynos_gem)
+ 				    exynos_gem->dma_addr, exynos_gem->size,
+ 				    exynos_gem->dma_attrs);
+ 	if (ret < 0) {
+-		DRM_ERROR("failed to get sgtable.\n");
++		DRM_DEV_ERROR(to_dma_dev(dev), "failed to get sgtable.\n");
+ 		goto err_dma_free;
+ 	}
+ 
+ 	if (drm_prime_sg_to_page_addr_arrays(&sgt, exynos_gem->pages, NULL,
+ 					     nr_pages)) {
+-		DRM_ERROR("invalid sgtable.\n");
++		DRM_DEV_ERROR(to_dma_dev(dev), "invalid sgtable.\n");
+ 		ret = -EINVAL;
+ 		goto err_sgt_free;
+ 	}
+@@ -186,7 +186,7 @@ static struct exynos_drm_gem *exynos_drm_gem_init(struct drm_device *dev,
+ 
+ 	ret = drm_gem_object_init(dev, obj, size);
+ 	if (ret < 0) {
+-		DRM_ERROR("failed to initialize gem object\n");
++		DRM_DEV_ERROR(dev->dev, "failed to initialize gem object\n");
+ 		kfree(exynos_gem);
+ 		return ERR_PTR(ret);
+ 	}
+@@ -211,12 +211,13 @@ struct exynos_drm_gem *exynos_drm_gem_create(struct drm_device *dev,
+ 	int ret;
+ 
+ 	if (flags & ~(EXYNOS_BO_MASK)) {
+-		DRM_ERROR("invalid GEM buffer flags: %u\n", flags);
++		DRM_DEV_ERROR(dev->dev,
++			      "invalid GEM buffer flags: %u\n", flags);
+ 		return ERR_PTR(-EINVAL);
+ 	}
+ 
+ 	if (!size) {
+-		DRM_ERROR("invalid GEM buffer size: %lu\n", size);
++		DRM_DEV_ERROR(dev->dev, "invalid GEM buffer size: %lu\n", size);
+ 		return ERR_PTR(-EINVAL);
+ 	}
+ 
+@@ -325,7 +326,7 @@ int exynos_drm_gem_get_ioctl(struct drm_device *dev, void *data,
+ 
+ 	obj = drm_gem_object_lookup(file_priv, args->handle);
+ 	if (!obj) {
+-		DRM_ERROR("failed to lookup gem object.\n");
++		DRM_DEV_ERROR(dev->dev, "failed to lookup gem object.\n");
+ 		return -EINVAL;
+ 	}
+ 
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_gsc.c b/drivers/gpu/drm/exynos/exynos_drm_gsc.c
+index f048d97fe9e2..ef10e45f9e7d 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_gsc.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_gsc.c
+@@ -395,7 +395,7 @@ static int gsc_sw_reset(struct gsc_context *ctx)
+ 	}
+ 
+ 	if (cfg) {
+-		DRM_ERROR("failed to reset gsc h/w.\n");
++		DRM_DEV_ERROR(ctx->dev, "failed to reset gsc h/w.\n");
+ 		return -EBUSY;
+ 	}
+ 
+@@ -706,12 +706,13 @@ static void gsc_dst_set_fmt(struct gsc_context *ctx, u32 fmt, bool tiled)
+ 	gsc_write(cfg, GSC_OUT_CON);
+ }
+ 
+-static int gsc_get_ratio_shift(u32 src, u32 dst, u32 *ratio)
++static int gsc_get_ratio_shift(struct gsc_context *ctx, u32 src, u32 dst,
++			       u32 *ratio)
+ {
+ 	DRM_DEBUG_KMS("src[%d]dst[%d]\n", src, dst);
+ 
+ 	if (src >= dst * 8) {
+-		DRM_ERROR("failed to make ratio and shift.\n");
++		DRM_DEV_ERROR(ctx->dev, "failed to make ratio and shift.\n");
+ 		return -EINVAL;
+ 	} else if (src >= dst * 4)
+ 		*ratio = 4;
+@@ -759,15 +760,15 @@ static int gsc_set_prescaler(struct gsc_context *ctx, struct gsc_scaler *sc,
+ 		dst_h = dst->h;
+ 	}
+ 
+-	ret = gsc_get_ratio_shift(src_w, dst_w, &sc->pre_hratio);
++	ret = gsc_get_ratio_shift(ctx, src_w, dst_w, &sc->pre_hratio);
+ 	if (ret) {
+-		dev_err(ctx->dev, "failed to get ratio horizontal.\n");
++		DRM_DEV_ERROR(ctx->dev, "failed to get ratio horizontal.\n");
+ 		return ret;
+ 	}
+ 
+-	ret = gsc_get_ratio_shift(src_h, dst_h, &sc->pre_vratio);
++	ret = gsc_get_ratio_shift(ctx, src_h, dst_h, &sc->pre_vratio);
+ 	if (ret) {
+-		dev_err(ctx->dev, "failed to get ratio vertical.\n");
++		DRM_DEV_ERROR(ctx->dev, "failed to get ratio vertical.\n");
+ 		return ret;
+ 	}
+ 
+@@ -979,7 +980,7 @@ static int gsc_get_src_buf_index(struct gsc_context *ctx)
+ 		curr_index, buf_id);
+ 
+ 	if (buf_id == GSC_MAX_SRC) {
+-		DRM_ERROR("failed to get in buffer index.\n");
++		DRM_DEV_ERROR(ctx->dev, "failed to get in buffer index.\n");
+ 		return -EINVAL;
+ 	}
+ 
+@@ -1006,7 +1007,7 @@ static int gsc_get_dst_buf_index(struct gsc_context *ctx)
+ 	}
+ 
+ 	if (buf_id == GSC_MAX_DST) {
+-		DRM_ERROR("failed to get out buffer index.\n");
++		DRM_DEV_ERROR(ctx->dev, "failed to get out buffer index.\n");
+ 		return -EINVAL;
+ 	}
+ 
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_mic.c b/drivers/gpu/drm/exynos/exynos_drm_mic.c
+index dd02e8a323ef..ddf5b4dfd6c3 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_mic.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_mic.c
+@@ -113,7 +113,8 @@ static void mic_set_path(struct exynos_mic *mic, bool enable)
+ 
+ 	ret = regmap_read(mic->sysreg, DSD_CFG_MUX, &val);
+ 	if (ret) {
+-		DRM_ERROR("mic: Failed to read system register\n");
++		DRM_DEV_ERROR(mic->dev,
++			      "mic: Failed to read system register\n");
+ 		return;
+ 	}
+ 
+@@ -129,7 +130,8 @@ static void mic_set_path(struct exynos_mic *mic, bool enable)
+ 
+ 	ret = regmap_write(mic->sysreg, DSD_CFG_MUX, val);
+ 	if (ret)
+-		DRM_ERROR("mic: Failed to read system register\n");
++		DRM_DEV_ERROR(mic->dev,
++			      "mic: Failed to read system register\n");
+ }
+ 
+ static int mic_sw_reset(struct exynos_mic *mic)
+@@ -274,7 +276,7 @@ static void mic_pre_enable(struct drm_bridge *bridge)
+ 
+ 	ret = mic_sw_reset(mic);
+ 	if (ret) {
+-		DRM_ERROR("Failed to reset\n");
++		DRM_DEV_ERROR(mic->dev, "Failed to reset\n");
+ 		goto turn_off;
+ 	}
+ 
+@@ -354,8 +356,8 @@ static int exynos_mic_resume(struct device *dev)
+ 	for (i = 0; i < NUM_CLKS; i++) {
+ 		ret = clk_prepare_enable(mic->clks[i]);
+ 		if (ret < 0) {
+-			DRM_ERROR("Failed to enable clock (%s)\n",
+-							clk_names[i]);
++			DRM_DEV_ERROR(dev, "Failed to enable clock (%s)\n",
++				      clk_names[i]);
+ 			while (--i > -1)
+ 				clk_disable_unprepare(mic->clks[i]);
+ 			return ret;
+@@ -380,7 +382,8 @@ static int exynos_mic_probe(struct platform_device *pdev)
+ 
+ 	mic = devm_kzalloc(dev, sizeof(*mic), GFP_KERNEL);
+ 	if (!mic) {
+-		DRM_ERROR("mic: Failed to allocate memory for MIC object\n");
++		DRM_DEV_ERROR(dev,
++			      "mic: Failed to allocate memory for MIC object\n");
+ 		ret = -ENOMEM;
+ 		goto err;
+ 	}
+@@ -389,12 +392,12 @@ static int exynos_mic_probe(struct platform_device *pdev)
+ 
+ 	ret = of_address_to_resource(dev->of_node, 0, &res);
+ 	if (ret) {
+-		DRM_ERROR("mic: Failed to get mem region for MIC\n");
++		DRM_DEV_ERROR(dev, "mic: Failed to get mem region for MIC\n");
+ 		goto err;
+ 	}
+ 	mic->reg = devm_ioremap(dev, res.start, resource_size(&res));
+ 	if (!mic->reg) {
+-		DRM_ERROR("mic: Failed to remap for MIC\n");
++		DRM_DEV_ERROR(dev, "mic: Failed to remap for MIC\n");
+ 		ret = -ENOMEM;
+ 		goto err;
+ 	}
+@@ -402,7 +405,7 @@ static int exynos_mic_probe(struct platform_device *pdev)
+ 	mic->sysreg = syscon_regmap_lookup_by_phandle(dev->of_node,
+ 							"samsung,disp-syscon");
+ 	if (IS_ERR(mic->sysreg)) {
+-		DRM_ERROR("mic: Failed to get system register.\n");
++		DRM_DEV_ERROR(dev, "mic: Failed to get system register.\n");
+ 		ret = PTR_ERR(mic->sysreg);
+ 		goto err;
+ 	}
+@@ -410,8 +413,8 @@ static int exynos_mic_probe(struct platform_device *pdev)
+ 	for (i = 0; i < NUM_CLKS; i++) {
+ 		mic->clks[i] = devm_clk_get(dev, clk_names[i]);
+ 		if (IS_ERR(mic->clks[i])) {
+-			DRM_ERROR("mic: Failed to get clock (%s)\n",
+-								clk_names[i]);
++			DRM_DEV_ERROR(dev, "mic: Failed to get clock (%s)\n",
++				      clk_names[i]);
+ 			ret = PTR_ERR(mic->clks[i]);
+ 			goto err;
+ 		}
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_plane.c b/drivers/gpu/drm/exynos/exynos_drm_plane.c
+index df0508e0e49e..6328565f889e 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_plane.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_plane.c
+@@ -181,6 +181,7 @@ exynos_drm_plane_check_format(const struct exynos_drm_plane_config *config,
+ 			      struct exynos_drm_plane_state *state)
+ {
+ 	struct drm_framebuffer *fb = state->base.fb;
++	struct drm_device *dev = fb->dev;
+ 
+ 	switch (fb->modifier) {
+ 	case DRM_FORMAT_MOD_SAMSUNG_64_32_TILE:
+@@ -192,7 +193,7 @@ exynos_drm_plane_check_format(const struct exynos_drm_plane_config *config,
+ 		break;
+ 
+ 	default:
+-		DRM_ERROR("unsupported pixel format modifier");
++		DRM_DEV_ERROR(dev->dev, "unsupported pixel format modifier");
+ 		return -ENOTSUPP;
+ 	}
+ 
+@@ -310,7 +311,7 @@ int exynos_plane_init(struct drm_device *dev,
+ 				       config->num_pixel_formats,
+ 				       NULL, config->type, NULL);
+ 	if (err) {
+-		DRM_ERROR("failed to initialize plane\n");
++		DRM_DEV_ERROR(dev->dev, "failed to initialize plane\n");
+ 		return err;
+ 	}
+ 
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_vidi.c b/drivers/gpu/drm/exynos/exynos_drm_vidi.c
+index 29f4c1932aed..302275604b87 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_vidi.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_vidi.c
+@@ -339,7 +339,8 @@ static int vidi_create_connector(struct drm_encoder *encoder)
+ 	ret = drm_connector_init(ctx->drm_dev, connector,
+ 			&vidi_connector_funcs, DRM_MODE_CONNECTOR_VIRTUAL);
+ 	if (ret) {
+-		DRM_ERROR("Failed to initialize connector with drm\n");
++		DRM_DEV_ERROR(ctx->drm_dev->dev,
++			      "Failed to initialize connector with drm\n");
+ 		return ret;
+ 	}
+ 
+@@ -402,7 +403,7 @@ static int vidi_bind(struct device *dev, struct device *master, void *data)
+ 	ctx->crtc = exynos_drm_crtc_create(drm_dev, &exynos_plane->base,
+ 			EXYNOS_DISPLAY_TYPE_VIDI, &vidi_crtc_ops, ctx);
+ 	if (IS_ERR(ctx->crtc)) {
+-		DRM_ERROR("failed to create crtc.\n");
++		DRM_DEV_ERROR(dev, "failed to create crtc.\n");
+ 		return PTR_ERR(ctx->crtc);
+ 	}
+ 
+@@ -417,7 +418,8 @@ static int vidi_bind(struct device *dev, struct device *master, void *data)
+ 
+ 	ret = vidi_create_connector(encoder);
+ 	if (ret) {
+-		DRM_ERROR("failed to create connector ret = %d\n", ret);
++		DRM_DEV_ERROR(dev, "failed to create connector ret = %d\n",
++			      ret);
+ 		drm_encoder_cleanup(encoder);
+ 		return ret;
+ 	}
+@@ -457,7 +459,8 @@ static int vidi_probe(struct platform_device *pdev)
+ 
+ 	ret = device_create_file(&pdev->dev, &dev_attr_connection);
+ 	if (ret < 0) {
+-		DRM_ERROR("failed to create connection sysfs.\n");
++		DRM_DEV_ERROR(&pdev->dev,
++			      "failed to create connection sysfs.\n");
+ 		return ret;
+ 	}
+ 
+diff --git a/drivers/gpu/drm/exynos/exynos_hdmi.c b/drivers/gpu/drm/exynos/exynos_hdmi.c
+index 8e2c02fc66e8..d391e2f6d271 100644
+--- a/drivers/gpu/drm/exynos/exynos_hdmi.c
++++ b/drivers/gpu/drm/exynos/exynos_hdmi.c
+@@ -947,7 +947,8 @@ static int hdmi_create_connector(struct drm_encoder *encoder)
+ 	ret = drm_connector_init(hdata->drm_dev, connector,
+ 			&hdmi_connector_funcs, DRM_MODE_CONNECTOR_HDMIA);
+ 	if (ret) {
+-		DRM_ERROR("Failed to initialize connector with drm\n");
++		DRM_DEV_ERROR(hdata->dev,
++			      "Failed to initialize connector with drm\n");
+ 		return ret;
+ 	}
+ 
+@@ -957,7 +958,7 @@ static int hdmi_create_connector(struct drm_encoder *encoder)
+ 	if (hdata->bridge) {
+ 		ret = drm_bridge_attach(encoder, hdata->bridge, NULL);
+ 		if (ret)
+-			DRM_ERROR("Failed to attach bridge\n");
++			DRM_DEV_ERROR(hdata->dev, "Failed to attach bridge\n");
+ 	}
+ 
+ 	return ret;
+@@ -1175,7 +1176,7 @@ static void hdmiphy_wait_for_pll(struct hdmi_context *hdata)
+ 		usleep_range(10, 20);
+ 	}
+ 
+-	DRM_ERROR("PLL could not reach steady state\n");
++	DRM_DEV_ERROR(hdata->dev, "PLL could not reach steady state\n");
+ }
+ 
+ static void hdmi_v13_mode_apply(struct hdmi_context *hdata)
+@@ -1411,7 +1412,7 @@ static void hdmiphy_conf_apply(struct hdmi_context *hdata)
+ 
+ 	ret = hdmi_find_phy_conf(hdata, m->clock * 1000);
+ 	if (ret < 0) {
+-		DRM_ERROR("failed to find hdmiphy conf\n");
++		DRM_DEV_ERROR(hdata->dev, "failed to find hdmiphy conf\n");
+ 		return;
+ 	}
+ 	phy_conf = hdata->drv_data->phy_confs.data[ret].conf;
+@@ -1423,7 +1424,7 @@ static void hdmiphy_conf_apply(struct hdmi_context *hdata)
+ 	hdmiphy_enable_mode_set(hdata, true);
+ 	ret = hdmiphy_reg_write_buf(hdata, 0, phy_conf, 32);
+ 	if (ret) {
+-		DRM_ERROR("failed to configure hdmiphy\n");
++		DRM_DEV_ERROR(hdata->dev, "failed to configure hdmiphy\n");
+ 		return;
+ 	}
+ 	hdmiphy_enable_mode_set(hdata, false);
+@@ -1734,7 +1735,7 @@ static int hdmi_bridge_init(struct hdmi_context *hdata)
+ 	np = of_graph_get_remote_port_parent(ep);
+ 	of_node_put(ep);
+ 	if (!np) {
+-		DRM_ERROR("failed to get remote port parent");
++		DRM_DEV_ERROR(dev, "failed to get remote port parent");
+ 		return -EINVAL;
+ 	}
+ 
+@@ -1756,13 +1757,13 @@ static int hdmi_resources_init(struct hdmi_context *hdata)
+ 
+ 	hdata->hpd_gpio = devm_gpiod_get(dev, "hpd", GPIOD_IN);
+ 	if (IS_ERR(hdata->hpd_gpio)) {
+-		DRM_ERROR("cannot get hpd gpio property\n");
++		DRM_DEV_ERROR(dev, "cannot get hpd gpio property\n");
+ 		return PTR_ERR(hdata->hpd_gpio);
+ 	}
+ 
+ 	hdata->irq = gpiod_to_irq(hdata->hpd_gpio);
+ 	if (hdata->irq < 0) {
+-		DRM_ERROR("failed to get GPIO irq\n");
++		DRM_DEV_ERROR(dev, "failed to get GPIO irq\n");
+ 		return  hdata->irq;
+ 	}
+ 
+@@ -1780,7 +1781,7 @@ static int hdmi_resources_init(struct hdmi_context *hdata)
+ 	ret = devm_regulator_bulk_get(dev, ARRAY_SIZE(supply), hdata->regul_bulk);
+ 	if (ret) {
+ 		if (ret != -EPROBE_DEFER)
+-			DRM_ERROR("failed to get regulators\n");
++			DRM_DEV_ERROR(dev, "failed to get regulators\n");
+ 		return ret;
+ 	}
+ 
+@@ -1792,7 +1793,8 @@ static int hdmi_resources_init(struct hdmi_context *hdata)
+ 
+ 		ret = regulator_enable(hdata->reg_hdmi_en);
+ 		if (ret) {
+-			DRM_ERROR("failed to enable hdmi-en regulator\n");
++			DRM_DEV_ERROR(dev,
++				      "failed to enable hdmi-en regulator\n");
+ 			return ret;
+ 		}
+ 	}
+@@ -1845,7 +1847,8 @@ static int hdmi_bind(struct device *dev, struct device *master, void *data)
+ 
+ 	ret = hdmi_create_connector(encoder);
+ 	if (ret) {
+-		DRM_ERROR("failed to create connector ret = %d\n", ret);
++		DRM_DEV_ERROR(dev, "failed to create connector ret = %d\n",
++			      ret);
+ 		drm_encoder_cleanup(encoder);
+ 		return ret;
+ 	}
+@@ -1875,7 +1878,8 @@ static int hdmi_get_ddc_adapter(struct hdmi_context *hdata)
+ 		np = of_parse_phandle(hdata->dev->of_node, "ddc", 0);
+ 
+ 	if (!np) {
+-		DRM_ERROR("Failed to find ddc node in device tree\n");
++		DRM_DEV_ERROR(hdata->dev,
++			      "Failed to find ddc node in device tree\n");
+ 		return -ENODEV;
+ 	}
+ 
+@@ -1902,7 +1906,8 @@ static int hdmi_get_phy_io(struct hdmi_context *hdata)
+ 	if (!np) {
+ 		np = of_parse_phandle(hdata->dev->of_node, "phy", 0);
+ 		if (!np) {
+-			DRM_ERROR("Failed to find hdmiphy node in device tree\n");
++			DRM_DEV_ERROR(hdata->dev,
++				      "Failed to find hdmiphy node in device tree\n");
+ 			return -ENODEV;
+ 		}
+ 	}
+@@ -1910,7 +1915,8 @@ static int hdmi_get_phy_io(struct hdmi_context *hdata)
+ 	if (hdata->drv_data->is_apb_phy) {
+ 		hdata->regs_hdmiphy = of_iomap(np, 0);
+ 		if (!hdata->regs_hdmiphy) {
+-			DRM_ERROR("failed to ioremap hdmi phy\n");
++			DRM_DEV_ERROR(hdata->dev,
++				      "failed to ioremap hdmi phy\n");
+ 			ret = -ENOMEM;
+ 			goto out;
+ 		}
+@@ -1951,7 +1957,7 @@ static int hdmi_probe(struct platform_device *pdev)
+ 	ret = hdmi_resources_init(hdata);
+ 	if (ret) {
+ 		if (ret != -EPROBE_DEFER)
+-			DRM_ERROR("hdmi_resources_init failed\n");
++			DRM_DEV_ERROR(dev, "hdmi_resources_init failed\n");
+ 		return ret;
+ 	}
+ 
+@@ -1977,14 +1983,14 @@ static int hdmi_probe(struct platform_device *pdev)
+ 			IRQF_TRIGGER_FALLING | IRQF_ONESHOT,
+ 			"hdmi", hdata);
+ 	if (ret) {
+-		DRM_ERROR("failed to register hdmi interrupt\n");
++		DRM_DEV_ERROR(dev, "failed to register hdmi interrupt\n");
+ 		goto err_hdmiphy;
+ 	}
+ 
+ 	hdata->pmureg = syscon_regmap_lookup_by_phandle(dev->of_node,
+ 			"samsung,syscon-phandle");
+ 	if (IS_ERR(hdata->pmureg)) {
+-		DRM_ERROR("syscon regmap lookup failed.\n");
++		DRM_DEV_ERROR(dev, "syscon regmap lookup failed.\n");
+ 		ret = -EPROBE_DEFER;
+ 		goto err_hdmiphy;
+ 	}
+@@ -1993,7 +1999,7 @@ static int hdmi_probe(struct platform_device *pdev)
+ 		hdata->sysreg = syscon_regmap_lookup_by_phandle(dev->of_node,
+ 				"samsung,sysreg-phandle");
+ 		if (IS_ERR(hdata->sysreg)) {
+-			DRM_ERROR("sysreg regmap lookup failed.\n");
++			DRM_DEV_ERROR(dev, "sysreg regmap lookup failed.\n");
+ 			ret = -EPROBE_DEFER;
+ 			goto err_hdmiphy;
+ 		}
+diff --git a/drivers/gpu/drm/exynos/exynos_mixer.c b/drivers/gpu/drm/exynos/exynos_mixer.c
+index f35e4ab55b27..9bda3d4bd17a 100644
+--- a/drivers/gpu/drm/exynos/exynos_mixer.c
++++ b/drivers/gpu/drm/exynos/exynos_mixer.c
+@@ -885,7 +885,8 @@ static int mixer_initialize(struct mixer_context *mixer_ctx,
+ 	/* acquire resources: regs, irqs, clocks */
+ 	ret = mixer_resources_init(mixer_ctx);
+ 	if (ret) {
+-		DRM_ERROR("mixer_resources_init failed ret=%d\n", ret);
++		DRM_DEV_ERROR(mixer_ctx->dev,
++			      "mixer_resources_init failed ret=%d\n", ret);
+ 		return ret;
+ 	}
+ 
+@@ -893,7 +894,8 @@ static int mixer_initialize(struct mixer_context *mixer_ctx,
+ 		/* acquire vp resources: regs, irqs, clocks */
+ 		ret = vp_resources_init(mixer_ctx);
+ 		if (ret) {
+-			DRM_ERROR("vp_resources_init failed ret=%d\n", ret);
++			DRM_DEV_ERROR(mixer_ctx->dev,
++				      "vp_resources_init failed ret=%d\n", ret);
+ 			return ret;
+ 		}
+ 	}
+@@ -1227,7 +1229,7 @@ static int mixer_probe(struct platform_device *pdev)
+ 
+ 	ctx = devm_kzalloc(&pdev->dev, sizeof(*ctx), GFP_KERNEL);
+ 	if (!ctx) {
+-		DRM_ERROR("failed to alloc mixer context.\n");
++		DRM_DEV_ERROR(dev, "failed to alloc mixer context.\n");
+ 		return -ENOMEM;
+ 	}
+ 
+@@ -1282,27 +1284,33 @@ static int __maybe_unused exynos_mixer_resume(struct device *dev)
+ 
+ 	ret = clk_prepare_enable(ctx->mixer);
+ 	if (ret < 0) {
+-		DRM_ERROR("Failed to prepare_enable the mixer clk [%d]\n", ret);
++		DRM_DEV_ERROR(ctx->dev,
++			      "Failed to prepare_enable the mixer clk [%d]\n",
++			      ret);
+ 		return ret;
+ 	}
+ 	ret = clk_prepare_enable(ctx->hdmi);
+ 	if (ret < 0) {
+-		DRM_ERROR("Failed to prepare_enable the hdmi clk [%d]\n", ret);
++		DRM_DEV_ERROR(dev,
++			      "Failed to prepare_enable the hdmi clk [%d]\n",
++			      ret);
+ 		return ret;
+ 	}
+ 	if (test_bit(MXR_BIT_VP_ENABLED, &ctx->flags)) {
+ 		ret = clk_prepare_enable(ctx->vp);
+ 		if (ret < 0) {
+-			DRM_ERROR("Failed to prepare_enable the vp clk [%d]\n",
+-				  ret);
++			DRM_DEV_ERROR(dev,
++				      "Failed to prepare_enable the vp clk [%d]\n",
++				      ret);
+ 			return ret;
+ 		}
+ 		if (test_bit(MXR_BIT_HAS_SCLK, &ctx->flags)) {
+ 			ret = clk_prepare_enable(ctx->sclk_mixer);
+ 			if (ret < 0) {
+-				DRM_ERROR("Failed to prepare_enable the " \
++				DRM_DEV_ERROR(dev,
++					   "Failed to prepare_enable the " \
+ 					   "sclk_mixer clk [%d]\n",
+-					  ret);
++					   ret);
+ 				return ret;
+ 			}
+ 		}

@@ -1,0 +1,59 @@
+['fdde1a82265ba635284c27f3ab65be461487ff00', '573.txt', 'Formatting']
+commit fdde1a82265ba635284c27f3ab65be461487ff00
+Author: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Date:   Thu Jan 19 18:39:47 2017 +0200
+
+    platform/x86: intel_mid_powerbtn: Join string literals
+    
+    There is no need and bad practice for debugging to split string
+    literals. Join them back.
+    
+    Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+
+diff --git a/drivers/platform/x86/intel_mid_powerbtn.c b/drivers/platform/x86/intel_mid_powerbtn.c
+index 12fbf400f228..9b718cf237ee 100644
+--- a/drivers/platform/x86/intel_mid_powerbtn.c
++++ b/drivers/platform/x86/intel_mid_powerbtn.c
+@@ -130,8 +130,8 @@ static irqreturn_t mid_pb_isr(int irq, void *dev_id)
+ 
+ 	ret = ddata->pbstat(ddata, &value);
+ 	if (ret < 0) {
+-		dev_err(input->dev.parent, "Read error %d while reading"
+-			       " MSIC_PB_STATUS\n", ret);
++		dev_err(input->dev.parent,
++			"Read error %d while reading MSIC_PB_STATUS\n", ret);
+ 	} else {
+ 		input_event(input, EV_KEY, KEY_POWER, value);
+ 		input_sync(input);
+@@ -204,15 +204,15 @@ static int mid_pb_probe(struct platform_device *pdev)
+ 	error = devm_request_threaded_irq(&pdev->dev, irq, NULL, mid_pb_isr,
+ 					  IRQF_ONESHOT, DRIVER_NAME, ddata);
+ 	if (error) {
+-		dev_err(&pdev->dev, "Unable to request irq %d for MID power"
+-				"button\n", irq);
++		dev_err(&pdev->dev,
++			"Unable to request irq %d for MID power button\n", irq);
+ 		return error;
+ 	}
+ 
+ 	error = input_register_device(input);
+ 	if (error) {
+-		dev_err(&pdev->dev, "Unable to register input dev, error "
+-				"%d\n", error);
++		dev_err(&pdev->dev,
++			"Unable to register input dev, error %d\n", error);
+ 		return error;
+ 	}
+ 
+@@ -220,8 +220,9 @@ static int mid_pb_probe(struct platform_device *pdev)
+ 
+ 	error = ddata->ack(ddata);
+ 	if (error) {
+-		dev_err(&pdev->dev, "Unable to clear power button interrupt, "
+-				"error: %d\n", error);
++		dev_err(&pdev->dev,
++			"Unable to clear power button interrupt, error: %d\n",
++			error);
+ 		return error;
+ 	}
+ 

@@ -1,0 +1,31 @@
+['2cdf4ed184d4a340b91e362892eb67effe17ef75', '66.txt', 'AddInfo']
+commit 2cdf4ed184d4a340b91e362892eb67effe17ef75
+Author: Russell King <rmk+kernel@arm.linux.org.uk>
+Date:   Wed Sep 23 18:17:48 2015 +0100
+
+    PCI: mvebu: Report full node name when reporting a DT error
+    
+    If we have a missing required property, report the full node name rather
+    than a vague "PCIe DT node" statement.  This allows the exact node in error
+    to be identified immediately.
+    
+    Tested-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com> (Armada XP GP)
+    Tested-by: Andrew Lunn <andrew@lunn.ch> (Kirkwood DIR665)
+    Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+    Signed-off-by: Bjorn Helgaas <bhelgaas@google.com>
+    Reviewed-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+
+diff --git a/drivers/pci/host/pci-mvebu.c b/drivers/pci/host/pci-mvebu.c
+index d331d2664580..8c715444b722 100644
+--- a/drivers/pci/host/pci-mvebu.c
++++ b/drivers/pci/host/pci-mvebu.c
+@@ -987,7 +987,8 @@ static int mvebu_pcie_probe(struct platform_device *pdev)
+ 		if (of_property_read_u32(child, "marvell,pcie-port",
+ 					 &port->port)) {
+ 			dev_warn(&pdev->dev,
+-				 "ignoring PCIe DT node, missing pcie-port property\n");
++				 "ignoring %s, missing pcie-port property\n",
++				 of_node_full_name(child));
+ 			continue;
+ 		}
+ 

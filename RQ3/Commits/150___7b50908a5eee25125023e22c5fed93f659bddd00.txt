@@ -1,0 +1,72 @@
+['7b50908a5eee25125023e22c5fed93f659bddd00', '836.txt', 'ModernizeLog']
+commit 7b50908a5eee25125023e22c5fed93f659bddd00
+Author: Eva Rachel Retuya <eraretuya@gmail.com>
+Date:   Sat Mar 5 23:16:17 2016 +0800
+
+    staging: unisys: visorinput: convert pr_err() to dev_err()
+    
+    Replace pr_err() calls with respective dev_err() counterpart.
+    Semantic patch used to detect and apply the transformation:
+    
+    @r exists@
+    identifier f,s,i;
+    position p;
+    @@
+    
+    f(...,struct s *i,...) {
+      <+...
+      pr_err@p(...)
+      ...+>
+    }
+    
+    @s@
+    identifier r.s, dev;
+    @@
+    
+    struct s {
+            ...
+            struct device dev;
+            ...
+    };
+    
+    @t@
+    identifier r.i, s.dev;
+    expression fmt;
+    position r.p;
+    @@
+    
+    - pr_err@p(
+    + dev_err(&i->dev,
+                            fmt, ...);
+    
+    Signed-off-by: Eva Rachel Retuya <eraretuya@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/unisys/visorinput/visorinput.c b/drivers/staging/unisys/visorinput/visorinput.c
+index 38d4d5b884df..13c0316112ac 100644
+--- a/drivers/staging/unisys/visorinput/visorinput.c
++++ b/drivers/staging/unisys/visorinput/visorinput.c
+@@ -222,8 +222,9 @@ static int visorinput_open(struct input_dev *visorinput_dev)
+ 	struct visorinput_devdata *devdata = input_get_drvdata(visorinput_dev);
+ 
+ 	if (!devdata) {
+-		pr_err("%s input_get_drvdata(%p) returned NULL\n",
+-		       __func__, visorinput_dev);
++		dev_err(&visorinput_dev->dev,
++			"%s input_get_drvdata(%p) returned NULL\n",
++			__func__, visorinput_dev);
+ 		return -EINVAL;
+ 	}
+ 	dev_dbg(&visorinput_dev->dev, "%s opened\n", __func__);
+@@ -236,8 +237,9 @@ static void visorinput_close(struct input_dev *visorinput_dev)
+ 	struct visorinput_devdata *devdata = input_get_drvdata(visorinput_dev);
+ 
+ 	if (!devdata) {
+-		pr_err("%s input_get_drvdata(%p) returned NULL\n",
+-		       __func__, visorinput_dev);
++		dev_err(&visorinput_dev->dev,
++			"%s input_get_drvdata(%p) returned NULL\n",
++			__func__, visorinput_dev);
+ 		return;
+ 	}
+ 	dev_dbg(&visorinput_dev->dev, "%s closed\n", __func__);

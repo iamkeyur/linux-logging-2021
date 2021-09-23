@@ -1,0 +1,26 @@
+['6af19fd10595936abb02c9199cd9ea1ff0411490', '679.txt', 'Typo']
+commit 6af19fd10595936abb02c9199cd9ea1ff0411490
+Author: Faisal Mehmood <f.m3hm00d@gmail.com>
+Date:   Sat Aug 18 21:49:54 2018 +0500
+
+    usb: dwc3: Fix spelling of 'optimizations'
+    
+    'optimizations' was misspelled as 'optmizations'. Fixed it. It is a
+    coding style change which should have no impact on runtime execution of code.
+    
+    Signed-off-by: Faisal Mehmood <f.m3hm00d@gmail.com>
+    Signed-off-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+
+diff --git a/drivers/usb/dwc3/core.c b/drivers/usb/dwc3/core.c
+index 88c80fcc39f5..becfbb87f791 100644
+--- a/drivers/usb/dwc3/core.c
++++ b/drivers/usb/dwc3/core.c
+@@ -756,7 +756,7 @@ static void dwc3_core_setup_global_control(struct dwc3 *dwc)
+ 
+ 	/* check if current dwc3 is on simulation board */
+ 	if (dwc->hwparams.hwparams6 & DWC3_GHWPARAMS6_EN_FPGA) {
+-		dev_info(dwc->dev, "Running with FPGA optmizations\n");
++		dev_info(dwc->dev, "Running with FPGA optimizations\n");
+ 		dwc->is_fpga = true;
+ 	}
+ 

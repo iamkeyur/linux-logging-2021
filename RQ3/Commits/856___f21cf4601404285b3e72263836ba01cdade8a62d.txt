@@ -1,0 +1,37 @@
+['f21cf4601404285b3e72263836ba01cdade8a62d', '68.txt', 'Formatting']
+commit f21cf4601404285b3e72263836ba01cdade8a62d
+Author: Sanjana Sanikommu <sanjana99reddy99@gmail.com>
+Date:   Sun Mar 17 23:43:28 2019 +0530
+
+    staging: gasket: gasket_interuppt.c: Fix string split issue.
+    
+    Remove string " across the line.
+    Issue found by checkpatch.pl semantic patch results for rtw_ap.c
+    
+    Signed-off-by: Sanjana Sanikommu <sanjana99reddy99@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/gasket/gasket_interrupt.c b/drivers/staging/gasket/gasket_interrupt.c
+index ff61b782df30..2d6195f7300e 100644
+--- a/drivers/staging/gasket/gasket_interrupt.c
++++ b/drivers/staging/gasket/gasket_interrupt.c
+@@ -97,8 +97,7 @@ static void gasket_interrupt_setup(struct gasket_dev *gasket_dev)
+ 		 * modify-write and shift based on the packing index.
+ 		 */
+ 		dev_dbg(gasket_dev->dev,
+-			"Setting up interrupt index %d with index 0x%llx and "
+-			"packing %d\n",
++			"Setting up interrupt index %d with index 0x%llx and packing %d\n",
+ 			interrupt_data->interrupts[i].index,
+ 			interrupt_data->interrupts[i].reg,
+ 			interrupt_data->interrupts[i].packing);
+@@ -120,8 +119,7 @@ static void gasket_interrupt_setup(struct gasket_dev *gasket_dev)
+ 				break;
+ 			default:
+ 				dev_dbg(gasket_dev->dev,
+-					"Found interrupt description with "
+-					"unknown enum %d\n",
++					"Found interrupt description with unknown enum %d\n",
+ 					interrupt_data->interrupts[i].packing);
+ 				return;
+ 			}

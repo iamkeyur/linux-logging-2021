@@ -1,0 +1,28 @@
+['78c3d5fa7354774b7c8638033d46c042ebae41fb', '405.txt', 'LogLevel']
+commit 78c3d5fa7354774b7c8638033d46c042ebae41fb
+Author: Daniel Vetter <daniel.vetter@ffwll.ch>
+Date:   Fri Oct 23 11:00:06 2015 +0200
+
+    drm/i915: Don't complain about lack of ACPI video bios
+    
+    Another CI fail we have for no reason. Totally unjustified since
+    nothing fails at all.
+    
+    Signed-off-by: Daniel Vetter <daniel.vetter@intel.com>
+    Link: http://patchwork.freedesktop.org/patch/msgid/1445590806-23886-1-git-send-email-daniel.vetter@ffwll.ch
+    Acked-by: Jani Nikula <jani.nikula@intel.com>
+    Signed-off-by: Daniel Vetter <daniel.vetter@ffwll.ch>
+
+diff --git a/drivers/gpu/drm/i915/intel_opregion.c b/drivers/gpu/drm/i915/intel_opregion.c
+index 6dc13c02c28e..e362a30776fa 100644
+--- a/drivers/gpu/drm/i915/intel_opregion.c
++++ b/drivers/gpu/drm/i915/intel_opregion.c
+@@ -682,7 +682,7 @@ static void intel_didl_outputs(struct drm_device *dev)
+ 	}
+ 
+ 	if (!acpi_video_bus) {
+-		DRM_ERROR("No ACPI video bus found\n");
++		DRM_DEBUG_KMS("No ACPI video bus found\n");
+ 		return;
+ 	}
+ 

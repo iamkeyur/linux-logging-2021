@@ -1,0 +1,34 @@
+['b135077b83f01549c2a0685b16b540254ce60e0f', '841.txt', 'NullPtr']
+commit b135077b83f01549c2a0685b16b540254ce60e0f
+Author: Frederic Barrat <fbarrat@linux.vnet.ibm.com>
+Date:   Mon Sep 12 12:37:43 2016 +0200
+
+    cxl: Fix informational message
+    
+    When set_sl_ops() is called, the adapter data structure is not fully
+    initialized yet. Therefore the device name is not showing up in the
+    trace. Fix is simply to get the device name from the pci_dev
+    structure.
+    
+    Fixes: 6d382616ac22 ("cxl: Abstract the differences between the PSL and XSL")
+    Signed-off-by: Frederic Barrat <fbarrat@linux.vnet.ibm.com>
+    Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
+
+diff --git a/drivers/misc/cxl/pci.c b/drivers/misc/cxl/pci.c
+index 6f0c4ac4b649..cd922a80bf97 100644
+--- a/drivers/misc/cxl/pci.c
++++ b/drivers/misc/cxl/pci.c
+@@ -1530,11 +1530,11 @@ static void set_sl_ops(struct cxl *adapter, struct pci_dev *dev)
+ {
+ 	if (dev->vendor == PCI_VENDOR_ID_MELLANOX && dev->device == 0x1013) {
+ 		/* Mellanox CX-4 */
+-		dev_info(&adapter->dev, "Device uses an XSL\n");
++		dev_info(&dev->dev, "Device uses an XSL\n");
+ 		adapter->native->sl_ops = &xsl_ops;
+ 		adapter->min_pe = 1; /* Workaround for CX-4 hardware bug */
+ 	} else {
+-		dev_info(&adapter->dev, "Device uses a PSL\n");
++		dev_info(&dev->dev, "Device uses a PSL\n");
+ 		adapter->native->sl_ops = &psl_ops;
+ 	}
+ }

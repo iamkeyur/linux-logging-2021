@@ -1,0 +1,24 @@
+['5ce4738a0250ba9b6fbc89900ee0fc92a5eb60db', '126.txt', 'Clarify/Reword']
+commit 5ce4738a0250ba9b6fbc89900ee0fc92a5eb60db
+Author: Jaegeuk Kim <jaegeuk@kernel.org>
+Date:   Tue Mar 7 13:54:56 2017 -0800
+
+    f2fs: show more precise message on orphan recovery failure
+    
+    This case is not caused by fsck.f2fs. User needs to retry mount.
+    
+    Signed-off-by: Jaegeuk Kim <jaegeuk@kernel.org>
+
+diff --git a/fs/f2fs/checkpoint.c b/fs/f2fs/checkpoint.c
+index b72a9aad296c..3c3d2d01448d 100644
+--- a/fs/f2fs/checkpoint.c
++++ b/fs/f2fs/checkpoint.c
+@@ -567,7 +567,7 @@ static int recover_orphan_inode(struct f2fs_sb_info *sbi, nid_t ino)
+ 	if (ni.blk_addr != NULL_ADDR) {
+ 		set_sbi_flag(sbi, SBI_NEED_FSCK);
+ 		f2fs_msg(sbi->sb, KERN_WARNING,
+-			"%s: orphan failed (ino=%x), run fsck to fix.",
++			"%s: orphan failed (ino=%x) by kernel, retry mount.",
+ 				__func__, ino);
+ 		return -EIO;
+ 	}

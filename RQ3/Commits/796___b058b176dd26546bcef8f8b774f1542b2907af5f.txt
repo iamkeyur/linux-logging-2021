@@ -1,0 +1,27 @@
+['b058b176dd26546bcef8f8b774f1542b2907af5f', '216.txt', 'AddInfo']
+commit b058b176dd26546bcef8f8b774f1542b2907af5f
+Author: Jarkko Nikula <jarkko.nikula@linux.intel.com>
+Date:   Fri Oct 7 10:59:51 2016 +0300
+
+    ASoC: rl6347a: Use dev_err for I2C communication error prints
+    
+    It's difficult to guess from bunch of "ret=-121" errors what driver and
+    device actually caused them. Since struct i2c_client has the dev pointer
+    use that for dev_err() with meaningful error message.
+    
+    Signed-off-by: Jarkko Nikula <jarkko.nikula@linux.intel.com>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/sound/soc/codecs/rl6347a.c b/sound/soc/codecs/rl6347a.c
+index a4b910efbd45..8f571cf8edd4 100644
+--- a/sound/soc/codecs/rl6347a.c
++++ b/sound/soc/codecs/rl6347a.c
+@@ -51,7 +51,7 @@ int rl6347a_hw_write(void *context, unsigned int reg, unsigned int value)
+ 	if (ret == 4)
+ 		return 0;
+ 	else
+-		pr_err("ret=%d\n", ret);
++		dev_err(&client->dev, "I2C error %d\n", ret);
+ 	if (ret < 0)
+ 		return ret;
+ 	else

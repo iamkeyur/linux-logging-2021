@@ -1,0 +1,50 @@
+['7b612ed94d0a4ce4fa457c070baa0e3a5eb35c18', '18.txt', 'LogLevel']
+commit 7b612ed94d0a4ce4fa457c070baa0e3a5eb35c18
+Author: Govind Singh <govinds@codeaurora.org>
+Date:   Fri Mar 1 20:20:00 2019 +0530
+
+    ath10k: Move board id and fw version logging to info level
+    
+    Board id and fw version is not printed by default in qmi
+    cap response message. Move board id and fw version logging
+    to info level for default logging.
+    
+    [   34.005399] ath10k_snoc a000000.wifi: qmi chip_id 0x30b chip_family 0x4001 board_id 0xff soc_id 0x40070000
+    [   34.005432] ath10k_snoc a000000.wifi: qmi fw_version 0x3106836b fw_build_timestamp 2019-02-13 10:24 fw_build_id QC_IMAGE_VERSION_STRING=WLAN.HL.3.1-00875-QCAHLSWMTPL-1
+    
+    Signed-off-by: Govind Singh <govinds@codeaurora.org>
+    Signed-off-by: Kalle Valo <kvalo@codeaurora.org>
+
+diff --git a/drivers/net/wireless/ath/ath10k/qmi.c b/drivers/net/wireless/ath/ath10k/qmi.c
+index a7bc2c70d076..2e678780df5d 100644
+--- a/drivers/net/wireless/ath/ath10k/qmi.c
++++ b/drivers/net/wireless/ath/ath10k/qmi.c
+@@ -506,6 +506,7 @@ static int ath10k_qmi_cap_send_sync_msg(struct ath10k_qmi *qmi)
+ 	struct wlfw_cap_resp_msg_v01 *resp;
+ 	struct wlfw_cap_req_msg_v01 req = {};
+ 	struct ath10k *ar = qmi->ar;
++	struct ath10k_snoc *ar_snoc = ath10k_snoc_priv(ar);
+ 	struct qmi_txn txn;
+ 	int ret;
+ 
+@@ -560,13 +561,13 @@ static int ath10k_qmi_cap_send_sync_msg(struct ath10k_qmi *qmi)
+ 		strlcpy(qmi->fw_build_id, resp->fw_build_id,
+ 			MAX_BUILD_ID_LEN + 1);
+ 
+-	ath10k_dbg(ar, ATH10K_DBG_QMI,
+-		   "qmi chip_id 0x%x chip_family 0x%x board_id 0x%x soc_id 0x%x",
+-		   qmi->chip_info.chip_id, qmi->chip_info.chip_family,
+-		   qmi->board_info.board_id, qmi->soc_info.soc_id);
+-	ath10k_dbg(ar, ATH10K_DBG_QMI,
+-		   "qmi fw_version 0x%x fw_build_timestamp %s fw_build_id %s",
+-		   qmi->fw_version, qmi->fw_build_timestamp, qmi->fw_build_id);
++	if (!test_bit(ATH10K_SNOC_FLAG_REGISTERED, &ar_snoc->flags)) {
++		ath10k_info(ar, "qmi chip_id 0x%x chip_family 0x%x board_id 0x%x soc_id 0x%x",
++			    qmi->chip_info.chip_id, qmi->chip_info.chip_family,
++			    qmi->board_info.board_id, qmi->soc_info.soc_id);
++		ath10k_info(ar, "qmi fw_version 0x%x fw_build_timestamp %s fw_build_id %s",
++			    qmi->fw_version, qmi->fw_build_timestamp, qmi->fw_build_id);
++	}
+ 
+ 	kfree(resp);
+ 	return 0;

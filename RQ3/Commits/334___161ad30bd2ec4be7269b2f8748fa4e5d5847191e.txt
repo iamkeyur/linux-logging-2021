@@ -1,0 +1,64 @@
+['161ad30bd2ec4be7269b2f8748fa4e5d5847191e', '638.txt', 'LogLevel']
+commit 161ad30bd2ec4be7269b2f8748fa4e5d5847191e
+Author: Richard Fitzgerald <rf@opensource.wolfsonmicro.com>
+Date:   Fri Oct 2 13:29:12 2015 +0100
+
+    mfd: arizona: Downgrade type mismatch messages to dev_warn
+    
+    If the declared codec type doesn't match the detected type
+    we issue a log message but carry on registering the device,
+    so a dev_warn() is appropriate rather than a dev_err()
+    
+    Signed-off-by: Richard Fitzgerald <rf@opensource.wolfsonmicro.com>
+    Acked-by: Lee Jones <lee.jones@linaro.org>
+    Signed-off-by: Charles Keepax <ckeepax@opensource.wolfsonmicro.com>
+    Signed-off-by: Lee Jones <lee.jones@linaro.org>
+
+diff --git a/drivers/mfd/arizona-core.c b/drivers/mfd/arizona-core.c
+index e32d0d30e9cd..c3f88e57fe4a 100644
+--- a/drivers/mfd/arizona-core.c
++++ b/drivers/mfd/arizona-core.c
+@@ -1130,8 +1130,8 @@ int arizona_dev_init(struct arizona *arizona)
+ 	case 0x5102:
+ 		type_name = "WM5102";
+ 		if (arizona->type != WM5102) {
+-			dev_err(arizona->dev, "WM5102 registered as %d\n",
+-				arizona->type);
++			dev_warn(arizona->dev, "WM5102 registered as %d\n",
++				 arizona->type);
+ 			arizona->type = WM5102;
+ 		}
+ 		apply_patch = wm5102_patch;
+@@ -1149,8 +1149,8 @@ int arizona_dev_init(struct arizona *arizona)
+ 			break;
+ 		default:
+ 			type_name = "WM5110";
+-			dev_err(arizona->dev, "WM5110 registered as %d\n",
+-				arizona->type);
++			dev_warn(arizona->dev, "WM5110 registered as %d\n",
++				 arizona->type);
+ 			arizona->type = WM5110;
+ 			break;
+ 		}
+@@ -1161,8 +1161,8 @@ int arizona_dev_init(struct arizona *arizona)
+ 	case 0x8997:
+ 		type_name = "WM8997";
+ 		if (arizona->type != WM8997) {
+-			dev_err(arizona->dev, "WM8997 registered as %d\n",
+-				arizona->type);
++			dev_warn(arizona->dev, "WM8997 registered as %d\n",
++				 arizona->type);
+ 			arizona->type = WM8997;
+ 		}
+ 		apply_patch = wm8997_patch;
+@@ -1181,8 +1181,8 @@ int arizona_dev_init(struct arizona *arizona)
+ 
+ 		default:
+ 			type_name = "WM8998";
+-			dev_err(arizona->dev, "WM8998 registered as %d\n",
+-				arizona->type);
++			dev_warn(arizona->dev, "WM8998 registered as %d\n",
++				 arizona->type);
+ 			arizona->type = WM8998;
+ 		}
+ 

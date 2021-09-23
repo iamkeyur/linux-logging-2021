@@ -1,0 +1,25 @@
+['b11c36d5d8e393c5766d829c2af75f40e66706c9', '448.txt', 'Typo']
+commit b11c36d5d8e393c5766d829c2af75f40e66706c9
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu Dec 6 09:24:11 2018 +0000
+
+    mmc: sdhci-of-esdhc: fix spelling mistake "upsupported" -> "unsupported"
+    
+    There is a spelling mistake in a pr_warn message, fix it.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 856e809f38b7..e21e90f81bbd 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -597,7 +597,7 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 			pre_div = 4;
+ 			div = 3;
+ 		} else {
+-			pr_warn("%s: using upsupported clock division.\n",
++			pr_warn("%s: using unsupported clock division.\n",
+ 				mmc_hostname(host->mmc));
+ 		}
+ 	}

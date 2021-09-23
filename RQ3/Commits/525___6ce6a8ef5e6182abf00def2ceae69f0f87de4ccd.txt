@@ -1,0 +1,26 @@
+['6ce6a8ef5e6182abf00def2ceae69f0f87de4ccd', '425.txt', 'Typo']
+commit 6ce6a8ef5e6182abf00def2ceae69f0f87de4ccd
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Wed May 9 05:07:31 2018 -0400
+
+    media: cx231xx: Fix spelling mistake: "senario" -> "scenario"
+    
+    Trivial fix to spelling mistake in dev_err message.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Hans Verkuil <hansverk@cisco.com>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+
+diff --git a/drivers/media/usb/cx231xx/cx231xx-pcb-cfg.c b/drivers/media/usb/cx231xx/cx231xx-pcb-cfg.c
+index 5bc74149fcb9..746c34ab0ec8 100644
+--- a/drivers/media/usb/cx231xx/cx231xx-pcb-cfg.c
++++ b/drivers/media/usb/cx231xx/cx231xx-pcb-cfg.c
+@@ -769,7 +769,7 @@ int initialize_cx231xx(struct cx231xx *dev)
+ 			break;
+ 		default:
+ 			dev_err(dev->dev,
+-				"bad senario!!!!!\nconfig_info=%x\n",
++				"bad scenario!!!!!\nconfig_info=%x\n",
+ 				config_info & SELFPOWER_MASK);
+ 			return -ENODEV;
+ 		}

@@ -1,0 +1,29 @@
+['6812faefb754135d88ace013ad3b75430a8ba413', '666.txt', 'LogLevel']
+commit 6812faefb754135d88ace013ad3b75430a8ba413
+Author: Hariprasad S <hariprasad@chelsio.com>
+Date:   Fri Feb 5 11:43:29 2016 +0530
+
+    iw_cxgb4: remove false error log entry
+    
+    Don't log errors if a listening endpoint is going away when procesing a
+    PASS_ACCEPT_REQ message.  This can happen.  Change the error printk to
+    a PDBG() debug log entry
+    
+    Signed-off-by: Steve Wise <swise@opengridcomputing.com>
+    Signed-off-by: Hariprasad Shenai <hariprasad@chelsio.com>
+    Signed-off-by: Doug Ledford <dledford@redhat.com>
+
+diff --git a/drivers/infiniband/hw/cxgb4/cm.c b/drivers/infiniband/hw/cxgb4/cm.c
+index cd2ff5f9518a..0c2111b5b2e4 100644
+--- a/drivers/infiniband/hw/cxgb4/cm.c
++++ b/drivers/infiniband/hw/cxgb4/cm.c
+@@ -2399,8 +2399,7 @@ static int pass_accept_req(struct c4iw_dev *dev, struct sk_buff *skb)
+ 	}
+ 
+ 	if (state_read(&parent_ep->com) != LISTEN) {
+-		printk(KERN_ERR "%s - listening ep not in LISTEN\n",
+-		       __func__);
++		PDBG("%s - listening ep not in LISTEN\n", __func__);
+ 		goto reject;
+ 	}
+ 

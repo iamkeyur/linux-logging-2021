@@ -1,0 +1,123 @@
+['27a0eb8fb69afc7ba72be2b8d500f74df25a847c', '825.txt', 'FixFormatSpecifier']
+commit 27a0eb8fb69afc7ba72be2b8d500f74df25a847c
+Author: Jeremy Sowden <jeremy@azazel.net>
+Date:   Fri Mar 8 08:49:51 2019 +0000
+
+    staging: fbtft: fixed format-string errors.
+    
+    Added __printf attribute to declaration of fbtft_dbg_hex and fixed
+    mismatches between format-specifiers and arguments in several function
+    calls.
+    
+    Signed-off-by: Jeremy Sowden <jeremy@azazel.net>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/fbtft/fb_agm1264k-fl.c b/drivers/staging/fbtft/fb_agm1264k-fl.c
+index 8f27bd8da17d..d4dca3ce4db0 100644
+--- a/drivers/staging/fbtft/fb_agm1264k-fl.c
++++ b/drivers/staging/fbtft/fb_agm1264k-fl.c
+@@ -406,7 +406,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len)
+ static int write(struct fbtft_par *par, void *buf, size_t len)
+ {
+ 	fbtft_par_dbg_hex(DEBUG_WRITE, par, par->info->device, u8, buf, len,
+-			  "%s(len=%d): ", __func__, len);
++			  "%s(len=%zu): ", __func__, len);
+ 
+ 	gpiod_set_value(par->RW, 0); /* set write mode */
+ 
+diff --git a/drivers/staging/fbtft/fb_ra8875.c b/drivers/staging/fbtft/fb_ra8875.c
+index 70b37fc7fb66..398bdbf53c9a 100644
+--- a/drivers/staging/fbtft/fb_ra8875.c
++++ b/drivers/staging/fbtft/fb_ra8875.c
+@@ -24,7 +24,7 @@ static int write_spi(struct fbtft_par *par, void *buf, size_t len)
+ 	struct spi_message m;
+ 
+ 	fbtft_par_dbg_hex(DEBUG_WRITE, par, par->info->device, u8, buf, len,
+-			  "%s(len=%d): ", __func__, len);
++			  "%s(len=%zu): ", __func__, len);
+ 
+ 	if (!par->spi) {
+ 		dev_err(par->info->device,
+diff --git a/drivers/staging/fbtft/fbtft-io.c b/drivers/staging/fbtft/fbtft-io.c
+index 38cdad6203ea..0863d257d762 100644
+--- a/drivers/staging/fbtft/fbtft-io.c
++++ b/drivers/staging/fbtft/fbtft-io.c
+@@ -14,7 +14,7 @@ int fbtft_write_spi(struct fbtft_par *par, void *buf, size_t len)
+ 	struct spi_message m;
+ 
+ 	fbtft_par_dbg_hex(DEBUG_WRITE, par, par->info->device, u8, buf, len,
+-			  "%s(len=%d): ", __func__, len);
++			  "%s(len=%zu): ", __func__, len);
+ 
+ 	if (!par->spi) {
+ 		dev_err(par->info->device,
+@@ -47,7 +47,7 @@ int fbtft_write_spi_emulate_9(struct fbtft_par *par, void *buf, size_t len)
+ 	u64 val, dc, tmp;
+ 
+ 	fbtft_par_dbg_hex(DEBUG_WRITE, par, par->info->device, u8, buf, len,
+-			  "%s(len=%d): ", __func__, len);
++			  "%s(len=%zu): ", __func__, len);
+ 
+ 	if (!par->extra) {
+ 		dev_err(par->info->device, "%s: error: par->extra is NULL\n",
+@@ -109,7 +109,7 @@ int fbtft_read_spi(struct fbtft_par *par, void *buf, size_t len)
+ 		txbuf[0] = par->startbyte | 0x3;
+ 		t.tx_buf = txbuf;
+ 		fbtft_par_dbg_hex(DEBUG_READ, par, par->info->device, u8,
+-				  txbuf, len, "%s(len=%d) txbuf => ",
++				  txbuf, len, "%s(len=%zu) txbuf => ",
+ 				  __func__, len);
+ 	}
+ 
+@@ -117,7 +117,7 @@ int fbtft_read_spi(struct fbtft_par *par, void *buf, size_t len)
+ 	spi_message_add_tail(&t, &m);
+ 	ret = spi_sync(par->spi, &m);
+ 	fbtft_par_dbg_hex(DEBUG_READ, par, par->info->device, u8, buf, len,
+-			  "%s(len=%d) buf <= ", __func__, len);
++			  "%s(len=%zu) buf <= ", __func__, len);
+ 
+ 	return ret;
+ }
+@@ -136,7 +136,7 @@ int fbtft_write_gpio8_wr(struct fbtft_par *par, void *buf, size_t len)
+ #endif
+ 
+ 	fbtft_par_dbg_hex(DEBUG_WRITE, par, par->info->device, u8, buf, len,
+-			  "%s(len=%d): ", __func__, len);
++			  "%s(len=%zu): ", __func__, len);
+ 
+ 	while (len--) {
+ 		data = *(u8 *)buf;
+@@ -186,7 +186,7 @@ int fbtft_write_gpio16_wr(struct fbtft_par *par, void *buf, size_t len)
+ #endif
+ 
+ 	fbtft_par_dbg_hex(DEBUG_WRITE, par, par->info->device, u8, buf, len,
+-			  "%s(len=%d): ", __func__, len);
++			  "%s(len=%zu): ", __func__, len);
+ 
+ 	while (len) {
+ 		data = *(u16 *)buf;
+diff --git a/drivers/staging/fbtft/fbtft.h b/drivers/staging/fbtft/fbtft.h
+index 7fdd3b0851ef..9b6bdb62093d 100644
+--- a/drivers/staging/fbtft/fbtft.h
++++ b/drivers/staging/fbtft/fbtft.h
+@@ -238,6 +238,7 @@ struct fbtft_par {
+ 
+ /* fbtft-core.c */
+ int fbtft_write_buf_dc(struct fbtft_par *par, void *buf, size_t len, int dc);
++__printf(5, 6)
+ void fbtft_dbg_hex(const struct device *dev, int groupsize,
+ 		   void *buf, size_t len, const char *fmt, ...);
+ struct fb_info *fbtft_framebuffer_alloc(struct fbtft_display *display,
+diff --git a/drivers/staging/fbtft/fbtft_device.c b/drivers/staging/fbtft/fbtft_device.c
+index 5f6cd0816d58..44e1410eb3fe 100644
+--- a/drivers/staging/fbtft/fbtft_device.c
++++ b/drivers/staging/fbtft/fbtft_device.c
+@@ -965,7 +965,7 @@ static int write_gpio16_wr_slow(struct fbtft_par *par, void *buf, size_t len)
+ #endif
+ 
+ 	fbtft_par_dbg_hex(DEBUG_WRITE, par, par->info->device, u8, buf, len,
+-			  "%s(len=%d): ", __func__, len);
++			  "%s(len=%zu): ", __func__, len);
+ 
+ 	while (len) {
+ 		data = *(u16 *)buf;

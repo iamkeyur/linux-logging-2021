@@ -1,0 +1,28 @@
+['23d01c425b84ea7996567567f65843f40a4c14eb', '361.txt', 'ModernizeLog']
+commit 23d01c425b84ea7996567567f65843f40a4c14eb
+Author: Zachary Dremann <dremann@gmail.com>
+Date:   Mon Jul 17 16:16:41 2017 -0400
+
+    staging: unisys: visorbus: visorbus_main.c: use __func__ over hardcoded name
+    
+    As reported by checkpatch.pl, replace hard-coded usage of the current
+    function's name in format string with usage of __func__.
+    
+    Signed-off-by: Zachary Dremann <dremann@gmail.com>
+    Signed-off-by: David Kershner <david.kershner@unisys.com>
+    Reviewed-by: David Binder <david.binder@unisys.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/unisys/visorbus/visorbus_main.c b/drivers/staging/unisys/visorbus/visorbus_main.c
+index f884b59efe37..2c79673909b1 100644
+--- a/drivers/staging/unisys/visorbus/visorbus_main.c
++++ b/drivers/staging/unisys/visorbus/visorbus_main.c
+@@ -1039,7 +1039,7 @@ visorbus_create_instance(struct visor_device *dev)
+ err_debugfs_dir:
+ 	debugfs_remove_recursive(dev->debugfs_dir);
+ 	kfree(hdr_info);
+-	dev_err(&dev->device, "visorbus_create_instance failed: %d\n", err);
++	dev_err(&dev->device, "%s failed: %d\n", __func__, err);
+ 	return err;
+ }
+ 

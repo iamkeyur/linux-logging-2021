@@ -1,0 +1,58 @@
+['0a79ef333dfa7f25abc2eab10f3a11bbdf9a9f17', '201.txt', 'LogLevel']
+commit 0a79ef333dfa7f25abc2eab10f3a11bbdf9a9f17
+Author: Marek Szyprowski <m.szyprowski@samsung.com>
+Date:   Wed Nov 16 07:04:51 2016 -0200
+
+    [media] s5p-mfc: Use printk_ratelimited for reporting ioctl errors
+    
+    Some applications don't check error codes from QBUF/DQBUF ioctls,
+    so don't spam kernel log with errors if they fall into endless loop
+    trying to queue next buffer after a failure.
+    
+    Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+    Signed-off-by: Sylwester Nawrocki <s.nawrocki@samsung.com>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+
+diff --git a/drivers/media/platform/s5p-mfc/s5p_mfc_debug.h b/drivers/media/platform/s5p-mfc/s5p_mfc_debug.h
+index 5936923c631c..1936a5b868f5 100644
+--- a/drivers/media/platform/s5p-mfc/s5p_mfc_debug.h
++++ b/drivers/media/platform/s5p-mfc/s5p_mfc_debug.h
+@@ -39,6 +39,12 @@ extern int mfc_debug_level;
+ 		       __func__, __LINE__, ##args);	\
+ 	} while (0)
+ 
++#define mfc_err_limited(fmt, args...)			\
++	do {						\
++		printk_ratelimited(KERN_ERR "%s:%d: " fmt,	\
++		       __func__, __LINE__, ##args);	\
++	} while (0)
++
+ #define mfc_info(fmt, args...)				\
+ 	do {						\
+ 		printk(KERN_INFO "%s:%d: " fmt,		\
+diff --git a/drivers/media/platform/s5p-mfc/s5p_mfc_dec.c b/drivers/media/platform/s5p-mfc/s5p_mfc_dec.c
+index cf787eae11b7..367ef8e8dbf0 100644
+--- a/drivers/media/platform/s5p-mfc/s5p_mfc_dec.c
++++ b/drivers/media/platform/s5p-mfc/s5p_mfc_dec.c
+@@ -642,7 +642,7 @@ static int vidioc_dqbuf(struct file *file, void *priv, struct v4l2_buffer *buf)
+ 	int ret;
+ 
+ 	if (ctx->state == MFCINST_ERROR) {
+-		mfc_err("Call on DQBUF after unrecoverable error\n");
++		mfc_err_limited("Call on DQBUF after unrecoverable error\n");
+ 		return -EIO;
+ 	}
+ 
+diff --git a/drivers/media/platform/s5p-mfc/s5p_mfc_enc.c b/drivers/media/platform/s5p-mfc/s5p_mfc_enc.c
+index fcc2e054c61f..e39d9e06e299 100644
+--- a/drivers/media/platform/s5p-mfc/s5p_mfc_enc.c
++++ b/drivers/media/platform/s5p-mfc/s5p_mfc_enc.c
+@@ -1268,7 +1268,7 @@ static int vidioc_dqbuf(struct file *file, void *priv, struct v4l2_buffer *buf)
+ 	int ret;
+ 
+ 	if (ctx->state == MFCINST_ERROR) {
+-		mfc_err("Call on DQBUF after unrecoverable error\n");
++		mfc_err_limited("Call on DQBUF after unrecoverable error\n");
+ 		return -EIO;
+ 	}
+ 	if (buf->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {

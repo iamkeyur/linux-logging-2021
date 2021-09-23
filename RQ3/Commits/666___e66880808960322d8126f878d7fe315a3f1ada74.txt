@@ -1,0 +1,30 @@
+['e66880808960322d8126f878d7fe315a3f1ada74', '266.txt', 'Typo']
+commit e66880808960322d8126f878d7fe315a3f1ada74
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Tue Jan 31 13:21:38 2017 +0000
+
+    efi/esrt: Fix typo in pr_err() message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Matt Fleming <matt@codeblueprint.co.uk>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: linux-efi@vger.kernel.org
+    Link: http://lkml.kernel.org/r/1485868902-20401-7-git-send-email-ard.biesheuvel@linaro.org
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
+index 14914074f716..08b026864d4e 100644
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -269,7 +269,7 @@ void __init efi_esrt_init(void)
+ 	max -= efi.esrt;
+ 
+ 	if (max < size) {
+-		pr_err("ESRT header doen't fit on single memory map entry. (size: %zu max: %zu)\n",
++		pr_err("ESRT header doesn't fit on single memory map entry. (size: %zu max: %zu)\n",
+ 		       size, max);
+ 		return;
+ 	}

@@ -1,0 +1,25 @@
+['7f48d0b48cba2ddc03d09353ba4ef6ae680da520', '996.txt', 'Typo']
+commit 7f48d0b48cba2ddc03d09353ba4ef6ae680da520
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Tue Apr 25 10:05:12 2017 +0100
+
+    drm/i915/gvt: fix typo: "supporte" -> "support"
+    
+    trivial fix to typo in WARN_ONCE message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Zhenyu Wang <zhenyuw@linux.intel.com>
+
+diff --git a/drivers/gpu/drm/i915/gvt/handlers.c b/drivers/gpu/drm/i915/gvt/handlers.c
+index 6da9ae1618e3..31624f1df893 100644
+--- a/drivers/gpu/drm/i915/gvt/handlers.c
++++ b/drivers/gpu/drm/i915/gvt/handlers.c
+@@ -1240,7 +1240,7 @@ static int dma_ctrl_write(struct intel_vgpu *vgpu, unsigned int offset,
+ 	mode = vgpu_vreg(vgpu, offset);
+ 
+ 	if (GFX_MODE_BIT_SET_IN_MASK(mode, START_DMA)) {
+-		WARN_ONCE(1, "VM(%d): iGVT-g doesn't supporte GuC\n",
++		WARN_ONCE(1, "VM(%d): iGVT-g doesn't support GuC\n",
+ 				vgpu->id);
+ 		return 0;
+ 	}

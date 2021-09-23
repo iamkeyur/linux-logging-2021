@@ -1,0 +1,27 @@
+['ac5fd4f4b97f5ac9a01303c024d26f34a99633c8', '720.txt', 'Typo']
+commit ac5fd4f4b97f5ac9a01303c024d26f34a99633c8
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Wed Jun 22 18:35:05 2016 +0100
+
+    ethernet: xircom: fix spelling mistakes on "excessive collisions"
+    
+    trivial fixes to spelling mistakes of the words "excessive collisions"
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/xircom/xirc2ps_cs.c b/drivers/net/ethernet/xircom/xirc2ps_cs.c
+index 7b44968e02e6..ddced28e8247 100644
+--- a/drivers/net/ethernet/xircom/xirc2ps_cs.c
++++ b/drivers/net/ethernet/xircom/xirc2ps_cs.c
+@@ -1144,8 +1144,8 @@ xirc2ps_interrupt(int irq, void *dev_id)
+ 	    dev->stats.tx_packets += lp->last_ptr_value - n;
+ 	netif_wake_queue(dev);
+     }
+-    if (tx_status & 0x0002) {	/* Execessive collissions */
+-	pr_debug("tx restarted due to execssive collissions\n");
++    if (tx_status & 0x0002) {	/* Excessive collisions */
++	pr_debug("tx restarted due to excessive collisions\n");
+ 	PutByte(XIRCREG_CR, RestartTx);  /* restart transmitter process */
+     }
+     if (tx_status & 0x0040)

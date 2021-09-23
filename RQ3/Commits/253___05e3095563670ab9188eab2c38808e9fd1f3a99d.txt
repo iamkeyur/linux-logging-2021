@@ -1,0 +1,46 @@
+['05e3095563670ab9188eab2c38808e9fd1f3a99d', '724.txt', 'LogLevel']
+commit 05e3095563670ab9188eab2c38808e9fd1f3a99d
+Author: Viresh Kumar <viresh.kumar@linaro.org>
+Date:   Thu Jun 23 23:22:15 2016 +0530
+
+    greybus: Revert "greybus: ratelimit errors usually seen on unipro_reset"
+    
+    This reverts commit 9b891f4fda8dfd6c1d8dc16479c5f6d418a9ccc7.
+    
+    We discussed this over the other thread,
+    
+    [PATCH 0/2] Improve watchdog's implementation a bit,
+    
+    and decided that we shouldn't be trying to hide the watchdog reboot
+    problem by using such patches, rather we should make sure they occur
+    consistently so that the real problem can be fixed.
+    
+    Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@google.com>
+
+diff --git a/drivers/staging/greybus/es2.c b/drivers/staging/greybus/es2.c
+index 426f83e1fda6..bdf502493e31 100644
+--- a/drivers/staging/greybus/es2.c
++++ b/drivers/staging/greybus/es2.c
+@@ -473,7 +473,7 @@ static int message_send(struct gb_host_device *hd, u16 cport_id,
+ 
+ 	retval = usb_submit_urb(urb, gfp_mask);
+ 	if (retval) {
+-		dev_err_ratelimited(&udev->dev, "failed to submit out-urb: %d\n", retval);
++		dev_err(&udev->dev, "failed to submit out-urb: %d\n", retval);
+ 
+ 		spin_lock_irqsave(&es2->cport_out_urb_lock, flags);
+ 		message->hcpriv = NULL;
+diff --git a/drivers/staging/greybus/operation.c b/drivers/staging/greybus/operation.c
+index 136707002b90..659e84b10c7f 100644
+--- a/drivers/staging/greybus/operation.c
++++ b/drivers/staging/greybus/operation.c
+@@ -1127,7 +1127,7 @@ int gb_operation_sync_timeout(struct gb_connection *connection, int type,
+ 
+ 	ret = gb_operation_request_send_sync_timeout(operation, timeout);
+ 	if (ret) {
+-		dev_err_ratelimited(&connection->hd->dev,
++		dev_err(&connection->hd->dev,
+ 			"%s: synchronous operation of type 0x%02x failed: %d\n",
+ 			connection->name, type, ret);
+ 	} else {

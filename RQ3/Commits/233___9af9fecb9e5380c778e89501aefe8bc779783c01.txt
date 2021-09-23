@@ -1,0 +1,36 @@
+['9af9fecb9e5380c778e89501aefe8bc779783c01', '747.txt', 'LogLevel']
+commit 9af9fecb9e5380c778e89501aefe8bc779783c01
+Author: Finn Thain <fthain@telegraphics.com.au>
+Date:   Mon Oct 10 00:46:53 2016 -0400
+
+    scsi: ncr5380: Suppress unhelpful "interrupt without IRQ bit" message
+    
+    If a NCR5380 host instance ends up on a shared interrupt line then
+    this printk will be a problem. It is already a problem on some Mac
+    models: when testing mac_scsi on a PowerBook 180 I found that PDMA
+    transfers (but not PIO transfers) cause the message to be logged.
+    
+    These spurious interrupts don't appear to come from the DRQ signal from
+    the 5380. And they don't happen at all on the Mac LC III. A comment in
+    the NetBSD source code mentions this mystery. Testing seems to show
+    that we can safely ignore these interrupts.
+    
+    Signed-off-by: Finn Thain <fthain@telegraphics.com.au>
+    Reviewed-by: Hannes Reinecke <hare@suse.com>
+    Tested-by: Ondrej Zary <linux@rainbow-software.org>
+    Tested-by: Michael Schmitz <schmitzmic@gmail.com>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/scsi/NCR5380.c b/drivers/scsi/NCR5380.c
+index 7d4e135a36cb..d849ffa378b1 100644
+--- a/drivers/scsi/NCR5380.c
++++ b/drivers/scsi/NCR5380.c
+@@ -995,7 +995,7 @@ static irqreturn_t __maybe_unused NCR5380_intr(int irq, void *dev_id)
+ 		}
+ 		handled = 1;
+ 	} else {
+-		shost_printk(KERN_NOTICE, instance, "interrupt without IRQ bit\n");
++		dsprintk(NDEBUG_INTR, instance, "interrupt without IRQ bit\n");
+ #ifdef SUN3_SCSI_VME
+ 		dregs->csr |= CSR_DMA_ENABLE;
+ #endif

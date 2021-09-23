@@ -1,0 +1,35 @@
+['b21a695d9cba3a144cc833961457bdc6c987226e', '506.txt', 'ModernizeLog']
+commit b21a695d9cba3a144cc833961457bdc6c987226e
+Author: peter enderborg <peter.enderborg@sony.com>
+Date:   Tue Jun 12 10:09:08 2018 +0200
+
+    selinux: Cleanup printk logging in sidtab
+    
+    Replace printk with pr_* to avoid checkpatch warnings.
+    
+    Signed-off-by: Peter Enderborg <peter.enderborg@sony.com>
+    Signed-off-by: Paul Moore <paul@paul-moore.com>
+
+diff --git a/security/selinux/ss/sidtab.c b/security/selinux/ss/sidtab.c
+index 5be31b7af225..fd75a12fa8fc 100644
+--- a/security/selinux/ss/sidtab.c
++++ b/security/selinux/ss/sidtab.c
+@@ -214,8 +214,7 @@ int sidtab_context_to_sid(struct sidtab *s,
+ 		}
+ 		sid = s->next_sid++;
+ 		if (context->len)
+-			printk(KERN_INFO
+-		       "SELinux:  Context %s is not valid (left unmapped).\n",
++			pr_info("SELinux:  Context %s is not valid (left unmapped).\n",
+ 			       context->str);
+ 		ret = sidtab_insert(s, sid, context);
+ 		if (ret)
+@@ -253,7 +252,7 @@ void sidtab_hash_eval(struct sidtab *h, char *tag)
+ 		}
+ 	}
+ 
+-	printk(KERN_DEBUG "%s:  %d entries and %d/%d buckets used, longest "
++	pr_debug("%s:  %d entries and %d/%d buckets used, longest "
+ 	       "chain length %d\n", tag, h->nel, slots_used, SIDTAB_SIZE,
+ 	       max_chain_len);
+ }

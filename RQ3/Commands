@@ -1,0 +1,2 @@
+awk -F',' '{ for (i=3; i<=NF; i++)   print $i }' OutDone | sort | uniq -c 
+awk -F',' '{ for (i=3; i<=NF; i++)   print $i }' OutDone | sort | awk '{a[$0]++} END{for (i in a) if (a[i]>1) printf "%5.2f%%\t%s\n", 100*a[i]/900, i}' 

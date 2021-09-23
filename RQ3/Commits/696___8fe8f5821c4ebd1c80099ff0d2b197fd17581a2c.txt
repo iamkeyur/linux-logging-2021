@@ -1,0 +1,28 @@
+['8fe8f5821c4ebd1c80099ff0d2b197fd17581a2c', '109.txt', 'AddInfo', 'Clarify/Reword']
+commit 8fe8f5821c4ebd1c80099ff0d2b197fd17581a2c
+Author: Shuah Khan <shuah@kernel.org>
+Date:   Tue Feb 27 15:23:56 2018 -0700
+
+    usbip: tools usbip_network: Fix cryptic error messages
+    
+    Kernel and tool version mismatch message is cryptic. Fix it to be
+    informative.
+    
+    Signed-off-by: Shuah Khan <shuahkh@osg.samsung.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/tools/usb/usbip/src/usbip_network.c b/tools/usb/usbip/src/usbip_network.c
+index b4c37e76a6e0..90325fa8bc38 100644
+--- a/tools/usb/usbip/src/usbip_network.c
++++ b/tools/usb/usbip/src/usbip_network.c
+@@ -179,8 +179,8 @@ int usbip_net_recv_op_common(int sockfd, uint16_t *code)
+ 	PACK_OP_COMMON(0, &op_common);
+ 
+ 	if (op_common.version != USBIP_VERSION) {
+-		dbg("version mismatch: %d %d", op_common.version,
+-		    USBIP_VERSION);
++		err("USBIP Kernel and tool version mismatch: %d %d:",
++		    op_common.version, USBIP_VERSION);
+ 		goto err;
+ 	}
+ 

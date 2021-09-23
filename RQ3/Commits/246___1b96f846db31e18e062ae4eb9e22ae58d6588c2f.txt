@@ -1,0 +1,98 @@
+['1b96f846db31e18e062ae4eb9e22ae58d6588c2f', '732.txt', 'Formatting']
+commit 1b96f846db31e18e062ae4eb9e22ae58d6588c2f
+Author: Tianzheng Li <ltz0302@gmail.com>
+Date:   Fri May 24 13:31:05 2019 +0200
+
+    staging/gasket: Fix string split
+    
+    This patch removes unnecessary quoted string splits.
+    
+    Co-developed-by: Jie Zhang <zhangjie.cnde@gmail.com>
+    Signed-off-by: Jie Zhang <zhangjie.cnde@gmail.com>
+    Signed-off-by: Tianzheng Li <ltz0302@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/gasket/gasket_core.c b/drivers/staging/gasket/gasket_core.c
+index a445d58fb399..13179f063a61 100644
+--- a/drivers/staging/gasket/gasket_core.c
++++ b/drivers/staging/gasket/gasket_core.c
+@@ -702,8 +702,7 @@ static bool gasket_mmap_has_permissions(struct gasket_dev *gasket_dev,
+ 	if ((vma->vm_flags & VM_WRITE) &&
+ 	    !gasket_owned_by_current_tgid(&gasket_dev->dev_info)) {
+ 		dev_dbg(gasket_dev->dev,
+-			"Attempting to mmap a region for write without owning "
+-			"device.\n");
++			"Attempting to mmap a region for write without owning device.\n");
+ 		return false;
+ 	}
+ 
+@@ -1054,8 +1053,7 @@ static int gasket_mmap(struct file *filp, struct vm_area_struct *vma)
+ 	}
+ 	if (bar_index > 0 && is_coherent_region) {
+ 		dev_err(gasket_dev->dev,
+-			"double matching bar and coherent buffers for address "
+-			"0x%lx\n",
++			"double matching bar and coherent buffers for address 0x%lx\n",
+ 			raw_offset);
+ 		trace_gasket_mmap_exit(bar_index);
+ 		return -EINVAL;
+diff --git a/drivers/staging/gasket/gasket_ioctl.c b/drivers/staging/gasket/gasket_ioctl.c
+index 0ca48e688818..7ecfba4f2b06 100644
+--- a/drivers/staging/gasket/gasket_ioctl.c
++++ b/drivers/staging/gasket/gasket_ioctl.c
+@@ -353,8 +353,7 @@ long gasket_handle_ioctl(struct file *filp, uint cmd, void __user *argp)
+ 		 */
+ 		trace_gasket_ioctl_integer_data(arg);
+ 		dev_dbg(gasket_dev->dev,
+-			"Unknown ioctl cmd=0x%x not caught by "
+-			"gasket_is_supported_ioctl\n",
++			"Unknown ioctl cmd=0x%x not caught by gasket_is_supported_ioctl\n",
+ 			cmd);
+ 		retval = -EINVAL;
+ 		break;
+diff --git a/drivers/staging/gasket/gasket_page_table.c b/drivers/staging/gasket/gasket_page_table.c
+index d35c4fb19e28..f6d715787da8 100644
+--- a/drivers/staging/gasket/gasket_page_table.c
++++ b/drivers/staging/gasket/gasket_page_table.c
+@@ -237,8 +237,8 @@ int gasket_page_table_init(struct gasket_page_table **ppg_tbl,
+ 	 * hardware register that contains the page table size.
+ 	 */
+ 	if (total_entries == ULONG_MAX) {
+-		dev_dbg(device, "Error reading page table size. "
+-			"Initializing page table with size 0\n");
++		dev_dbg(device,
++			"Error reading page table size. Initializing page table with size 0\n");
+ 		total_entries = 0;
+ 	}
+ 
+@@ -491,8 +491,7 @@ static int gasket_perform_mapping(struct gasket_page_table *pg_tbl,
+ 
+ 			if (ret <= 0) {
+ 				dev_err(pg_tbl->device,
+-					"get user pages failed for addr=0x%lx, "
+-					"offset=0x%lx [ret=%d]\n",
++					"get user pages failed for addr=0x%lx, offset=0x%lx [ret=%d]\n",
+ 					page_addr, offset, ret);
+ 				return ret ? ret : -ENOMEM;
+ 			}
+@@ -779,8 +778,8 @@ static bool gasket_is_extended_dev_addr_bad(struct gasket_page_table *pg_tbl,
+ 
+ 	if (page_lvl0_idx >= pg_tbl->num_extended_entries) {
+ 		dev_err(pg_tbl->device,
+-			"starting level 0 slot at %lu is too large, max is < "
+-			"%u\n", page_lvl0_idx, pg_tbl->num_extended_entries);
++			"starting level 0 slot at %lu is too large, max is < %u\n",
++			page_lvl0_idx, pg_tbl->num_extended_entries);
+ 		return true;
+ 	}
+ 
+@@ -965,8 +964,7 @@ static int gasket_map_extended_pages(struct gasket_page_table *pg_tbl,
+ 	if (ret) {
+ 		dev_addr_end = dev_addr + (num_pages / PAGE_SIZE) - 1;
+ 		dev_err(pg_tbl->device,
+-			"page table slots (%lu,%lu) (@ 0x%lx) to (%lu,%lu) are "
+-			"not available\n",
++			"page table slots (%lu,%lu) (@ 0x%lx) to (%lu,%lu) are not available\n",
+ 			gasket_extended_lvl0_page_idx(pg_tbl, dev_addr),
+ 			dev_addr,
+ 			gasket_extended_lvl1_page_idx(pg_tbl, dev_addr),

@@ -1,0 +1,30 @@
+['286b92f43c0d0ae2c29a61769b66219fe5ae6701', '41.txt', 'WrongInformation']
+commit 286b92f43c0d0ae2c29a61769b66219fe5ae6701
+Author: Su Yue <suy.fnst@cn.fujitsu.com>
+Date:   Wed May 24 09:31:32 2017 +0800
+
+    btrfs: tree-log.c: Wrong printk information about namelen
+    
+    In verify_dir_item, it wants to printk name_len of dir_item but
+    printk data_len acutally.
+    
+    Fix it by calling btrfs_dir_name_len instead of btrfs_dir_data_len.
+    
+    Signed-off-by: Su Yue <suy.fnst@cn.fujitsu.com>
+    Reviewed-by: David Sterba <dsterba@suse.com>
+    Signed-off-by: David Sterba <dsterba@suse.com>
+    Signed-off-by: Chris Mason <clm@fb.com>
+
+diff --git a/fs/btrfs/dir-item.c b/fs/btrfs/dir-item.c
+index 60a750678a82..c24d615e3d7f 100644
+--- a/fs/btrfs/dir-item.c
++++ b/fs/btrfs/dir-item.c
+@@ -468,7 +468,7 @@ int verify_dir_item(struct btrfs_fs_info *fs_info,
+ 
+ 	if (btrfs_dir_name_len(leaf, dir_item) > namelen) {
+ 		btrfs_crit(fs_info, "invalid dir item name len: %u",
+-		       (unsigned)btrfs_dir_data_len(leaf, dir_item));
++		       (unsigned)btrfs_dir_name_len(leaf, dir_item));
+ 		return 1;
+ 	}
+ 

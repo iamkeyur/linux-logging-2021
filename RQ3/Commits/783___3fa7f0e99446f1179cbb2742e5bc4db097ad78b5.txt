@@ -1,0 +1,29 @@
+['3fa7f0e99446f1179cbb2742e5bc4db097ad78b5', '200.txt', 'LogLevel']
+commit 3fa7f0e99446f1179cbb2742e5bc4db097ad78b5
+Author: Bart Van Assche <bvanassche@acm.org>
+Date:   Mon Jan 8 11:00:48 2018 -0800
+
+    IB/srpt: Reduce frequency of receive failure messages
+    
+    Disabling an SRP target port causes the state of all QPs associated
+    with a port to be changed into IB_QPS_ERR. Avoid that this causes
+    one error message per I/O context to be reported.
+    
+    Signed-off-by: Bart Van Assche <bart.vanassche@wdc.com>
+    Signed-off-by: Doug Ledford <dledford@redhat.com>
+
+diff --git a/drivers/infiniband/ulp/srpt/ib_srpt.c b/drivers/infiniband/ulp/srpt/ib_srpt.c
+index 31b6f108dffb..6f5a4d66eacc 100644
+--- a/drivers/infiniband/ulp/srpt/ib_srpt.c
++++ b/drivers/infiniband/ulp/srpt/ib_srpt.c
+@@ -1622,8 +1622,8 @@ static void srpt_recv_done(struct ib_cq *cq, struct ib_wc *wc)
+ 			pr_err("req_lim = %d < 0\n", req_lim);
+ 		srpt_handle_new_iu(ch, ioctx, NULL);
+ 	} else {
+-		pr_info("receiving failed for ioctx %p with status %d\n",
+-			ioctx, wc->status);
++		pr_info_ratelimited("receiving failed for ioctx %p with status %d\n",
++				    ioctx, wc->status);
+ 	}
+ }
+ 

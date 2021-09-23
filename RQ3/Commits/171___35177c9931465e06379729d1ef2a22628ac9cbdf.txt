@@ -1,0 +1,33 @@
+['35177c9931465e06379729d1ef2a22628ac9cbdf', '812.txt', 'AddInfo']
+commit 35177c9931465e06379729d1ef2a22628ac9cbdf
+Author: Sara Sharon <sara.sharon@intel.com>
+Date:   Mon Aug 15 17:13:27 2016 +0300
+
+    iwlwifi: pcie: log full command sequence
+    
+    Log group as well. Remove 0x prefix to match TX logging.
+    
+    Signed-off-by: Sara Sharon <sara.sharon@intel.com>
+    Signed-off-by: Luca Coelho <luciano.coelho@intel.com>
+
+diff --git a/drivers/net/wireless/intel/iwlwifi/pcie/rx.c b/drivers/net/wireless/intel/iwlwifi/pcie/rx.c
+index 0b5b331010fb..78cb6d2314d9 100644
+--- a/drivers/net/wireless/intel/iwlwifi/pcie/rx.c
++++ b/drivers/net/wireless/intel/iwlwifi/pcie/rx.c
+@@ -1108,13 +1108,14 @@ static void iwl_pcie_rx_handle_rb(struct iwl_trans *trans,
+ 			FH_RSCSR_RXQ_POS != rxq->id);
+ 
+ 		IWL_DEBUG_RX(trans,
+-			     "cmd at offset %d: %s (0x%.2x, seq 0x%x)\n",
++			     "cmd at offset %d: %s (%.2x.%2x, seq 0x%x)\n",
+ 			     rxcb._offset,
+ 			     iwl_get_cmd_string(trans,
+ 						iwl_cmd_id(pkt->hdr.cmd,
+ 							   pkt->hdr.group_id,
+ 							   0)),
+-			     pkt->hdr.cmd, le16_to_cpu(pkt->hdr.sequence));
++			     pkt->hdr.group_id, pkt->hdr.cmd,
++			     le16_to_cpu(pkt->hdr.sequence));
+ 
+ 		len = iwl_rx_packet_len(pkt);
+ 		len += sizeof(u32); /* account for status word */

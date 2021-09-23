@@ -1,0 +1,25 @@
+['ffab8c89ba59c4e01f9c277f1baaad12bd5a3c0c', '707.txt', 'Typo']
+commit ffab8c89ba59c4e01f9c277f1baaad12bd5a3c0c
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Tue May 1 09:25:49 2018 +0100
+
+    RDMA/qedr: fix spelling mistake: "failes" -> "fails"
+    
+    Trivial fix to spelling mistake in DP_ERR error message
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Doug Ledford <dledford@redhat.com>
+
+diff --git a/drivers/infiniband/hw/qedr/verbs.c b/drivers/infiniband/hw/qedr/verbs.c
+index 7d3763b2e01c..35f3b6f8fd45 100644
+--- a/drivers/infiniband/hw/qedr/verbs.c
++++ b/drivers/infiniband/hw/qedr/verbs.c
+@@ -2579,7 +2579,7 @@ static int qedr_set_page(struct ib_mr *ibmr, u64 addr)
+ 	u32 pbes_in_page;
+ 
+ 	if (unlikely(mr->npages == mr->info.pbl_info.num_pbes)) {
+-		DP_ERR(mr->dev, "qedr_set_page failes when %d\n", mr->npages);
++		DP_ERR(mr->dev, "qedr_set_page fails when %d\n", mr->npages);
+ 		return -ENOMEM;
+ 	}
+ 

@@ -1,0 +1,30 @@
+['6baaac096179e7f49b7c3d1bc7785d7cd88215ee', '322.txt', 'Typo']
+commit 6baaac096179e7f49b7c3d1bc7785d7cd88215ee
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Tue Jul 17 19:14:49 2018 -0700
+
+    fs/9p/v9fs.c: fix spelling mistake "Uknown" -> "Unknown"
+    
+    fix spelling mistake in pr_info message text
+    
+    Link: http://lkml.kernel.org/r/20180526150650.10562-1-colin.king@canonical.com
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Cc: Eric Van Hensbergen <ericvh@gmail.com>
+    Cc: Ron Minnich <rminnich@sandia.gov>
+    Cc: Latchesar Ionkov <lucho@ionkov.net>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Dominique Martinet <dominique.martinet@cea.fr>
+
+diff --git a/fs/9p/v9fs.c b/fs/9p/v9fs.c
+index 0429c8ee58f1..89bac3d2f05b 100644
+--- a/fs/9p/v9fs.c
++++ b/fs/9p/v9fs.c
+@@ -343,7 +343,7 @@ static int v9fs_parse_options(struct v9fs_session_info *v9ses, char *opts)
+ 				v9ses->uid = make_kuid(current_user_ns(), uid);
+ 				if (!uid_valid(v9ses->uid)) {
+ 					ret = -EINVAL;
+-					pr_info("Uknown uid %s\n", s);
++					pr_info("Unknown uid %s\n", s);
+ 				}
+ 			}
+ 

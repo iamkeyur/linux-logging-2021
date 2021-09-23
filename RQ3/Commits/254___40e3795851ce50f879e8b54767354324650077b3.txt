@@ -1,0 +1,32 @@
+['40e3795851ce50f879e8b54767354324650077b3', '723.txt', 'LogLevel']
+commit 40e3795851ce50f879e8b54767354324650077b3
+Author: Nishanth Menon <nm@ti.com>
+Date:   Tue Jan 15 10:20:59 2019 +0200
+
+    pinctrl: ti: iodelay: Lower the priority of prints
+    
+    Dont print every single iodelay register configuration - this is just
+    plain noise. Since this is useful debug information, just lower to debug
+    
+    Signed-off-by: Nishanth Menon <nm@ti.com>
+    Signed-off-by: Tero Kristo <t-kristo@ti.com>
+    Acked-by: Tony Lindgren <tony@atomide.com>
+    Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+
+diff --git a/drivers/pinctrl/ti/pinctrl-ti-iodelay.c b/drivers/pinctrl/ti/pinctrl-ti-iodelay.c
+index a4bc506a01a3..76f9083d9c63 100644
+--- a/drivers/pinctrl/ti/pinctrl-ti-iodelay.c
++++ b/drivers/pinctrl/ti/pinctrl-ti-iodelay.c
+@@ -263,9 +263,9 @@ static int ti_iodelay_pinconf_set(struct ti_iodelay_device *iod,
+ 	reg_val |= reg->unlock_val << __ffs(reg->lock_mask);
+ 	r = regmap_update_bits(iod->regmap, cfg->offset, reg_mask, reg_val);
+ 
+-	dev_info(dev, "Set reg 0x%x Delay(a: %d g: %d), Elements(C=%d F=%d)0x%x\n",
+-		 cfg->offset, cfg->a_delay, cfg->g_delay, c_elements,
+-		 f_elements, reg_val);
++	dev_dbg(dev, "Set reg 0x%x Delay(a: %d g: %d), Elements(C=%d F=%d)0x%x\n",
++		cfg->offset, cfg->a_delay, cfg->g_delay, c_elements,
++		f_elements, reg_val);
+ 
+ 	return r;
+ }

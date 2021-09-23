@@ -1,0 +1,35 @@
+['9edaf50b373d3fe94e360af16f7c0d024d9567bb', '27.txt', 'ModernizeLog']
+commit 9edaf50b373d3fe94e360af16f7c0d024d9567bb
+Author: Fabio Estevam <festevam@gmail.com>
+Date:   Tue Jun 4 00:31:38 2019 -0300
+
+    serial: fsl_lpuart: Use dev_info() instead of printk()
+    
+    dev_info() is more appropriate for printing messages inside drivers, so
+    switch to dev_info().
+    
+    Signed-off-by: Fabio Estevam <festevam@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/tty/serial/fsl_lpuart.c b/drivers/tty/serial/fsl_lpuart.c
+index ea1c85e3b432..08b52cca650c 100644
+--- a/drivers/tty/serial/fsl_lpuart.c
++++ b/drivers/tty/serial/fsl_lpuart.c
+@@ -2078,7 +2078,7 @@ lpuart_console_get_options(struct lpuart_port *sport, int *baud,
+ 	baud_raw = uartclk / (16 * (sbr + brfa / 32));
+ 
+ 	if (*baud != baud_raw)
+-		printk(KERN_INFO "Serial: Console lpuart rounded baud rate"
++		dev_info(sport->port.dev, "Serial: Console lpuart rounded baud rate"
+ 				"from %d to %d\n", baud_raw, *baud);
+ }
+ 
+@@ -2121,7 +2121,7 @@ lpuart32_console_get_options(struct lpuart_port *sport, int *baud,
+ 	baud_raw = uartclk / (16 * sbr);
+ 
+ 	if (*baud != baud_raw)
+-		printk(KERN_INFO "Serial: Console lpuart rounded baud rate"
++		dev_info(sport->port.dev, "Serial: Console lpuart rounded baud rate"
+ 				"from %d to %d\n", baud_raw, *baud);
+ }
+ 

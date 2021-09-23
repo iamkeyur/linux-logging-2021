@@ -1,0 +1,32 @@
+['a9734d8ee63346865d5966551ef4aabf8016d8dd', '307.txt', 'LogLevel']
+commit a9734d8ee63346865d5966551ef4aabf8016d8dd
+Author: Chris Wilson <chris@chris-wilson.co.uk>
+Date:   Tue Sep 4 12:57:19 2018 +0100
+
+    drm: Suppress user controlled spam for invalid drm_wait_vblank_ioctl
+    
+    The ioctl arguments are under control of the user and as such we should
+    resist any temptation to flood the kernel logs with their errors.
+    Relegate the DRM_ERROR to a DRM_DEBUG so the user has to opt into
+    hearing of their own mistakes. (One day we will have a small ringbuffer
+    attached to the task, so that the concerned process can inspect its own
+    debug info for EINVAL without them being hitting syslog at all.)
+    
+    Signed-off-by: Chris Wilson <chris@chris-wilson.co.uk>
+    Cc: Daniel Vetter <daniel.vetter@ffwll.ch>
+    Reviewed-by: Daniel Vetter <daniel.vetter@ffwll.ch>
+    Link: https://patchwork.freedesktop.org/patch/msgid/20180904115719.24525-1-chris@chris-wilson.co.uk
+
+diff --git a/drivers/gpu/drm/drm_vblank.c b/drivers/gpu/drm/drm_vblank.c
+index 7610ff466ef9..ec2dcfdac8ef 100644
+--- a/drivers/gpu/drm/drm_vblank.c
++++ b/drivers/gpu/drm/drm_vblank.c
+@@ -1541,7 +1541,7 @@ int drm_wait_vblank_ioctl(struct drm_device *dev, void *data,
+ 	if (vblwait->request.type &
+ 	    ~(_DRM_VBLANK_TYPES_MASK | _DRM_VBLANK_FLAGS_MASK |
+ 	      _DRM_VBLANK_HIGH_CRTC_MASK)) {
+-		DRM_ERROR("Unsupported type value 0x%x, supported mask 0x%x\n",
++		DRM_DEBUG("Unsupported type value 0x%x, supported mask 0x%x\n",
+ 			  vblwait->request.type,
+ 			  (_DRM_VBLANK_TYPES_MASK | _DRM_VBLANK_FLAGS_MASK |
+ 			   _DRM_VBLANK_HIGH_CRTC_MASK));

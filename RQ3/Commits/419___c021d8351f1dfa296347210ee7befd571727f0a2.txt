@@ -1,0 +1,48 @@
+['c021d8351f1dfa296347210ee7befd571727f0a2', '542.txt', 'FixFormatSpecifier']
+commit c021d8351f1dfa296347210ee7befd571727f0a2
+Author: Vinod Koul <vkoul@kernel.org>
+Date:   Tue Sep 13 22:27:53 2016 +0530
+
+    dmaengine: coh901318: fix pointer cast warnings
+    
+    On some systems, pointer can be large than unsigned int, triggering warning
+    pointer-to-int-cast on conversion.
+    
+    drivers/dma/coh901318.c: In function 'coh901318_filter_id':
+    drivers/dma/coh901318.c:1769:23: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+      unsigned int ch_nr = (unsigned int) chan_id;
+    
+    Also, converting an iomem pointer for print leads to warn on some system
+    which can be avoided with %p specfier
+    
+    drivers/dma/coh901318.c: In function 'coh901318_probe':
+    drivers/dma/coh901318.c:2748:3: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+       (u32) base->virtbase);
+    
+    Acked-by: Linus Walleij <linus.walleij@linaro.org>
+    Signed-off-by: Vinod Koul <vinod.koul@intel.com>
+
+diff --git a/drivers/dma/coh901318.c b/drivers/dma/coh901318.c
+index 57619adf79b4..66d3507c97e4 100644
+--- a/drivers/dma/coh901318.c
++++ b/drivers/dma/coh901318.c
+@@ -1766,7 +1766,7 @@ static int coh901318_resume(struct dma_chan *chan)
+ 
+ bool coh901318_filter_id(struct dma_chan *chan, void *chan_id)
+ {
+-	unsigned int ch_nr = (unsigned int) chan_id;
++	unsigned long ch_nr = (unsigned long) chan_id;
+ 
+ 	if (ch_nr == to_coh901318_chan(chan)->id)
+ 		return true;
+@@ -2744,8 +2744,8 @@ static int __init coh901318_probe(struct platform_device *pdev)
+ 		goto err_register_of_dma;
+ 
+ 	platform_set_drvdata(pdev, base);
+-	dev_info(&pdev->dev, "Initialized COH901318 DMA on virtual base 0x%08x\n",
+-		(u32) base->virtbase);
++	dev_info(&pdev->dev, "Initialized COH901318 DMA on virtual base 0x%p\n",
++		base->virtbase);
+ 
+ 	return err;
+ 

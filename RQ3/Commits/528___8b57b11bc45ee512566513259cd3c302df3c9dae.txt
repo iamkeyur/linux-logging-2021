@@ -1,0 +1,41 @@
+['8b57b11bc45ee512566513259cd3c302df3c9dae', '422.txt', 'LogLevel']
+commit 8b57b11bc45ee512566513259cd3c302df3c9dae
+Author: Flavio Suligoi <f.suligoi@asem.it>
+Date:   Fri Apr 5 14:40:22 2019 +0200
+
+    spi: pxa2xxx: change "no DMA channels..." msg from debug to warning
+    
+    Change the type of the diagnostic message:
+    
+    "no DMA channels available, using PIO"
+    
+    from debug to warning.
+    
+    The lack of an available DMA channel is very important regard the
+    spi-pxa2xx performance. The transfer speed can be reduced more than 50%.
+    
+    So it is very important to warn the user about this, without enabling
+    the full SPI debug with CONFIG_SPI_DEBUG.
+    
+    Moreover, enabling the full SPI debug only to enable this specific
+    debug message, the dmesg buffer fills quickly with a lot of
+    repetitive information during the SPI data transfer.
+    This cause the loss of all the first important messages
+    written during the initialization.
+    
+    Signed-off-by: Flavio Suligoi <f.suligoi@asem.it>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/drivers/spi/spi-pxa2xx.c b/drivers/spi/spi-pxa2xx.c
+index 6160fe0ce7ab..f7068ccfe7d2 100644
+--- a/drivers/spi/spi-pxa2xx.c
++++ b/drivers/spi/spi-pxa2xx.c
+@@ -1696,7 +1696,7 @@ static int pxa2xx_spi_probe(struct platform_device *pdev)
+ 	if (platform_info->enable_dma) {
+ 		status = pxa2xx_spi_dma_setup(drv_data);
+ 		if (status) {
+-			dev_dbg(dev, "no DMA channels available, using PIO\n");
++			dev_warn(dev, "no DMA channels available, using PIO\n");
+ 			platform_info->enable_dma = false;
+ 		} else {
+ 			controller->can_dma = pxa2xx_spi_can_dma;

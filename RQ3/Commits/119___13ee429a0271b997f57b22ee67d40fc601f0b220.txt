@@ -1,0 +1,39 @@
+['13ee429a0271b997f57b22ee67d40fc601f0b220', '871.txt', 'LogLevel']
+commit 13ee429a0271b997f57b22ee67d40fc601f0b220
+Author: Feras Daoud <ferasda@mellanox.com>
+Date:   Wed Dec 28 14:47:26 2016 +0200
+
+    IB/ipoib: Use debug prints instead of warnings in RNR WC status
+    
+    If a receive request has not been posted to the work queue, the incoming
+    message is rejected and the peer will receive a receiver-not-ready (RNR)
+    error. In IPoIB, IB_WC_RNR_RETRY_EXC_ERR error is part of the life cycle
+    therefore ipoib_cm_handle_tx_wc function will print to debug instead
+    of warnings.
+    
+    Signed-off-by: Feras Daoud <ferasda@mellanox.com>
+    Signed-off-by: Erez Shitrit <erezsh@mellanox.com>
+    Signed-off-by: Leon Romanovsky <leon@kernel.org>
+    Reviewed-by: Yuval Shaia <yuval.shaia@oracle.com>
+    Signed-off-by: Doug Ledford <dledford@redhat.com>
+
+diff --git a/drivers/infiniband/ulp/ipoib/ipoib_cm.c b/drivers/infiniband/ulp/ipoib/ipoib_cm.c
+index a720d2ddddc1..c433e72994f5 100644
+--- a/drivers/infiniband/ulp/ipoib/ipoib_cm.c
++++ b/drivers/infiniband/ulp/ipoib/ipoib_cm.c
+@@ -820,9 +820,12 @@ void ipoib_cm_handle_tx_wc(struct net_device *dev, struct ib_wc *wc)
+ 	    wc->status != IB_WC_WR_FLUSH_ERR) {
+ 		struct ipoib_neigh *neigh;
+ 
+-		ipoib_dbg(priv, "failed cm send event "
+-			   "(status=%d, wrid=%d vend_err %x)\n",
+-			   wc->status, wr_id, wc->vendor_err);
++		if (wc->status != IB_WC_RNR_RETRY_EXC_ERR)
++			ipoib_warn(priv, "failed cm send event (status=%d, wrid=%d vend_err %x)\n",
++				   wc->status, wr_id, wc->vendor_err);
++		else
++			ipoib_dbg(priv, "failed cm send event (status=%d, wrid=%d vend_err %x)\n",
++				  wc->status, wr_id, wc->vendor_err);
+ 
+ 		spin_lock_irqsave(&priv->lock, flags);
+ 		neigh = tx->neigh;

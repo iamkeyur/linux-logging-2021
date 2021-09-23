@@ -1,0 +1,32 @@
+['76a563675485849f6f9ad5b30df220438b3628c1', '794.txt', 'FixFormatSpecifier']
+commit 76a563675485849f6f9ad5b30df220438b3628c1
+Author: Rasmus Villemoes <linux@rasmusvillemoes.dk>
+Date:   Tue Dec 8 12:15:54 2015 -0200
+
+    [media] exynos4-is: fix a format string bug
+    
+    Ironically, 7d4020c3c400 ("[media] exynos4-is: fix some warnings when
+    compiling on arm64") fixed some format string bugs but introduced a
+    new one. buf_index is a simple int, so it should be printed with %d,
+    not %pad (which is correctly used for dma_addr_t).
+    
+    Fixes: 7d4020c3c400 ("[media] exynos4-is: fix some warnings when compiling on arm64")
+    
+    Signed-off-by: Rasmus Villemoes <linux@rasmusvillemoes.dk>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@osg.samsung.com>
+
+diff --git a/drivers/media/platform/exynos4-is/fimc-isp-video.c b/drivers/media/platform/exynos4-is/fimc-isp-video.c
+index bf9261eb57a1..c0816728cbfe 100644
+--- a/drivers/media/platform/exynos4-is/fimc-isp-video.c
++++ b/drivers/media/platform/exynos4-is/fimc-isp-video.c
+@@ -218,8 +218,8 @@ static void isp_video_capture_buffer_queue(struct vb2_buffer *vb)
+ 							ivb->dma_addr[i];
+ 
+ 			isp_dbg(2, &video->ve.vdev,
+-				"dma_buf %pad (%d/%d/%d) addr: %pad\n",
+-				&buf_index, ivb->index, i, vb->index,
++				"dma_buf %d (%d/%d/%d) addr: %pad\n",
++				buf_index, ivb->index, i, vb->index,
+ 				&ivb->dma_addr[i]);
+ 		}
+ 

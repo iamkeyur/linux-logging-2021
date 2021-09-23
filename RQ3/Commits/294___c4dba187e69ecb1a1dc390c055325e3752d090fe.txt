@@ -1,0 +1,25 @@
+['c4dba187e69ecb1a1dc390c055325e3752d090fe', '680.txt', 'Typo']
+commit c4dba187e69ecb1a1dc390c055325e3752d090fe
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Tue Oct 16 18:28:53 2018 +0100
+
+    scsi: lpfc: fix spelling mistake "Resrouce" -> "Resource"
+    
+    Trivial fix to spelling mistake in lpfc_printf_log message text.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/scsi/lpfc/lpfc_init.c b/drivers/scsi/lpfc/lpfc_init.c
+index 054072cbfa3c..323a32e87258 100644
+--- a/drivers/scsi/lpfc/lpfc_init.c
++++ b/drivers/scsi/lpfc/lpfc_init.c
+@@ -7993,7 +7993,7 @@ lpfc_sli4_read_config(struct lpfc_hba *phba)
+ 	else
+ 		lpfc_printf_log(phba, KERN_ERR, LOG_SLI,
+ 				"3028 GET_FUNCTION_CONFIG: failed to find "
+-				"Resrouce Descriptor:x%x\n",
++				"Resource Descriptor:x%x\n",
+ 				LPFC_RSRC_DESC_TYPE_FCFCOE);
+ 
+ read_cfg_out:

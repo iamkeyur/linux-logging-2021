@@ -1,0 +1,32 @@
+['155b9f175e2c4b36bf433a1b58e90319ea890de8', '502.txt', 'FixFormatSpecifier']
+commit 155b9f175e2c4b36bf433a1b58e90319ea890de8
+Author: Viresh Kumar <viresh.kumar@linaro.org>
+Date:   Thu Jul 23 10:30:47 2015 +0530
+
+    greybus: svc: Fix build warning on 64bit systems
+    
+    Fix below warnings that only generate for a 64 bit system:
+    
+    greybus/svc.c:202:16: warning: format ‘%d’ expects argument of type ‘int’, but argument 4 has type ‘size_t {aka long unsigned int}’ [-Wformat=]
+       dev_err(dev, "%s: Illegal size of hello request (%d %d)\n",
+                    ^
+    greybus/svc.c:202:16: warning: format ‘%d’ expects argument of type ‘int’, but argument 5 has type ‘long unsigned int’ [-Wformat=]
+    
+    Fixes: 9cbe73e0cf45 ("svc: Implement SVC requests")
+    Reported-by: Greg KH <gregkh@google.com>
+    Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@google.com>
+
+diff --git a/drivers/staging/greybus/svc.c b/drivers/staging/greybus/svc.c
+index c9bbdc04e2d7..ebd282d33e66 100644
+--- a/drivers/staging/greybus/svc.c
++++ b/drivers/staging/greybus/svc.c
+@@ -199,7 +199,7 @@ static int gb_svc_hello(struct gb_operation *op)
+ 	 * request, use that to create an endo.
+ 	 */
+ 	if (op->request->payload_size != sizeof(*hello_request)) {
+-		dev_err(dev, "%s: Illegal size of hello request (%d %d)\n",
++		dev_err(dev, "%s: Illegal size of hello request (%zu %zu)\n",
+ 			__func__, op->request->payload_size,
+ 			sizeof(*hello_request));
+ 		return -EINVAL;

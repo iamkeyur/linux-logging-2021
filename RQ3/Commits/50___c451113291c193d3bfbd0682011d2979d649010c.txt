@@ -1,0 +1,44 @@
+['c451113291c193d3bfbd0682011d2979d649010c', '945.txt', 'WrongInformation']
+commit c451113291c193d3bfbd0682011d2979d649010c
+Author: Simon Horman <horms+renesas@verge.net.au>
+Date:   Mon Nov 2 10:40:17 2015 +0900
+
+    ravb: use pdev rather than ndev for error messages
+    
+    This corrects what appear to be typos, making the code consistent with
+    itself, and allowing meaningful prefixes to be displayed with the errors in
+    question.
+    
+    Before:
+     (null): failed to initialize MDIO
+     (null): Cannot allocate desc base address table (size 176 bytes)
+    
+    After:
+    ravb e6800000.ethernet: failed to initialize MDIO
+    ravb e6800000.ethernet: Cannot allocate desc base address table (size 176 bytes)
+    
+    Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/renesas/ravb_main.c b/drivers/net/ethernet/renesas/ravb_main.c
+index 8cc5ec5ed19a..aa7b2083cb53 100644
+--- a/drivers/net/ethernet/renesas/ravb_main.c
++++ b/drivers/net/ethernet/renesas/ravb_main.c
+@@ -1765,7 +1765,7 @@ static int ravb_probe(struct platform_device *pdev)
+ 	priv->desc_bat = dma_alloc_coherent(ndev->dev.parent, priv->desc_bat_size,
+ 					    &priv->desc_bat_dma, GFP_KERNEL);
+ 	if (!priv->desc_bat) {
+-		dev_err(&ndev->dev,
++		dev_err(&pdev->dev,
+ 			"Cannot allocate desc base address table (size %d bytes)\n",
+ 			priv->desc_bat_size);
+ 		error = -ENOMEM;
+@@ -1792,7 +1792,7 @@ static int ravb_probe(struct platform_device *pdev)
+ 	/* MDIO bus init */
+ 	error = ravb_mdio_init(priv);
+ 	if (error) {
+-		dev_err(&ndev->dev, "failed to initialize MDIO\n");
++		dev_err(&pdev->dev, "failed to initialize MDIO\n");
+ 		goto out_dma_free;
+ 	}
+ 

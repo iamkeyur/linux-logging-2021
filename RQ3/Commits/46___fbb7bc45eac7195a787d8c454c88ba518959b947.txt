@@ -1,0 +1,35 @@
+['fbb7bc45eac7195a787d8c454c88ba518959b947', '949.txt', 'RedundantInformation']
+commit fbb7bc45eac7195a787d8c454c88ba518959b947
+Author: Florian Fainelli <f.fainelli@gmail.com>
+Date:   Wed Mar 20 09:45:16 2019 -0700
+
+    net: dsa: bcm_sf2: Remove print of base address
+    
+    Since commit ad67b74d2469 ("printk: hash addresses printed with %p")
+    pointers are being hashed when printed. Displaying the virtual memory at
+    bootup time is not helpful, we use a dev_info() print which already
+    displays the platform device's address.
+    
+    Signed-off-by: Florian Fainelli <f.fainelli@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/dsa/bcm_sf2.c b/drivers/net/dsa/bcm_sf2.c
+index c8e3f05e1d72..4ccb3239f5f7 100644
+--- a/drivers/net/dsa/bcm_sf2.c
++++ b/drivers/net/dsa/bcm_sf2.c
+@@ -1188,10 +1188,11 @@ static int bcm_sf2_sw_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto out_mdio;
+ 
+-	pr_info("Starfighter 2 top: %x.%02x, core: %x.%02x base: 0x%p, IRQs: %d, %d\n",
+-		priv->hw_params.top_rev >> 8, priv->hw_params.top_rev & 0xff,
+-		priv->hw_params.core_rev >> 8, priv->hw_params.core_rev & 0xff,
+-		priv->core, priv->irq0, priv->irq1);
++	dev_info(&pdev->dev,
++		 "Starfighter 2 top: %x.%02x, core: %x.%02x, IRQs: %d, %d\n",
++		 priv->hw_params.top_rev >> 8, priv->hw_params.top_rev & 0xff,
++		 priv->hw_params.core_rev >> 8, priv->hw_params.core_rev & 0xff,
++		 priv->irq0, priv->irq1);
+ 
+ 	return 0;
+ 

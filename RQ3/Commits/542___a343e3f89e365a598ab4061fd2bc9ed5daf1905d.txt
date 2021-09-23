@@ -1,0 +1,35 @@
+['a343e3f89e365a598ab4061fd2bc9ed5daf1905d', '407.txt', 'Typo']
+commit a343e3f89e365a598ab4061fd2bc9ed5daf1905d
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu Mar 29 13:11:07 2018 +0100
+
+    qedr: Fix spelling mistake: "hanlde" -> "handle"
+    
+    Trivial fix to spelling mistake in DP_ERR message text
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Reviewed-by: Shamir Rabinovitch <shamir.rabinovitch@oracle.com>
+    Signed-off-by: Jason Gunthorpe <jgg@mellanox.com>
+
+diff --git a/drivers/infiniband/hw/qedr/main.c b/drivers/infiniband/hw/qedr/main.c
+index f865c0991ad9..2274d12a4f75 100644
+--- a/drivers/infiniband/hw/qedr/main.c
++++ b/drivers/infiniband/hw/qedr/main.c
+@@ -708,7 +708,7 @@ static void qedr_affiliated_event(void *context, u8 e_code, void *fw_handle)
+ 			     "Error: CQ event with NULL pointer ibcq. Handle=%llx\n",
+ 			     roce_handle64);
+ 		}
+-		DP_ERR(dev, "CQ event %d on hanlde %p\n", e_code, cq);
++		DP_ERR(dev, "CQ event %d on handle %p\n", e_code, cq);
+ 		break;
+ 	case EVENT_TYPE_QP:
+ 		qp = (struct qedr_qp *)(uintptr_t)roce_handle64;
+@@ -724,7 +724,7 @@ static void qedr_affiliated_event(void *context, u8 e_code, void *fw_handle)
+ 			     "Error: QP event with NULL pointer ibqp. Handle=%llx\n",
+ 			     roce_handle64);
+ 		}
+-		DP_ERR(dev, "QP event %d on hanlde %p\n", e_code, qp);
++		DP_ERR(dev, "QP event %d on handle %p\n", e_code, qp);
+ 		break;
+ 	default:
+ 		break;

@@ -1,0 +1,27 @@
+['4fa589126f23243bd998a464cb6158d343eb6a89', '779.txt', 'WrongInformation']
+commit 4fa589126f23243bd998a464cb6158d343eb6a89
+Author: Viresh Kumar <viresh.kumar@linaro.org>
+Date:   Wed Oct 12 08:02:22 2016 +0530
+
+    Staging: greybus: uart: Use gbphy_dev->dev instead of bundle->dev
+    
+    Some of the print messages are using the incorrect device pointer, fix
+    them.
+    
+    Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+    Acked-by: Johan Hovold <johan@kernel.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/greybus/uart.c b/drivers/staging/greybus/uart.c
+index 5ee7954bd9f9..2633d2bfb1b4 100644
+--- a/drivers/staging/greybus/uart.c
++++ b/drivers/staging/greybus/uart.c
+@@ -888,7 +888,7 @@ static int gb_uart_probe(struct gbphy_device *gbphy_dev,
+ 	minor = alloc_minor(gb_tty);
+ 	if (minor < 0) {
+ 		if (minor == -ENOSPC) {
+-			dev_err(&connection->bundle->dev,
++			dev_err(&gbphy_dev->dev,
+ 				"no more free minor numbers\n");
+ 			retval = -ENODEV;
+ 		} else {

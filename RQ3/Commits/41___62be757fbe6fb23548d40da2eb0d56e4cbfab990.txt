@@ -1,0 +1,34 @@
+['62be757fbe6fb23548d40da2eb0d56e4cbfab990', '956.txt', 'RedundantInformation']
+commit 62be757fbe6fb23548d40da2eb0d56e4cbfab990
+Author: Florian Fainelli <f.fainelli@gmail.com>
+Date:   Wed Mar 20 09:45:17 2019 -0700
+
+    net: systemport: Remove print of base address
+    
+    Since commit ad67b74d2469 ("printk: hash addresses printed with %p")
+    pointers are being hashed when printed. Displaying the virtual memory at
+    bootup time is not helpful, especially given we use a dev_info() which
+    already displays the platform device's address.
+    
+    Signed-off-by: Florian Fainelli <f.fainelli@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/broadcom/bcmsysport.c b/drivers/net/ethernet/broadcom/bcmsysport.c
+index a9d3d26a7202..dfe46dacf5cf 100644
+--- a/drivers/net/ethernet/broadcom/bcmsysport.c
++++ b/drivers/net/ethernet/broadcom/bcmsysport.c
+@@ -2598,11 +2598,11 @@ static int bcm_sysport_probe(struct platform_device *pdev)
+ 
+ 	priv->rev = topctrl_readl(priv, REV_CNTL) & REV_MASK;
+ 	dev_info(&pdev->dev,
+-		 "Broadcom SYSTEMPORT%s" REV_FMT
+-		 " at 0x%p (irqs: %d, %d, TXQs: %d, RXQs: %d)\n",
++		 "Broadcom SYSTEMPORT%s " REV_FMT
++		 " (irqs: %d, %d, TXQs: %d, RXQs: %d)\n",
+ 		 priv->is_lite ? " Lite" : "",
+ 		 (priv->rev >> 8) & 0xff, priv->rev & 0xff,
+-		 priv->base, priv->irq0, priv->irq1, txq, rxq);
++		 priv->irq0, priv->irq1, txq, rxq);
+ 
+ 	return 0;
+ 

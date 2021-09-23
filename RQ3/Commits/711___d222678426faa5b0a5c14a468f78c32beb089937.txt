@@ -1,0 +1,27 @@
+['d222678426faa5b0a5c14a468f78c32beb089937', '125.txt', 'Formatting']
+commit d222678426faa5b0a5c14a468f78c32beb089937
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Tue Jan 17 14:57:20 2017 +0000
+
+    ACPI, APEI, EINJ: fix malformed newline escape
+    
+    The pr_warn message has a malformed newline escape, add in the
+    missing \
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Reviewed-by: Borislav Petkov <bp@suse.de>
+    Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+
+diff --git a/drivers/acpi/apei/einj.c b/drivers/acpi/apei/einj.c
+index eebb7e39c49c..ec50c32ea3da 100644
+--- a/drivers/acpi/apei/einj.c
++++ b/drivers/acpi/apei/einj.c
+@@ -711,7 +711,7 @@ static int __init einj_init(void)
+ 
+ 	rc = einj_check_table(einj_tab);
+ 	if (rc) {
+-		pr_warn(FW_BUG "Invalid EINJ table.n");
++		pr_warn(FW_BUG "Invalid EINJ table.\n");
+ 		return -EINVAL;
+ 	}
+ 

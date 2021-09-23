@@ -1,0 +1,33 @@
+['ea4ae35a829cc53b4df131e845216b2409ed706f', '632.txt', 'CopyPasteMistakes']
+commit ea4ae35a829cc53b4df131e845216b2409ed706f
+Author: Kittipon Meesompop <kmeesomp@linux.vnet.ibm.com>
+Date:   Tue Aug 15 17:02:49 2017 +0200
+
+    s390/qeth: fix trace-messages for deleting rxip addresses
+    
+    change trace-messages:
+    - from addrxip4 to delrxip4
+    - from addrxip6 to delrxip6
+    
+    Signed-off-by: Kittipon Meesompop <kmeesomp@linux.vnet.ibm.com>
+    Signed-off-by: Julian Wiedmann <jwi@linux.vnet.ibm.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/s390/net/qeth_l3_main.c b/drivers/s390/net/qeth_l3_main.c
+index 140ed124d2f0..41bd00454d0f 100644
+--- a/drivers/s390/net/qeth_l3_main.c
++++ b/drivers/s390/net/qeth_l3_main.c
+@@ -784,11 +784,11 @@ void qeth_l3_del_rxip(struct qeth_card *card, enum qeth_prot_versions proto,
+ 	ipaddr = qeth_l3_get_addr_buffer(proto);
+ 	if (ipaddr) {
+ 		if (proto == QETH_PROT_IPV4) {
+-			QETH_CARD_TEXT(card, 2, "addrxip4");
++			QETH_CARD_TEXT(card, 2, "delrxip4");
+ 			memcpy(&ipaddr->u.a4.addr, addr, 4);
+ 			ipaddr->u.a4.mask = 0;
+ 		} else if (proto == QETH_PROT_IPV6) {
+-			QETH_CARD_TEXT(card, 2, "addrxip6");
++			QETH_CARD_TEXT(card, 2, "delrxip6");
+ 			memcpy(&ipaddr->u.a6.addr, addr, 16);
+ 			ipaddr->u.a6.pfxlen = 0;
+ 		}

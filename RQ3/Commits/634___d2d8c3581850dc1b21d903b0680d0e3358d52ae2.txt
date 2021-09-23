@@ -1,0 +1,27 @@
+['d2d8c3581850dc1b21d903b0680d0e3358d52ae2', '301.txt', 'LogLevel']
+commit d2d8c3581850dc1b21d903b0680d0e3358d52ae2
+Author: Thierry Reding <treding@nvidia.com>
+Date:   Mon Nov 23 16:46:30 2015 +0100
+
+    drm/tegra: Use DRIVER level for IOMMU aperture message
+    
+    This allows the message to be shown even if core messages are disabled
+    globally in DRM.
+    
+    Signed-off-by: Thierry Reding <treding@nvidia.com>
+
+diff --git a/drivers/gpu/drm/tegra/drm.c b/drivers/gpu/drm/tegra/drm.c
+index ced5a095d2ad..d9a09251e9f1 100644
+--- a/drivers/gpu/drm/tegra/drm.c
++++ b/drivers/gpu/drm/tegra/drm.c
+@@ -137,8 +137,8 @@ static int tegra_drm_load(struct drm_device *drm, unsigned long flags)
+ 		start = geometry->aperture_start;
+ 		end = geometry->aperture_end;
+ 
+-		DRM_DEBUG("IOMMU context initialized (aperture: %#llx-%#llx)\n",
+-			  start, end);
++		DRM_DEBUG_DRIVER("IOMMU aperture initialized (%#llx-%#llx)\n",
++				 start, end);
+ 		drm_mm_init(&tegra->mm, start, end - start + 1);
+ 	}
+ 

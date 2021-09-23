@@ -1,0 +1,28 @@
+['12a3cc8424fe1237aaeb982dec4f0914ddd22f3e', '730.txt', 'WrongInformation']
+commit 12a3cc8424fe1237aaeb982dec4f0914ddd22f3e
+Author: Alexei Starovoitov <ast@kernel.org>
+Date:   Thu Nov 30 21:31:35 2017 -0800
+
+    bpf: fix stack state printing in verifier log
+    
+    fix incorrect stack state prints in print_verifier_state()
+    
+    Fixes: 638f5b90d460 ("bpf: reduce verifier memory consumption")
+    Signed-off-by: Alexei Starovoitov <ast@kernel.org>
+    Acked-by: John Fastabend <john.fastabend@gmail.com>
+    Acked-by: Daniel Borkmann <daniel@iogearbox.net>
+    Signed-off-by: Daniel Borkmann <daniel@iogearbox.net>
+
+diff --git a/kernel/bpf/verifier.c b/kernel/bpf/verifier.c
+index d4593571c404..71a9429fdbb5 100644
+--- a/kernel/bpf/verifier.c
++++ b/kernel/bpf/verifier.c
+@@ -279,7 +279,7 @@ static void print_verifier_state(struct bpf_verifier_env *env,
+ 	for (i = 0; i < state->allocated_stack / BPF_REG_SIZE; i++) {
+ 		if (state->stack[i].slot_type[0] == STACK_SPILL)
+ 			verbose(env, " fp%d=%s",
+-				-MAX_BPF_STACK + i * BPF_REG_SIZE,
++				(-i - 1) * BPF_REG_SIZE,
+ 				reg_type_str[state->stack[i].spilled_ptr.type]);
+ 	}
+ 	verbose(env, "\n");

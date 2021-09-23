@@ -1,0 +1,28 @@
+['285249884ec19480f99c011d223760bb1fc865a2', '264.txt', 'LogLevel']
+commit 285249884ec19480f99c011d223760bb1fc865a2
+Author: Jiada Wang <jiada_wang@mentor.com>
+Date:   Mon Nov 16 17:10:05 2015 +0900
+
+    thermal: of-thermal: Reduce log level for message when can't fine thermal zone
+    
+    Some systems register thermal zone by themself and don't need to
+    have thermal zones node in DT. Therefore reduce the log level from
+    ERROR to DEBUG when thermal zone node can't be find in
+    of_thermal_destroy_zones().
+    
+    Signed-off-by: Jiada Wang <jiada_wang@mentor.com>
+    Signed-off-by: Eduardo Valentin <edubezval@gmail.com>
+
+diff --git a/drivers/thermal/of-thermal.c b/drivers/thermal/of-thermal.c
+index 42b7d4253b94..be4eedcb839a 100644
+--- a/drivers/thermal/of-thermal.c
++++ b/drivers/thermal/of-thermal.c
+@@ -964,7 +964,7 @@ void of_thermal_destroy_zones(void)
+ 
+ 	np = of_find_node_by_name(NULL, "thermal-zones");
+ 	if (!np) {
+-		pr_err("unable to find thermal zones\n");
++		pr_debug("unable to find thermal zones\n");
+ 		return;
+ 	}
+ 

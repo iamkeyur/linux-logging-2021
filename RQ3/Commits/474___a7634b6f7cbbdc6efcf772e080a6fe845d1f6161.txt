@@ -1,0 +1,26 @@
+['a7634b6f7cbbdc6efcf772e080a6fe845d1f6161', '483.txt', 'Typo']
+commit a7634b6f7cbbdc6efcf772e080a6fe845d1f6161
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu Apr 18 11:20:25 2019 +0100
+
+    scsi: aic7xxx: fix spelling mistake "recevied" -> "received"
+    
+    There is a spelling mistake in a kernel message, fix it.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Reviewed-by: Mukesh Ojha <mojha@codeaurora.org>
+    Signed-off-by: Martin K. Petersen <martin.petersen@oracle.com>
+
+diff --git a/drivers/scsi/aic7xxx/aic7xxx_core.c b/drivers/scsi/aic7xxx/aic7xxx_core.c
+index f3362f4ab16e..3993f15e7ff6 100644
+--- a/drivers/scsi/aic7xxx/aic7xxx_core.c
++++ b/drivers/scsi/aic7xxx/aic7xxx_core.c
+@@ -1666,7 +1666,7 @@ ahc_handle_scsiint(struct ahc_softc *ahc, u_int intstat)
+ 					printk("\tCRC Value Mismatch\n");
+ 				if ((sstat2 & CRCENDERR) != 0)
+ 					printk("\tNo terminal CRC packet "
+-					       "recevied\n");
++					       "received\n");
+ 				if ((sstat2 & CRCREQERR) != 0)
+ 					printk("\tIllegal CRC packet "
+ 					       "request\n");

@@ -1,0 +1,38 @@
+['3c168909002eac649fb8b803d6a9babe758ec7c2', '299.txt', 'Typo']
+commit 3c168909002eac649fb8b803d6a9babe758ec7c2
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Sat Sep 29 12:43:13 2018 +0100
+
+    usb: gadget: fix spelling mistakeis "[En]queing" -> "[En]queuing"
+    
+    Trivial fix to spelling mistakes in debug warning messages
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/usb/gadget/udc/aspeed-vhub/epn.c b/drivers/usb/gadget/udc/aspeed-vhub/epn.c
+index 5939eb1e97f2..4a28e3fbeb0b 100644
+--- a/drivers/usb/gadget/udc/aspeed-vhub/epn.c
++++ b/drivers/usb/gadget/udc/aspeed-vhub/epn.c
+@@ -353,7 +353,7 @@ static int ast_vhub_epn_queue(struct usb_ep* u_ep, struct usb_request *u_req,
+ 	/* Endpoint enabled ? */
+ 	if (!ep->epn.enabled || !u_ep->desc || !ep->dev || !ep->d_idx ||
+ 	    !ep->dev->enabled || ep->dev->suspended) {
+-		EPDBG(ep,"Enqueing request on wrong or disabled EP\n");
++		EPDBG(ep, "Enqueuing request on wrong or disabled EP\n");
+ 		return -ESHUTDOWN;
+ 	}
+ 
+diff --git a/drivers/usb/gadget/udc/udc-xilinx.c b/drivers/usb/gadget/udc/udc-xilinx.c
+index 6407e433bc78..b1f4104d1283 100644
+--- a/drivers/usb/gadget/udc/udc-xilinx.c
++++ b/drivers/usb/gadget/udc/udc-xilinx.c
+@@ -1078,7 +1078,7 @@ static int xudc_ep_queue(struct usb_ep *_ep, struct usb_request *_req,
+ 	unsigned long flags;
+ 
+ 	if (!ep->desc) {
+-		dev_dbg(udc->dev, "%s:queing request to disabled %s\n",
++		dev_dbg(udc->dev, "%s: queuing request to disabled %s\n",
+ 			__func__, ep->name);
+ 		return -ESHUTDOWN;
+ 	}

@@ -1,0 +1,264 @@
+['7eb6ce2f272336ff8337f40fa8668fa04dc2d684', '50.txt', 'FixFormatSpecifier']
+commit 7eb6ce2f272336ff8337f40fa8668fa04dc2d684
+Author: Rob Herring <robh@kernel.org>
+Date:   Tue Jul 18 16:43:03 2017 -0500
+
+    gpio: Convert to using %pOF instead of full_name
+    
+    Now that we have a custom printf format specifier, convert users of
+    full_name to use %pOF instead. This is preparation to remove storing
+    of the full path string for each node.
+    
+    Signed-off-by: Rob Herring <robh@kernel.org>
+    Cc: Tien Hock Loh <thloh@altera.com>
+    Cc: Linus Walleij <linus.walleij@linaro.org>
+    Cc: Alexandre Courbot <gnurou@gmail.com>
+    Cc: Brian Norris <computersforpeace@gmail.com>
+    Cc: Florian Fainelli <f.fainelli@gmail.com>
+    Cc: bcm-kernel-feedback-list@broadcom.com
+    Cc: Michal Simek <michal.simek@xilinx.com>
+    Cc: "Sören Brinkmann" <soren.brinkmann@xilinx.com>
+    Cc: linux-gpio@vger.kernel.org
+    Cc: linux-arm-kernel@lists.infradead.org
+    Acked-by: Gregory Fong <gregory.0xf0@gmail.com>
+    Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+
+diff --git a/drivers/gpio/gpio-altera.c b/drivers/gpio/gpio-altera.c
+index 17485dc20384..ccc02ed65b3c 100644
+--- a/drivers/gpio/gpio-altera.c
++++ b/drivers/gpio/gpio-altera.c
+@@ -324,8 +324,8 @@ static int altera_gpio_probe(struct platform_device *pdev)
+ 	return 0;
+ teardown:
+ 	of_mm_gpiochip_remove(&altera_gc->mmchip);
+-	pr_err("%s: registration failed with status %d\n",
+-		node->full_name, ret);
++	pr_err("%pOF: registration failed with status %d\n",
++		node, ret);
+ 
+ 	return ret;
+ }
+diff --git a/drivers/gpio/gpio-brcmstb.c b/drivers/gpio/gpio-brcmstb.c
+index e6489143721a..73f2c3be4657 100644
+--- a/drivers/gpio/gpio-brcmstb.c
++++ b/drivers/gpio/gpio-brcmstb.c
+@@ -483,7 +483,7 @@ static int brcmstb_gpio_probe(struct platform_device *pdev)
+ 
+ 		gc->of_node = np;
+ 		gc->owner = THIS_MODULE;
+-		gc->label = np->full_name;
++		gc->label = devm_kasprintf(dev, GFP_KERNEL, "%pOF", dev->of_node);
+ 		gc->base = gpio_base;
+ 		gc->of_gpio_n_cells = 2;
+ 		gc->of_xlate = brcmstb_gpio_of_xlate;
+diff --git a/drivers/gpio/gpio-ge.c b/drivers/gpio/gpio-ge.c
+index 8650b2916f87..6f5a7fe9787d 100644
+--- a/drivers/gpio/gpio-ge.c
++++ b/drivers/gpio/gpio-ge.c
+@@ -76,8 +76,7 @@ static int __init gef_gpio_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	/* Setup pointers to chip functions */
+-	gc->label = devm_kstrdup(&pdev->dev, pdev->dev.of_node->full_name,
+-				     GFP_KERNEL);
++	gc->label = devm_kasprintf(&pdev->dev, GFP_KERNEL, "%pOF", pdev->dev.of_node);
+ 	if (!gc->label) {
+ 		ret = -ENOMEM;
+ 		goto err0;
+@@ -96,8 +95,7 @@ static int __init gef_gpio_probe(struct platform_device *pdev)
+ 	return 0;
+ err0:
+ 	iounmap(regs);
+-	pr_err("%s: GPIO chip registration failed\n",
+-			pdev->dev.of_node->full_name);
++	pr_err("%pOF: GPIO chip registration failed\n", pdev->dev.of_node);
+ 	return ret;
+ };
+ 
+diff --git a/drivers/gpio/gpio-grgpio.c b/drivers/gpio/gpio-grgpio.c
+index 7847dd34f86f..6544a16ab02e 100644
+--- a/drivers/gpio/gpio-grgpio.c
++++ b/drivers/gpio/gpio-grgpio.c
+@@ -367,7 +367,7 @@ static int grgpio_probe(struct platform_device *ofdev)
+ 	gc->of_node = np;
+ 	gc->owner = THIS_MODULE;
+ 	gc->to_irq = grgpio_to_irq;
+-	gc->label = np->full_name;
++	gc->label = devm_kasprintf(&ofdev->dev, GFP_KERNEL, "%pOF", np);
+ 	gc->base = -1;
+ 
+ 	err = of_property_read_u32(np, "nbits", &prop);
+diff --git a/drivers/gpio/gpio-mpc8xxx.c b/drivers/gpio/gpio-mpc8xxx.c
+index 793518a30afe..8c93dec498fa 100644
+--- a/drivers/gpio/gpio-mpc8xxx.c
++++ b/drivers/gpio/gpio-mpc8xxx.c
+@@ -348,8 +348,8 @@ static int mpc8xxx_probe(struct platform_device *pdev)
+ 
+ 	ret = gpiochip_add_data(gc, mpc8xxx_gc);
+ 	if (ret) {
+-		pr_err("%s: GPIO chip registration failed with status %d\n",
+-		       np->full_name, ret);
++		pr_err("%pOF: GPIO chip registration failed with status %d\n",
++		       np, ret);
+ 		goto err;
+ 	}
+ 
+diff --git a/drivers/gpio/gpio-tb10x.c b/drivers/gpio/gpio-tb10x.c
+index 80b6959ae995..091ffaaec635 100644
+--- a/drivers/gpio/gpio-tb10x.c
++++ b/drivers/gpio/gpio-tb10x.c
+@@ -191,7 +191,8 @@ static int tb10x_gpio_probe(struct platform_device *pdev)
+ 	if (IS_ERR(tb10x_gpio->base))
+ 		return PTR_ERR(tb10x_gpio->base);
+ 
+-	tb10x_gpio->gc.label		= of_node_full_name(dn);
++	tb10x_gpio->gc.label		=
++		devm_kasprintf(&pdev->dev, GFP_KERNEL, "%pOF", pdev->dev.of_node);
+ 	tb10x_gpio->gc.parent		= &pdev->dev;
+ 	tb10x_gpio->gc.owner		= THIS_MODULE;
+ 	tb10x_gpio->gc.direction_input	= tb10x_gpio_direction_in;
+diff --git a/drivers/gpio/gpio-tz1090.c b/drivers/gpio/gpio-tz1090.c
+index ca958e0f6909..22c5be65051f 100644
+--- a/drivers/gpio/gpio-tz1090.c
++++ b/drivers/gpio/gpio-tz1090.c
+@@ -527,13 +527,12 @@ static void tz1090_gpio_register_banks(struct tz1090_gpio *priv)
+ 
+ 		ret = of_property_read_u32(node, "reg", &addr);
+ 		if (ret) {
+-			dev_err(priv->dev, "invalid reg on %s\n",
+-				node->full_name);
++			dev_err(priv->dev, "invalid reg on %pOF\n", node);
+ 			continue;
+ 		}
+ 		if (addr >= 3) {
+-			dev_err(priv->dev, "index %u in %s out of range\n",
+-				addr, node->full_name);
++			dev_err(priv->dev, "index %u in %pOF out of range\n",
++				addr, node);
+ 			continue;
+ 		}
+ 
+@@ -543,8 +542,7 @@ static void tz1090_gpio_register_banks(struct tz1090_gpio *priv)
+ 
+ 		ret = tz1090_gpio_bank_probe(&info);
+ 		if (ret) {
+-			dev_err(priv->dev, "failure registering %s\n",
+-				node->full_name);
++			dev_err(priv->dev, "failure registering %pOF\n", node);
+ 			of_node_put(node);
+ 			continue;
+ 		}
+diff --git a/drivers/gpio/gpio-xilinx.c b/drivers/gpio/gpio-xilinx.c
+index 14b2a62338ea..e8ec0e33a0a9 100644
+--- a/drivers/gpio/gpio-xilinx.c
++++ b/drivers/gpio/gpio-xilinx.c
+@@ -360,8 +360,8 @@ static int xgpio_probe(struct platform_device *pdev)
+ 	/* Call the OF gpio helper to setup and register the GPIO device */
+ 	status = of_mm_gpiochip_add_data(np, &chip->mmchip, chip);
+ 	if (status) {
+-		pr_err("%s: error in probe function with status %d\n",
+-		       np->full_name, status);
++		pr_err("%pOF: error in probe function with status %d\n",
++		       np, status);
+ 		return status;
+ 	}
+ 
+diff --git a/drivers/gpio/gpiolib-of.c b/drivers/gpio/gpiolib-of.c
+index 54ce8dc58ad0..8cde02ed5fd5 100644
+--- a/drivers/gpio/gpiolib-of.c
++++ b/drivers/gpio/gpiolib-of.c
+@@ -78,8 +78,8 @@ struct gpio_desc *of_get_named_gpiod_flags(struct device_node *np,
+ 	ret = of_parse_phandle_with_args(np, propname, "#gpio-cells", index,
+ 					 &gpiospec);
+ 	if (ret) {
+-		pr_debug("%s: can't parse '%s' property of node '%s[%d]'\n",
+-			__func__, propname, np->full_name, index);
++		pr_debug("%s: can't parse '%s' property of node '%pOF[%d]'\n",
++			__func__, propname, np, index);
+ 		return ERR_PTR(ret);
+ 	}
+ 
+@@ -93,8 +93,8 @@ struct gpio_desc *of_get_named_gpiod_flags(struct device_node *np,
+ 	if (IS_ERR(desc))
+ 		goto out;
+ 
+-	pr_debug("%s: parsed '%s' property of node '%s[%d]' - status (%d)\n",
+-		 __func__, propname, np->full_name, index,
++	pr_debug("%s: parsed '%s' property of node '%pOF[%d]' - status (%d)\n",
++		 __func__, propname, np, index,
+ 		 PTR_ERR_OR_ZERO(desc));
+ 
+ out:
+@@ -337,7 +337,7 @@ int of_mm_gpiochip_add_data(struct device_node *np,
+ 	int ret = -ENOMEM;
+ 	struct gpio_chip *gc = &mm_gc->gc;
+ 
+-	gc->label = kstrdup(np->full_name, GFP_KERNEL);
++	gc->label = kasprintf(GFP_KERNEL, "%pOF", np);
+ 	if (!gc->label)
+ 		goto err0;
+ 
+@@ -362,8 +362,7 @@ int of_mm_gpiochip_add_data(struct device_node *np,
+ err1:
+ 	kfree(gc->label);
+ err0:
+-	pr_err("%s: GPIO chip registration failed with status %d\n",
+-	       np->full_name, ret);
++	pr_err("%pOF: GPIO chip registration failed with status %d\n", np, ret);
+ 	return ret;
+ }
+ EXPORT_SYMBOL(of_mm_gpiochip_add_data);
+@@ -418,8 +417,8 @@ static int of_gpiochip_add_pin_range(struct gpio_chip *chip)
+ 						group_names_propname,
+ 						index, &name);
+ 				if (strlen(name)) {
+-					pr_err("%s: Group name of numeric GPIO ranges must be the empty string.\n",
+-						np->full_name);
++					pr_err("%pOF: Group name of numeric GPIO ranges must be the empty string.\n",
++						np);
+ 					break;
+ 				}
+ 			}
+@@ -434,14 +433,14 @@ static int of_gpiochip_add_pin_range(struct gpio_chip *chip)
+ 		} else {
+ 			/* npins == 0: special range */
+ 			if (pinspec.args[1]) {
+-				pr_err("%s: Illegal gpio-range format.\n",
+-					np->full_name);
++				pr_err("%pOF: Illegal gpio-range format.\n",
++					np);
+ 				break;
+ 			}
+ 
+ 			if (!group_names) {
+-				pr_err("%s: GPIO group range requested but no %s property.\n",
+-					np->full_name, group_names_propname);
++				pr_err("%pOF: GPIO group range requested but no %s property.\n",
++					np, group_names_propname);
+ 				break;
+ 			}
+ 
+@@ -452,8 +451,8 @@ static int of_gpiochip_add_pin_range(struct gpio_chip *chip)
+ 				break;
+ 
+ 			if (!strlen(name)) {
+-				pr_err("%s: Group name of GPIO group range cannot be the empty string.\n",
+-				np->full_name);
++				pr_err("%pOF: Group name of GPIO group range cannot be the empty string.\n",
++				np);
+ 				break;
+ 			}
+ 
+diff --git a/drivers/gpio/gpiolib.c b/drivers/gpio/gpiolib.c
+index 92a5503f739d..528539d31274 100644
+--- a/drivers/gpio/gpiolib.c
++++ b/drivers/gpio/gpiolib.c
+@@ -1787,7 +1787,7 @@ int gpiochip_irqchip_add_key(struct gpio_chip *gpiochip,
+ 	 * conflicting triggers. Tell the user, and reset to NONE.
+ 	 */
+ 	if (WARN(of_node && type != IRQ_TYPE_NONE,
+-		 "%s: Ignoring %d default trigger\n", of_node->full_name, type))
++		 "%pOF: Ignoring %d default trigger\n", of_node, type))
+ 		type = IRQ_TYPE_NONE;
+ 	if (has_acpi_companion(gpiochip->parent) && type != IRQ_TYPE_NONE) {
+ 		acpi_handle_warn(ACPI_HANDLE(gpiochip->parent),

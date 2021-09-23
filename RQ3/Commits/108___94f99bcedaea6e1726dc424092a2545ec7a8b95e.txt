@@ -1,0 +1,26 @@
+['94f99bcedaea6e1726dc424092a2545ec7a8b95e', '883.txt', 'NullPtr']
+commit 94f99bcedaea6e1726dc424092a2545ec7a8b95e
+Author: Antti Keränen <detegr@gmail.com>
+Date:   Thu Apr 4 15:44:17 2019 +0300
+
+    staging: mt7621-pci-phy: prevent use of uninitialized variable
+    
+    Do not use uninitialized variable 'port' when printing an error message
+    
+    Signed-off-by: Antti Keränen <detegr@gmail.com>
+    Reviewed-by: Sergio Paracuellos <sergio.paracuellos@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/mt7621-pci-phy/pci-mt7621-phy.c b/drivers/staging/mt7621-pci-phy/pci-mt7621-phy.c
+index 118302c122ee..aa3ae7777632 100644
+--- a/drivers/staging/mt7621-pci-phy/pci-mt7621-phy.c
++++ b/drivers/staging/mt7621-pci-phy/pci-mt7621-phy.c
+@@ -331,7 +331,7 @@ static int mt7621_pci_phy_probe(struct platform_device *pdev)
+ 
+ 	ret = of_address_to_resource(np, 0, &res);
+ 	if (ret) {
+-		dev_err(dev, "failed to get address resource(id-%d)\n", port);
++		dev_err(dev, "failed to get address resource\n");
+ 		return ret;
+ 	}
+ 

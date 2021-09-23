@@ -1,0 +1,24 @@
+['13c240ef95e6569956ba9c731a650cecb3603f0e', '521.txt', 'Typo']
+commit 13c240ef95e6569956ba9c731a650cecb3603f0e
+Author: Alexandre Demers <alexandre.f.demers@gmail.com>
+Date:   Thu Jan 7 19:22:44 2016 -0500
+
+    drm/radeon: fix trivial typo in warning message
+    
+    Reviewed-by: Christian König <christian.koenig@amd.com>
+    Signed-off-by: Alexandre Demers <alexandre.f.demers@gmail.com>
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+diff --git a/drivers/gpu/drm/radeon/radeon_device.c b/drivers/gpu/drm/radeon/radeon_device.c
+index d690df545b4d..902b59cebac5 100644
+--- a/drivers/gpu/drm/radeon/radeon_device.c
++++ b/drivers/gpu/drm/radeon/radeon_device.c
+@@ -1150,7 +1150,7 @@ static void radeon_check_arguments(struct radeon_device *rdev)
+ 	}
+ 
+ 	if (radeon_vm_size < 1) {
+-		dev_warn(rdev->dev, "VM size (%d) to small, min is 1GB\n",
++		dev_warn(rdev->dev, "VM size (%d) too small, min is 1GB\n",
+ 			 radeon_vm_size);
+ 		radeon_vm_size = 4;
+ 	}

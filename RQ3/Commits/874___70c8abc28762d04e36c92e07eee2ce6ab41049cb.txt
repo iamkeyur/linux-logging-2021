@@ -1,0 +1,29 @@
+['70c8abc28762d04e36c92e07eee2ce6ab41049cb', '95.txt', 'AddInfo']
+commit 70c8abc28762d04e36c92e07eee2ce6ab41049cb
+Author: Catalin Marinas <catalin.marinas@arm.com>
+Date:   Fri Feb 19 14:28:58 2016 +0000
+
+    arm64: User die() instead of panic() in do_page_fault()
+    
+    The former gives better error reporting on unhandled permission faults
+    (introduced by the UAO patches).
+    
+    Signed-off-by: Catalin Marinas <catalin.marinas@arm.com>
+
+diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
+index a8eafeceb08a..44e56de23f79 100644
+--- a/arch/arm64/mm/fault.c
++++ b/arch/arm64/mm/fault.c
+@@ -235,10 +235,10 @@ static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
+ 
+ 	if (permission_fault(esr) && (addr < USER_DS)) {
+ 		if (get_fs() == KERNEL_DS)
+-			panic("Accessing user space memory with fs=KERNEL_DS");
++			die("Accessing user space memory with fs=KERNEL_DS", regs, esr);
+ 
+ 		if (!search_exception_tables(regs->pc))
+-			panic("Accessing user space memory outside uaccess.h routines");
++			die("Accessing user space memory outside uaccess.h routines", regs, esr);
+ 	}
+ 
+ 	/*

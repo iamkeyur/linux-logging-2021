@@ -1,0 +1,27 @@
+['6dae61627d1004895bfcee81d24482ec64cbecc5', '942.txt', 'FixFormatSpecifier']
+commit 6dae61627d1004895bfcee81d24482ec64cbecc5
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Wed Jul 13 08:36:03 2016 +0100
+
+    drm/amdkfd: print doorbell offset as a hex value
+    
+    The doorbell offset is formatted with a 0x prefix to suggest it is
+    a hexadecimal value, when in fact %d is being used and this is confusing.
+    Use %X instead to match the proceeding 0x prefix.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Oded Gabbay <oded.gabbay@gmail.com>
+
+diff --git a/drivers/gpu/drm/amd/amdkfd/kfd_doorbell.c b/drivers/gpu/drm/amd/amdkfd/kfd_doorbell.c
+index e621eba63126..a7d3cb3fead0 100644
+--- a/drivers/gpu/drm/amd/amdkfd/kfd_doorbell.c
++++ b/drivers/gpu/drm/amd/amdkfd/kfd_doorbell.c
+@@ -184,7 +184,7 @@ u32 __iomem *kfd_get_kernel_doorbell(struct kfd_dev *kfd,
+ 							sizeof(u32)) + inx;
+ 
+ 	pr_debug("kfd: get kernel queue doorbell\n"
+-			 "     doorbell offset   == 0x%08d\n"
++			 "     doorbell offset   == 0x%08X\n"
+ 			 "     kernel address    == 0x%08lX\n",
+ 		*doorbell_off, (uintptr_t)(kfd->doorbell_kernel_ptr + inx));
+ 

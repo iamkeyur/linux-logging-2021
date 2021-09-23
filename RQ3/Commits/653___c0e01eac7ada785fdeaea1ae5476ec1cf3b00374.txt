@@ -1,0 +1,45 @@
+['c0e01eac7ada785fdeaea1ae5476ec1cf3b00374', '279.txt', 'NullPtr']
+commit c0e01eac7ada785fdeaea1ae5476ec1cf3b00374
+Author: Ido Schimmel <idosch@mellanox.com>
+Date:   Thu May 18 13:03:52 2017 +0200
+
+    mlxsw: spectrum: Avoid possible NULL pointer dereference
+    
+    In case we got an FDB notification for a port that doesn't exist we
+    execute an FDB entry delete to prevent it from re-appearing the next
+    time we poll for notifications.
+    
+    If the operation failed we would trigger a NULL pointer dereference as
+    'mlxsw_sp_port' is NULL.
+    
+    Fix it by reporting the error using the underlying bus device instead.
+    
+    Fixes: 12f1501e7511 ("mlxsw: spectrum: remove FDB entry in case we get unknown object notification")
+    Signed-off-by: Ido Schimmel <idosch@mellanox.com>
+    Signed-off-by: Jiri Pirko <jiri@mellanox.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/ethernet/mellanox/mlxsw/spectrum_switchdev.c b/drivers/net/ethernet/mellanox/mlxsw/spectrum_switchdev.c
+index 0d8411f1f954..f4bb0c0b7c1d 100644
+--- a/drivers/net/ethernet/mellanox/mlxsw/spectrum_switchdev.c
++++ b/drivers/net/ethernet/mellanox/mlxsw/spectrum_switchdev.c
+@@ -1497,8 +1497,7 @@ static void mlxsw_sp_fdb_notify_mac_process(struct mlxsw_sp *mlxsw_sp,
+ 	err = mlxsw_sp_port_fdb_uc_op(mlxsw_sp, local_port, mac, fid,
+ 				      adding, true);
+ 	if (err) {
+-		if (net_ratelimit())
+-			netdev_err(mlxsw_sp_port->dev, "Failed to set FDB entry\n");
++		dev_err_ratelimited(mlxsw_sp->bus_info->dev, "Failed to set FDB entry\n");
+ 		return;
+ 	}
+ 
+@@ -1558,8 +1557,7 @@ static void mlxsw_sp_fdb_notify_mac_lag_process(struct mlxsw_sp *mlxsw_sp,
+ 	err = mlxsw_sp_port_fdb_uc_lag_op(mlxsw_sp, lag_id, mac, fid, lag_vid,
+ 					  adding, true);
+ 	if (err) {
+-		if (net_ratelimit())
+-			netdev_err(mlxsw_sp_port->dev, "Failed to set FDB entry\n");
++		dev_err_ratelimited(mlxsw_sp->bus_info->dev, "Failed to set FDB entry\n");
+ 		return;
+ 	}
+ 

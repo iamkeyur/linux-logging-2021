@@ -1,0 +1,24 @@
+['e966a725c0d87cc6a591ca3cfe04aaefc9e09ea6', '910.txt', 'LogLevel']
+commit e966a725c0d87cc6a591ca3cfe04aaefc9e09ea6
+Author: Shaoyun Liu <Shaoyun.Liu@amd.com>
+Date:   Thu Feb 1 16:45:26 2018 -0500
+
+    drm/amdgpu: Enable ip block bit mask print out info by default
+    
+    Signed-off-by: Shaoyun Liu <Shaoyun.Liu@amd.com>
+    Reviewed-by: Christian Konig <christian.koenig@amd.com>
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_device.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_device.c
+index 2ad9de42b65b..628ed92fe9a2 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_device.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_device.c
+@@ -1036,7 +1036,7 @@ int amdgpu_device_ip_block_add(struct amdgpu_device *adev,
+ 	if (!ip_block_version)
+ 		return -EINVAL;
+ 
+-	DRM_DEBUG("add ip block number %d <%s>\n", adev->num_ip_blocks,
++	DRM_INFO("add ip block number %d <%s>\n", adev->num_ip_blocks,
+ 		  ip_block_version->funcs->name);
+ 
+ 	adev->ip_blocks[adev->num_ip_blocks++].version = ip_block_version;

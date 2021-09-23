@@ -1,0 +1,28 @@
+['30b7c6147d18d77c6120a8f689d04d2518d3f5e4', '759.txt', 'LogLevel']
+commit 30b7c6147d18d77c6120a8f689d04d2518d3f5e4
+Author: Harry Wentland <harry.wentland@amd.com>
+Date:   Thu Oct 26 15:35:14 2017 -0400
+
+    drm/amd/display: Don't print error when bo_pin is interrupted
+    
+    v2: Also don't print for ERESTARTSYS or EAGAIN
+    v3: Best practice is to only ignore ERESTARTSYS
+    
+    Signed-off-by: Harry Wentland <harry.wentland@amd.com>
+    Reviewed-by: Christian König <christian.koenig@amd.com>
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+diff --git a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
+index fd3e995fc426..b94987bb6af9 100644
+--- a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
++++ b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
+@@ -2923,7 +2923,8 @@ static int dm_plane_helper_prepare_fb(struct drm_plane *plane,
+ 	amdgpu_bo_unreserve(rbo);
+ 
+ 	if (unlikely(r != 0)) {
+-		DRM_ERROR("Failed to pin framebuffer\n");
++		if (r != -ERESTARTSYS)
++			DRM_ERROR("Failed to pin framebuffer with error %d\n", r);
+ 		return r;
+ 	}
+ 

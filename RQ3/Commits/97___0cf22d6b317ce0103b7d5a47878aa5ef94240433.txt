@@ -1,0 +1,34 @@
+['0cf22d6b317ce0103b7d5a47878aa5ef94240433', '897.txt', 'Mislead/Ambiguous']
+commit 0cf22d6b317ce0103b7d5a47878aa5ef94240433
+Author: Jakub Kicinski <jakub.kicinski@netronome.com>
+Date:   Fri Apr 20 12:56:36 2018 -0500
+
+    PCI: Add "PCIe" to pcie_print_link_status() messages
+    
+    Currently the pcie_print_link_status() will print PCIe bandwidth and link
+    width information but does not mention it is pertaining to the PCIe.  Since
+    this and related functions are used exclusively by networking drivers today
+    users may get confused into thinking that it's the NIC bandwidth that is
+    being talked about.  Insert a "PCIe" into the messages.
+    
+    Signed-off-by: Jakub Kicinski <jakub.kicinski@netronome.com>
+    Signed-off-by: Bjorn Helgaas <bhelgaas@google.com>
+
+diff --git a/drivers/pci/pci.c b/drivers/pci/pci.c
+index e597655a5643..a04197ce767d 100644
+--- a/drivers/pci/pci.c
++++ b/drivers/pci/pci.c
+@@ -5273,11 +5273,11 @@ void pcie_print_link_status(struct pci_dev *dev)
+ 	bw_avail = pcie_bandwidth_available(dev, &limiting_dev, &speed, &width);
+ 
+ 	if (bw_avail >= bw_cap)
+-		pci_info(dev, "%u.%03u Gb/s available bandwidth (%s x%d link)\n",
++		pci_info(dev, "%u.%03u Gb/s available PCIe bandwidth (%s x%d link)\n",
+ 			 bw_cap / 1000, bw_cap % 1000,
+ 			 PCIE_SPEED2STR(speed_cap), width_cap);
+ 	else
+-		pci_info(dev, "%u.%03u Gb/s available bandwidth, limited by %s x%d link at %s (capable of %u.%03u Gb/s with %s x%d link)\n",
++		pci_info(dev, "%u.%03u Gb/s available PCIe bandwidth, limited by %s x%d link at %s (capable of %u.%03u Gb/s with %s x%d link)\n",
+ 			 bw_avail / 1000, bw_avail % 1000,
+ 			 PCIE_SPEED2STR(speed), width,
+ 			 limiting_dev ? pci_name(limiting_dev) : "<unknown>",

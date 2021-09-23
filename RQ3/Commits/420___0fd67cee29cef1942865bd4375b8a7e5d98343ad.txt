@@ -1,0 +1,26 @@
+['0fd67cee29cef1942865bd4375b8a7e5d98343ad', '541.txt', 'Typo']
+commit 0fd67cee29cef1942865bd4375b8a7e5d98343ad
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Fri Sep 2 09:45:25 2016 +0100
+
+    ASoC: Intel: sst: fix to spelling mistake: "susupend" -> "suspend"
+    
+    trivial fix to spelling mistake in dev_err message and replace "cant"
+    with "can't"
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/sound/soc/intel/atom/sst/sst.c b/sound/soc/intel/atom/sst/sst.c
+index 498b5f7fba4c..9b6e27385dc9 100644
+--- a/sound/soc/intel/atom/sst/sst.c
++++ b/sound/soc/intel/atom/sst/sst.c
+@@ -442,7 +442,7 @@ static int intel_sst_suspend(struct device *dev)
+ 		struct stream_info *stream = &ctx->streams[i];
+ 
+ 		if (stream->status == STREAM_RUNNING) {
+-			dev_err(dev, "stream %d is running, cant susupend, abort\n", i);
++			dev_err(dev, "stream %d is running, can't suspend, abort\n", i);
+ 			return -EBUSY;
+ 		}
+ 	}

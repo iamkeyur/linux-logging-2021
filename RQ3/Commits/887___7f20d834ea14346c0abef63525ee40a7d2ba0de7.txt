@@ -1,0 +1,33 @@
+['7f20d834ea14346c0abef63525ee40a7d2ba0de7', '1513.txt', 'LogLevel']
+commit 7f20d834ea14346c0abef63525ee40a7d2ba0de7
+Author: Andrew Lunn <andrew@lunn.ch>
+Date:   Wed Mar 28 23:50:29 2018 +0200
+
+    net: dsa: mv88e6xxx: Make VTU miss violations less spammy
+    
+    VTU miss violations can happen under normal conditions. Don't spam the
+    kernel log, downgrade the output to debug level only. The statistics
+    counter will indicate it is happening, if anybody not debugging is
+    interested.
+    
+    Signed-off-by: Andrew Lunn <andrew@lunn.ch>
+    Reported-by: Florian Fainelli <f.fainelli@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/drivers/net/dsa/mv88e6xxx/global1_vtu.c b/drivers/net/dsa/mv88e6xxx/global1_vtu.c
+index 2cbaf946e7ed..058326924f3e 100644
+--- a/drivers/net/dsa/mv88e6xxx/global1_vtu.c
++++ b/drivers/net/dsa/mv88e6xxx/global1_vtu.c
+@@ -548,10 +548,11 @@ static irqreturn_t mv88e6xxx_g1_vtu_prob_irq_thread_fn(int irq, void *dev_id)
+ 	}
+ 
+ 	if (val & MV88E6XXX_G1_VTU_OP_MISS_VIOLATION) {
+-		dev_err_ratelimited(chip->dev, "VTU miss violation for vid %d, source port %d\n",
++		dev_dbg_ratelimited(chip->dev, "VTU miss violation for vid %d, source port %d\n",
+ 				    entry.vid, spid);
+ 		chip->ports[spid].vtu_miss_violation++;
+ 	}
++
+ 	mutex_unlock(&chip->reg_lock);
+ 
+ 	return IRQ_HANDLED;

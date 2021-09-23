@@ -1,0 +1,27 @@
+['de70b2a581125a8a627db6fdc1d7f9c05536fe84', '486.txt', 'Typo']
+commit de70b2a581125a8a627db6fdc1d7f9c05536fe84
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu Mar 28 09:28:16 2019 +0000
+
+    ASoC: fsl: fix spelling mistake: "missign" -> "missing"
+    
+    There is a spelling mistake in a dev_err message. Fix this.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Reviewed-by: Mukesh Ojha <mojha@codeaurora.org>
+    Acked-by: Viorel Suman <viorel.suman@nxp.com>
+    Signed-off-by: Mark Brown <broonie@kernel.org>
+
+diff --git a/sound/soc/fsl/imx-audmix.c b/sound/soc/fsl/imx-audmix.c
+index 72e37ca6cfbb..7983bd339c01 100644
+--- a/sound/soc/fsl/imx-audmix.c
++++ b/sound/soc/fsl/imx-audmix.c
+@@ -161,7 +161,7 @@ static int imx_audmix_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	if (!audmix_np) {
+-		dev_err(&pdev->dev, "Missign DT node for parent device.\n");
++		dev_err(&pdev->dev, "Missing DT node for parent device.\n");
+ 		return -EINVAL;
+ 	}
+ 

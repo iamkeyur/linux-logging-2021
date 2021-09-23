@@ -1,0 +1,33 @@
+['695eaa3b60a0a9a2baf41241e60b589efb6479ee', '711.txt', 'AddInfo']
+commit 695eaa3b60a0a9a2baf41241e60b589efb6479ee
+Author: Chris Wilson <chris@chris-wilson.co.uk>
+Date:   Sun Apr 23 18:06:19 2017 +0100
+
+    drm/i915: Include interesting seqno in the missed breadcrumb debug
+    
+    Knowing the neighbouring seqno (current on hw, last submitted to hw)
+    provide some useful breadcrumbs to the debug log.
+    
+    Signed-off-by: Chris Wilson <chris@chris-wilson.co.uk>
+    Link: http://patchwork.freedesktop.org/patch/msgid/20170423170619.7156-4-chris@chris-wilson.co.uk
+    Reviewed-by: Mika Kuoppala <mika.kuoppala@intel.com>
+
+diff --git a/drivers/gpu/drm/i915/intel_breadcrumbs.c b/drivers/gpu/drm/i915/intel_breadcrumbs.c
+index 9ccbf26124c6..35da5928bd8a 100644
+--- a/drivers/gpu/drm/i915/intel_breadcrumbs.c
++++ b/drivers/gpu/drm/i915/intel_breadcrumbs.c
+@@ -64,10 +64,12 @@ static unsigned long wait_timeout(void)
+ 
+ static noinline void missed_breadcrumb(struct intel_engine_cs *engine)
+ {
+-	DRM_DEBUG_DRIVER("%s missed breadcrumb at %pF, irq posted? %s\n",
++	DRM_DEBUG_DRIVER("%s missed breadcrumb at %pF, irq posted? %s, current seqno=%x, last=%x\n",
+ 			 engine->name, __builtin_return_address(0),
+ 			 yesno(test_bit(ENGINE_IRQ_BREADCRUMB,
+-					&engine->irq_posted)));
++					&engine->irq_posted)),
++			 intel_engine_get_seqno(engine),
++			 intel_engine_last_submit(engine));
+ 
+ 	set_bit(engine->id, &engine->i915->gpu_error.missed_irq_rings);
+ }

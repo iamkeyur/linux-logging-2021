@@ -1,0 +1,41 @@
+['4ffa66992476c94d8b4d33b2c792d336a400ada2', '130.txt', 'AddInfo']
+commit 4ffa66992476c94d8b4d33b2c792d336a400ada2
+Author: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
+Date:   Thu Jun 30 11:56:38 2016 -0700
+
+    torture: Add task state to writer-task stall printk()s
+    
+    This commit adds a dump of the scheduler state for stalled rcutorture
+    writer tasks.  This addition provides yet more debug for the intermittent
+    "failures to proceed", where grace periods move ahead but the rcutorture
+    writer tasks fail to do so.
+    
+    Signed-off-by: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
+
+diff --git a/kernel/rcu/rcutorture.c b/kernel/rcu/rcutorture.c
+index 971e2b138063..f0f32f888ec5 100644
+--- a/kernel/rcu/rcutorture.c
++++ b/kernel/rcu/rcutorture.c
+@@ -1238,6 +1238,7 @@ rcu_torture_stats_print(void)
+ 	long pipesummary[RCU_TORTURE_PIPE_LEN + 1] = { 0 };
+ 	long batchsummary[RCU_TORTURE_PIPE_LEN + 1] = { 0 };
+ 	static unsigned long rtcv_snap = ULONG_MAX;
++	struct task_struct *wtp;
+ 
+ 	for_each_possible_cpu(cpu) {
+ 		for (i = 0; i < RCU_TORTURE_PIPE_LEN + 1; i++) {
+@@ -1312,10 +1313,12 @@ rcu_torture_stats_print(void)
+ 
+ 		rcutorture_get_gp_data(cur_ops->ttype,
+ 				       &flags, &gpnum, &completed);
+-		pr_alert("??? Writer stall state %s(%d) g%lu c%lu f%#x\n",
++		wtp = READ_ONCE(writer_task);
++		pr_alert("??? Writer stall state %s(%d) g%lu c%lu f%#x ->state %#lx\n",
+ 			 rcu_torture_writer_state_getname(),
+ 			 rcu_torture_writer_state,
+-			 gpnum, completed, flags);
++			 gpnum, completed, flags,
++			 wtp == NULL ? ~0UL : wtp->state);
+ 		show_rcu_gp_kthreads();
+ 		rcu_ftrace_dump(DUMP_ALL);
+ 	}

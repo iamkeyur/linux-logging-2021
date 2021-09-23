@@ -1,0 +1,38 @@
+['58493d8e405e6ebe530d04f97bfe32724608c89e', '619.txt', 'Typo']
+commit 58493d8e405e6ebe530d04f97bfe32724608c89e
+Author: Nik Nyby <nikolas@gnu.org>
+Date:   Sun Mar 20 15:46:35 2016 -0400
+
+    staging: rtl8192u: fix typo in debug message
+    
+    This fixes a mis-spelled word in a few debug statements.
+    
+    Signed-off-by: Nik Nyby <nikolas@gnu.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/rtl8192u/ieee80211/ieee80211_rx.c b/drivers/staging/rtl8192u/ieee80211/ieee80211_rx.c
+index f18fc0b6775b..051c2be842d0 100644
+--- a/drivers/staging/rtl8192u/ieee80211/ieee80211_rx.c
++++ b/drivers/staging/rtl8192u/ieee80211/ieee80211_rx.c
+@@ -746,7 +746,7 @@ static void RxReorderIndicatePacket(struct ieee80211_device *ieee,
+ 
+ 		// Indicate packets
+ 		if(index>REORDER_WIN_SIZE){
+-			IEEE80211_DEBUG(IEEE80211_DL_ERR, "RxReorderIndicatePacket(): Rx Reorer buffer full!! \n");
++			IEEE80211_DEBUG(IEEE80211_DL_ERR, "RxReorderIndicatePacket(): Rx Reorder buffer full!! \n");
+ 			kfree(prxbIndicateArray);
+ 			return;
+ 		}
+diff --git a/drivers/staging/rtl8192u/ieee80211/rtl819x_TSProc.c b/drivers/staging/rtl8192u/ieee80211/rtl819x_TSProc.c
+index 148d0d45547b..6033502eff3d 100644
+--- a/drivers/staging/rtl8192u/ieee80211/rtl819x_TSProc.c
++++ b/drivers/staging/rtl8192u/ieee80211/rtl819x_TSProc.c
+@@ -75,7 +75,7 @@ static void RxPktPendingTimeout(unsigned long data)
+ 
+ 		// Indicate packets
+ 		if(index > REORDER_WIN_SIZE){
+-			IEEE80211_DEBUG(IEEE80211_DL_ERR, "RxReorderIndicatePacket(): Rx Reorer buffer full!! \n");
++			IEEE80211_DEBUG(IEEE80211_DL_ERR, "RxReorderIndicatePacket(): Rx Reorder buffer full!! \n");
+ 			spin_unlock_irqrestore(&(ieee->reorder_spinlock), flags);
+ 			return;
+ 		}

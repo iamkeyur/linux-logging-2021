@@ -1,0 +1,132 @@
+['0e0594edd86fc7d77f65f316cde78b2d1278fa35', '251.txt', 'ModernizeLog']
+commit 0e0594edd86fc7d77f65f316cde78b2d1278fa35
+Author: Simo Koskinen <koskisoft@gmail.com>
+Date:   Tue Aug 29 14:08:16 2017 +0200
+
+    staging: lustre: coding style fixes found by checkpatch.pl
+    
+    The patch removes "WARNING: Prefer using '"%s...", __func__'
+    to using 'xxxxxxxx', this function's name, in a string" warnings
+    reported by checkpatch.pl script.
+    
+    Signed-off-by: Simo Koskinen <koskisoft@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+diff --git a/drivers/staging/lustre/lnet/klnds/o2iblnd/o2iblnd.c b/drivers/staging/lustre/lnet/klnds/o2iblnd/o2iblnd.c
+index 0520f02f670d..64763aacda57 100644
+--- a/drivers/staging/lustre/lnet/klnds/o2iblnd/o2iblnd.c
++++ b/drivers/staging/lustre/lnet/klnds/o2iblnd/o2iblnd.c
+@@ -2936,7 +2936,7 @@ static int kiblnd_startup(struct lnet_ni *ni)
+ net_failed:
+ 	kiblnd_shutdown(ni);
+ 
+-	CDEBUG(D_NET, "kiblnd_startup failed\n");
++	CDEBUG(D_NET, "%s failed\n", __func__);
+ 	return -ENETDOWN;
+ }
+ 
+diff --git a/drivers/staging/lustre/lnet/lnet/lib-move.c b/drivers/staging/lustre/lnet/lnet/lib-move.c
+index d886504bc6cc..bc0779c02d97 100644
+--- a/drivers/staging/lustre/lnet/lnet/lib-move.c
++++ b/drivers/staging/lustre/lnet/lnet/lib-move.c
+@@ -2034,7 +2034,7 @@ LNetPut(lnet_nid_t self, struct lnet_handle_md mdh, enum lnet_ack_req ack,
+ 		return -ENOENT;
+ 	}
+ 
+-	CDEBUG(D_NET, "LNetPut -> %s\n", libcfs_id2str(target));
++	CDEBUG(D_NET, "%s -> %s\n", __func__, libcfs_id2str(target));
+ 
+ 	lnet_msg_attach_md(msg, md, 0, 0);
+ 
+@@ -2239,7 +2239,7 @@ LNetGet(lnet_nid_t self, struct lnet_handle_md mdh,
+ 		return -ENOENT;
+ 	}
+ 
+-	CDEBUG(D_NET, "LNetGet -> %s\n", libcfs_id2str(target));
++	CDEBUG(D_NET, "%s -> %s\n", __func__, libcfs_id2str(target));
+ 
+ 	lnet_msg_attach_md(msg, md, 0, 0);
+ 
+diff --git a/drivers/staging/lustre/lustre/ldlm/ldlm_flock.c b/drivers/staging/lustre/lustre/ldlm/ldlm_flock.c
+index 39433ac9fd57..d571b8b050d8 100644
+--- a/drivers/staging/lustre/lustre/ldlm/ldlm_flock.c
++++ b/drivers/staging/lustre/lustre/ldlm/ldlm_flock.c
+@@ -90,8 +90,8 @@ ldlm_flocks_overlap(struct ldlm_lock *lock, struct ldlm_lock *new)
+ static inline void
+ ldlm_flock_destroy(struct ldlm_lock *lock, enum ldlm_mode mode, __u64 flags)
+ {
+-	LDLM_DEBUG(lock, "ldlm_flock_destroy(mode: %d, flags: 0x%llx)",
+-		   mode, flags);
++	LDLM_DEBUG(lock, "%s(mode: %d, flags: 0x%llx)",
++		   __func__, mode, flags);
+ 
+ 	/* Safe to not lock here, since it should be empty anyway */
+ 	LASSERT(hlist_unhashed(&lock->l_exp_flock_hash));
+diff --git a/drivers/staging/lustre/lustre/ldlm/ldlm_lockd.c b/drivers/staging/lustre/lustre/ldlm/ldlm_lockd.c
+index 895d07d07177..e2707336586c 100644
+--- a/drivers/staging/lustre/lustre/ldlm/ldlm_lockd.c
++++ b/drivers/staging/lustre/lustre/ldlm/ldlm_lockd.c
+@@ -1138,7 +1138,7 @@ int ldlm_init(void)
+ void ldlm_exit(void)
+ {
+ 	if (ldlm_refcount)
+-		CERROR("ldlm_refcount is %d in ldlm_exit!\n", ldlm_refcount);
++		CERROR("ldlm_refcount is %d in %s!\n", ldlm_refcount, __func__);
+ 	kmem_cache_destroy(ldlm_resource_slab);
+ 	/* ldlm_lock_put() use RCU to call ldlm_lock_free, so need call
+ 	 * synchronize_rcu() to wait a grace period elapsed, so that
+diff --git a/drivers/staging/lustre/lustre/ldlm/ldlm_request.c b/drivers/staging/lustre/lustre/ldlm/ldlm_request.c
+index d96a3048bddc..f3bf238d0748 100644
+--- a/drivers/staging/lustre/lustre/ldlm/ldlm_request.c
++++ b/drivers/staging/lustre/lustre/ldlm/ldlm_request.c
+@@ -1663,7 +1663,7 @@ int ldlm_cli_cancel_list(struct list_head *cancels, int count,
+ 
+ 		if (res < 0) {
+ 			CDEBUG_LIMIT(res == -ESHUTDOWN ? D_DLMTRACE : D_ERROR,
+-				     "ldlm_cli_cancel_list: %d\n", res);
++				     "%s: %d\n", __func__, res);
+ 			res = count;
+ 		}
+ 
+diff --git a/drivers/staging/lustre/lustre/lov/lov_lock.c b/drivers/staging/lustre/lustre/lov/lov_lock.c
+index 7d0d3ea5a92a..e12dc5afc14f 100644
+--- a/drivers/staging/lustre/lustre/lov/lov_lock.c
++++ b/drivers/staging/lustre/lustre/lov/lov_lock.c
+@@ -264,8 +264,8 @@ static void lov_lock_cancel(const struct lu_env *env,
+ 			cl_lock_cancel(subenv->lse_env, sublock);
+ 		} else {
+ 			CL_LOCK_DEBUG(D_ERROR, env, slice->cls_lock,
+-				      "lov_lock_cancel fails with %ld.\n",
+-				      PTR_ERR(subenv));
++				      "%s fails with %ld.\n",
++				      __func__, PTR_ERR(subenv));
+ 		}
+ 	}
+ }
+diff --git a/drivers/staging/lustre/lustre/obdclass/lu_object.c b/drivers/staging/lustre/lustre/obdclass/lu_object.c
+index 304e9875abfb..09c98184a291 100644
+--- a/drivers/staging/lustre/lustre/obdclass/lu_object.c
++++ b/drivers/staging/lustre/lustre/obdclass/lu_object.c
+@@ -1409,9 +1409,9 @@ void lu_context_key_degister(struct lu_context_key *key)
+ 	 */
+ 	while (atomic_read(&key->lct_used) > 1) {
+ 		spin_unlock(&lu_keys_guard);
+-		CDEBUG(D_INFO, "lu_context_key_degister: \"%s\" %p, %d\n",
+-		       key->lct_owner ? key->lct_owner->name : "", key,
+-		       atomic_read(&key->lct_used));
++		CDEBUG(D_INFO, "%s: \"%s\" %p, %d\n",
++		       __func__, key->lct_owner ? key->lct_owner->name : "",
++		       key, atomic_read(&key->lct_used));
+ 		schedule();
+ 		spin_lock(&lu_keys_guard);
+ 	}
+@@ -1548,7 +1548,8 @@ void lu_context_key_quiesce(struct lu_context_key *key)
+ 		 */
+ 		while (atomic_read(&lu_key_initing_cnt) > 0) {
+ 			spin_unlock(&lu_keys_guard);
+-			CDEBUG(D_INFO, "lu_context_key_quiesce: \"%s\" %p, %d (%d)\n",
++			CDEBUG(D_INFO, "%s: \"%s\" %p, %d (%d)\n",
++			       __func__,
+ 			       key->lct_owner ? key->lct_owner->name : "",
+ 			       key, atomic_read(&key->lct_used),
+ 			atomic_read(&lu_key_initing_cnt));

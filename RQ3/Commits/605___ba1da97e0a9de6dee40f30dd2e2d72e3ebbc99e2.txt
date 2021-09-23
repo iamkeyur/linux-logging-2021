@@ -1,0 +1,114 @@
+['ba1da97e0a9de6dee40f30dd2e2d72e3ebbc99e2', '333.txt', 'Formatting']
+commit ba1da97e0a9de6dee40f30dd2e2d72e3ebbc99e2
+Author: Mauro Carvalho Chehab <mchehab@kernel.org>
+Date:   Tue Oct 18 17:44:14 2016 -0200
+
+    [media] cx231xx: don't break long lines
+    
+    Due to the 80-cols restrictions, and latter due to checkpatch
+    warnings, several strings were broken into multiple lines. This
+    is not considered a good practice anymore, as it makes harder
+    to grep for strings at the source code.
+    
+    As we're right now fixing other drivers due to KERN_CONT, we need
+    to be able to identify what printk strings don't end with a "\n".
+    It is a way easier to detect those if we don't break long lines.
+    
+    So, join those continuation lines.
+    
+    The patch was generated via the script below, and manually
+    adjusted if needed.
+    
+    </script>
+    use Text::Tabs;
+    while (<>) {
+            if ($next ne "") {
+                    $c=$_;
+                    if ($c =~ /^\s+\"(.*)/) {
+                            $c2=$1;
+                            $next =~ s/\"\n$//;
+                            $n = expand($next);
+                            $funpos = index($n, '(');
+                            $pos = index($c2, '",');
+                            if ($funpos && $pos > 0) {
+                                    $s1 = substr $c2, 0, $pos + 2;
+                                    $s2 = ' ' x ($funpos + 1) . substr $c2, $pos + 2;
+                                    $s2 =~ s/^\s+//;
+    
+                                    $s2 = ' ' x ($funpos + 1) . $s2 if ($s2 ne "");
+    
+                                    print unexpand("$next$s1\n");
+                                    print unexpand("$s2\n") if ($s2 ne "");
+                            } else {
+                                    print "$next$c2\n";
+                            }
+                            $next="";
+                            next;
+                    } else {
+                            print $next;
+                    }
+                    $next="";
+            } else {
+                    if (m/\"$/) {
+                            if (!m/\\n\"$/) {
+                                    $next=$_;
+                                    next;
+                            }
+                    }
+            }
+            print $_;
+    }
+    </script>
+    
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@s-opensource.com>
+
+diff --git a/drivers/media/usb/cx231xx/cx231xx-core.c b/drivers/media/usb/cx231xx/cx231xx-core.c
+index 8b099fe1d592..550ec932f931 100644
+--- a/drivers/media/usb/cx231xx/cx231xx-core.c
++++ b/drivers/media/usb/cx231xx/cx231xx-core.c
+@@ -241,8 +241,7 @@ static int __usb_control_msg(struct cx231xx *dev, unsigned int pipe,
+ 	int rc, i;
+ 
+ 	if (reg_debug) {
+-		printk(KERN_DEBUG "%s: (pipe 0x%08x): "
+-				"%s:  %02x %02x %02x %02x %02x %02x %02x %02x ",
++		printk(KERN_DEBUG "%s: (pipe 0x%08x): %s:  %02x %02x %02x %02x %02x %02x %02x %02x ",
+ 				dev->name,
+ 				pipe,
+ 				(requesttype & USB_DIR_IN) ? "IN" : "OUT",
+@@ -441,8 +440,7 @@ int cx231xx_write_ctrl_reg(struct cx231xx *dev, u8 req, u16 reg, char *buf,
+ 	if (reg_debug) {
+ 		int byte;
+ 
+-		cx231xx_isocdbg("(pipe 0x%08x): "
+-			"OUT: %02x %02x %02x %02x %02x %02x %02x %02x >>>",
++		cx231xx_isocdbg("(pipe 0x%08x): OUT: %02x %02x %02x %02x %02x %02x %02x %02x >>>",
+ 			pipe,
+ 			USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+ 			req, 0, val, reg & 0xff,
+@@ -600,8 +598,8 @@ int cx231xx_set_alt_setting(struct cx231xx *dev, u8 index, u8 alt)
+ 			return -1;
+ 	}
+ 
+-	cx231xx_coredbg("setting alternate %d with wMaxPacketSize=%u,"
+-			"Interface = %d\n", alt, max_pkt_size,
++	cx231xx_coredbg("setting alternate %d with wMaxPacketSize=%u,Interface = %d\n",
++			alt, max_pkt_size,
+ 			usb_interface_index);
+ 
+ 	if (usb_interface_index > 0) {
+diff --git a/drivers/media/usb/cx231xx/cx231xx-dvb.c b/drivers/media/usb/cx231xx/cx231xx-dvb.c
+index 1417515d30eb..2868546999ca 100644
+--- a/drivers/media/usb/cx231xx/cx231xx-dvb.c
++++ b/drivers/media/usb/cx231xx/cx231xx-dvb.c
+@@ -377,8 +377,8 @@ static int attach_xc5000(u8 addr, struct cx231xx *dev)
+ 	cfg.i2c_addr = addr;
+ 
+ 	if (!dev->dvb->frontend) {
+-		dev_err(dev->dev, "%s/2: dvb frontend not attached. "
+-		       "Can't attach xc5000\n", dev->name);
++		dev_err(dev->dev, "%s/2: dvb frontend not attached. Can't attach xc5000\n",
++			dev->name);
+ 		return -EINVAL;
+ 	}
+ 
